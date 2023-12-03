@@ -523,6 +523,15 @@ function App() {
         </Suspense>
       ),
     },
+    {
+      path: "/logout",
+      element: (
+          <Suspense fallback={<Loader/>}>
+            <LoginPage />
+          </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
     { path: "*", element: <NotFoundPage /> },
   ]);
   return <RouterProvider router={router} fallbackElement={<Loader />} />;

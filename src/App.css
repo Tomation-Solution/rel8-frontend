@@ -3,11 +3,11 @@
 }
 
 .react-multi-carousel-dot > button{
- background-color: #9DA3AF !important; 
+ background-color: #9DA3AF !important;
  outline: none !important;
  border: none !important;
  /* background-color: red !important; */
-} 
+}
 .react-multi-carousel-dot--active > button{
     width: 30px !important;
     height: 10px !important;

@@ -32,7 +32,7 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
     }, [user,navigate,notifyUser]);
 
     useEffect(() => {
-      if (user){
+      if (user && userProfileData){
 
         if (userProfileData[0]?.amount_owing>0) {
          
