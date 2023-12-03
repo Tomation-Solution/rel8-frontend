@@ -11,10 +11,10 @@ export default {
         "textColor":"#1E1E1E",
         
         "primary":{
-          "blue":"#224829",
-          "dark1":"#177227",
-          "dark2":"#0D4016",
-          "light1":"#27BF41",
+          "blue":"#26414A",
+          "dark1":"#23657C",
+          "dark2":"#153C4A",
+          "light1":"#39A4C9",
           "light2":"#B7B8E1",
         },
         "secondary":{
