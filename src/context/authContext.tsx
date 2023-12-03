@@ -50,10 +50,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
  
   useEffect(()=>{
     setUserProfileData(userProfile?.data?.data)
-    if (userProfile && userProfile.data && userProfile.data.data.length > 0){
-      const parts = userProfile?.data?.data[0]?.more_info[5]?.value.split(' ');
-      if (parts.length > 0) {
-        setUserFullName(parts[0]);
+    if (userProfile && userProfile.data && userProfile.data.data && userProfile.data.data.length > 0){
+      const name = userProfile?.data?.data[0]?.more_info.find(v => v.name === "name")?.value;
+      if (name) {
+        setUserFullName(name);
       }
     }
   },[userProfile])
