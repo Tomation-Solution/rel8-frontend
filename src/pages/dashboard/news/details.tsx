@@ -9,7 +9,7 @@ import { fetchUserPublications } from "../../../api/publications/publications-ap
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
-const PublicationsDetailPage = () => {
+const NewsDetailPage = () => {
 
   const { notifyUser } = Toast();
   const { publicationId } = useParams();
@@ -35,7 +35,7 @@ const PublicationsDetailPage = () => {
       <main>
           <div className="grid grid-cols-4  space-x-7">
             <div className="col-span-3">
-                <BreadCrumb title="Publications" />
+                <BreadCrumb title="News" />
                 <div className="relative" >
                   <img
                     src={publicationItem?.image}
@@ -83,4 +83,4 @@ const PublicationsDetailPage = () => {
   }
 }
 
-export default PublicationsDetailPage
+export default NewsDetailPage

@@ -26,8 +26,8 @@ const EventDetailPage = () => {
 
     const handleFreeEventMutation = useMutation(registerForFreeEvent, {
       onSuccess: (data) => {
-        // notifyUser(data.message,"success");
-        console.log('hahaha-->event',data)
+        notifyUser(data.message,"success");
+        // console.log('hahaha-->event',data)
       
        
       },
@@ -77,7 +77,7 @@ const EventDetailPage = () => {
         
         const formData = new FormData()
         formData.append("event_id",eventId)
-        formData.append("proxy_participants",JSON.stringify([{"email":userProfileData[0]?.more_info[0]?.value,"full_name":userProfileData[0]?.more_info[5]?.value}]))
+        // formData.append("proxy_participants",JSON.stringify([]))
         handleFreeEventMutation.mutate(formData)
       }
     }
@@ -124,6 +124,10 @@ const EventDetailPage = () => {
 
         return (
           <main className="grid grid-cols-4 gap-x-[60px] text-textColor ">
+            {
+              handleFreeEventMutation.isLoading?
+              <CircleLoader />:''
+            }
           <div className="col-span-3">
             <BreadCrumb title="Events" />
             <div className="relative " >
@@ -189,6 +193,9 @@ const EventDetailPage = () => {
               
                 <button onClick={event?.is_paid_event ? handleRegisterUserForPaidEvents :handleRegisterUserForFreeEvents}  className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
                Register
+               {
+                event?.is_paid_event?"Pay for event":"Register for free"
+               }
               </button>
                 </div>
             </div>

@@ -37,8 +37,15 @@ export const sideBarData: SideBarLinkType[] = [
   },
   {
     mainIcon:membersEnviroment,
+    name: "Registry",
+    path: "/registry",
+    activeLinkIcon: '',
+    notActiveLinkIcon:'',
+  },
+  {
+    mainIcon:membersEnviroment,
     name: "Members Enviroment",
-    path: "/members",
+    path: "#",
     activeLinkIcon: activeLinkIcon,
     notActiveLinkIcon:nonActiveLinkIcon,
   },
@@ -60,21 +67,26 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Events",
     path: "/events",
   },
+  // {
+  //   mainIcon: eventsIcon,
+  //   name: "Special Events",
+  //   path: "/special-events",
+  // },
   {
-    mainIcon: eventsIcon,
-    name: "Special Events",
-    path: "/special-events",
+    mainIcon:newsIcon,
+    name: "Publication",
+    path: "/publications",
   },
   {
     mainIcon:newsIcon,
     name: "News",
-    path: "/publications",
+    path: "/news",
   },
-  {
-    mainIcon:resourcesIcon,
-    name: "Resources",
-    path: "/resources",
-  },
+  // {
+  //   mainIcon:resourcesIcon,
+  //   name: "Resources",
+  //   path: "/resources",
+  // },
   {
     mainIcon: galleryIcon,
     name: "Gallery",
@@ -95,16 +107,16 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Election",
     path: "/election",
   },
-  {
-    mainIcon: subscribeIcon,
-    name: "Subscribe",
-    path: "/subscribe",
-  },
-  {
-    mainIcon: supportIcon,
-    name: "Support",
-    path: "/support",
-  },
+  // {
+  //   mainIcon: subscribeIcon,
+  //   name: "Subscribe",
+  //   path: "/subscribe",
+  // },
+  // {
+  //   mainIcon: supportIcon,
+  //   name: "Support",
+  //   path: "/support",
+  // },
   {
     mainIcon: logoutIcon,
     name: "Logout",
