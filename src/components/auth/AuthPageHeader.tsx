@@ -1,3 +1,6 @@
+import { getTenantInfo } from '../../utils/constants';
+
+
 interface Props{
     authPageHeader:string;
     authPageText:string;
@@ -5,8 +8,14 @@ interface Props{
 }
 
 const AuthPageHeader = ({authPageHeader,authPageText,className}:Props) => {
+  const {logo} = getTenantInfo()
   return (
     <div  className={`grid w-full my-10 text-center ${className}`} >
+          <img
+          src={logo}
+          className="block mx-auto"
+          alt=""
+          />
            <h1 className='font-bold text-primary-blue ' >{authPageHeader}</h1>
            <p className="font-[400] text-[16px] text-textColor" > {authPageText}</p>
          </div>

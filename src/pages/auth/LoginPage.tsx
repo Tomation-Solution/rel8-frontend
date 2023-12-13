@@ -1,4 +1,5 @@
-import loginPageCoverImage from "../../assets/cover-images/login-background-cover.png";
+// import loginPageCoverImage from "../../assets/cover-images/login-background-cover.png";
+import loginPageCoverImage from "../../assets/cover-images/login-back2.jpg"
 import formImage from "../../assets/images/form-image.png";
 import AuthPageLeftContainer from "../../components/auth/AuthPageLeftContainer";
 import AuthPageHeader from "../../components/auth/AuthPageHeader";
@@ -15,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../../components/toast/Toast";
 import { memberLogin } from "../../api/auth/auth-api";
 import { useAppContext } from "../../context/authContext";
+
+
 
 
 export type LoginFormFields = {

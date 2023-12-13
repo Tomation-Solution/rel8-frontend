@@ -59,3 +59,22 @@ export const setRel8LoginUserData = (data:{item:string, value:any}) =>{
 }
 }
 
+
+
+
+export const  getSubdomain =()=> {
+  const hostname = window.location.hostname;
+
+  // Split the hostname by dots
+  const parts = hostname.split('.');
+
+  // Check if there is a subdomain
+  if (parts.length >= 3) {
+    // The subdomain is the first part of the hostname
+    const subdomain = parts[0];
+    return subdomain;
+  } else {
+    // No subdomain found
+    return null;
+  }
+}

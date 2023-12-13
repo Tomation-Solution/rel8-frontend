@@ -21,8 +21,10 @@ const NavItem = ({item,isMobileSidebarOpen,setIsMobileSidebarOpen}:NavItemProps)
     <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem] text-[#6C7383] p-3 mx-4 rounded-lg group ${location.pathname == item.path ? "bg-activeLink  text-white" : "hover:bg-activeLink  hover:text-white"}`} >
       <div className='flex items-center gap-2' >
 
+        <div className='bg-primary-dark1 rounded-full p-2'> 
         <img src={item.mainIcon} className='  object-fit' alt="" />
-        <span className="text-sm">
+        </div>
+        <span className="text-sm md:text-lg">
         {item.name}
         </span>
       </div>

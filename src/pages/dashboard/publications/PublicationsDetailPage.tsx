@@ -2,7 +2,7 @@ import SeeAll from "../../../components/SeeAll";
 // import NewsCard from "../../components/cards/NewsCard";
 // import { newsData } from "../../data/newsData";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { PublicationDataType, PublicationParagraphType } from "../../../types/myTypes";
+import { PublicationDataType,  } from "../../../types/myTypes";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { fetchUserPublications } from "../../../api/publications/publications-api";
@@ -45,11 +45,11 @@ const PublicationsDetailPage = () => {
                 </div>
                 <div className="col-span-1 mt-6">
                     <h3 className=" font-semibold my-2" >{publicationItem?.name}</h3>
-                    {publicationItem?.paragraphs.map((item:PublicationParagraphType)=>(
+                    {/* {publicationItem?.paragraphs.map((item:PublicationParagraphType)=>(
                     <p className="text-textColor font-light text-justify" >
                       {item.paragragh}
                     </p>
-                    ))}
+                    ))} */}
                 </div>
                 <div>
                 <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue">
