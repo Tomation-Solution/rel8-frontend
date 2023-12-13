@@ -29,6 +29,10 @@ function App() {
   const NotificationsPage = lazy(() => import("./pages/dashboard/notifications/NotificationsPage"));
   const PublicationsPage = lazy(() => import("./pages/dashboard/publications/PublicationsPage"));
   const PublicationsDetailPage = lazy(() => import("./pages/dashboard/publications/PublicationsDetailPage"));
+
+  const NewsPage = lazy(() => import("./pages/dashboard/news/index"));
+  const NewsDetailPage = lazy(() => import("./pages/dashboard/news/details"));
+
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
@@ -230,8 +234,32 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
+
     {
-      path: "/members",
+      path: "/news",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <NewsPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/news/:publicationId",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <NewsDetailPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+
+    {
+      path: "/registry",
       element: (
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
