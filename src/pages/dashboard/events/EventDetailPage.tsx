@@ -9,11 +9,11 @@ import { useMutation, useQuery } from 'react-query';
 import { fetchAllUserEvents, registerForFreeEvent, registerForPaidEvent } from "../../../api/events/events-api";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import { useAppContext } from "../../../context/authContext";
+// import { useAppContext } from "../../../context/authContext";
 
 const EventDetailPage = () => {
 
-  const { userProfileData } = useAppContext();
+  // const { userProfileData } = useAppContext();
 
     const { eventId } = useParams();
     const { notifyUser } = Toast();

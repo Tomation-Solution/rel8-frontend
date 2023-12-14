@@ -1,4 +1,3 @@
-import  { useState } from 'react'
 import blueEllipse from  '../../../assets/images/notification-blue-ellipse.png'
 import pinkEllipse from  '../../../assets/images/notification-ink-ellipse.png'
 import BreadCrumb from '../../../components/breadcrumb/BreadCrumb'
