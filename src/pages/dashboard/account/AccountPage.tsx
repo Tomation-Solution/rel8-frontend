@@ -10,9 +10,12 @@ import { fetchUserDues } from "../../../api/account/account-api";
 import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import Table from '../../../components/Table/Table'
+import useDynamicPaymentApi from "../../../api/payment";
 
 const AccountPage = () => {
     const [showCompleted, setShowCompleted] = useState(true);
+    const {pay,loadingPay} = useDynamicPaymentApi()
     const showPendingTable = () =>{
       setShowCompleted(false)
     }
@@ -42,10 +45,42 @@ const AccountPage = () => {
       notifyUser("An error occured while fetching account details","error")
     }
     
+    const prop_columns =[
+        
+        
+      {
+          Header:'Due Name',
+          accessor:'due__Name',
+      },
+      {
+        Header:'Amount',
+        accessor:'amount',
+    },
+    {
+      Header:'Date',
+      accessor:'due__startDate',
+      id:44,
+  },
+      {
+          Header:'Update Subbmission',
+          accessor:'a',
+          Cell:(tableProps:any)=>(
+            <button className="text-white bg-primary-blue px-3 py-1 rounded-md my-2 min-w-[70px]" 
+            onClick={()=>{
+              pay({'forWhat':'dues','payment_id':tableProps.row.original.id,})
+            }}
+            >
+              Pay
+            </button>     
+
+          )
+      },
+  ]
    
   return (
     <main>
     <BreadCrumb title="My Account" />
+    {loadingPay&&<CircleLoader />}
     <div className="flex items-center gap-x-9">
       <div className="flex items-center">
         <img
@@ -70,7 +105,11 @@ const AccountPage = () => {
     </div>
     <div>
     {/* {showCompleted ? "" : <PendingPaymentTable tableData={pendingDues} />} */}
-    {!showCompleted && pendingDues && <PendingPaymentTable  isLoading={isLoading} tableData={pendingDues} /> }
+    {/* {!showCompleted && pendingDues && <PendingPaymentTable  isLoading={isLoading} tableData={pendingDues} /> } */}
+    {!showCompleted && pendingDues && <Table 
+    prop_columns={prop_columns} 
+    custom_data={pendingDues}
+     /> }
     {showCompleted && paidDues && <CompletedPaymentTable isLoading={isLoading} tableData={paidDues} /> }
     
    

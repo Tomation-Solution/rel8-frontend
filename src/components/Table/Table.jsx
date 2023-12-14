@@ -30,11 +30,10 @@ const Table = ({ prop_columns=[],custom_data=[]}) =>{
     //this would send the page to a detail page
   }
   return(
-    <div className='w-full'>
+    <div className='p-2 registration-table'>
       {/* <Preloader loading={status==='pending'}/> */}
-      <div  {...getTableProps()} 
-      
-      className='tableStyle'
+      <table   {...getTableProps()} 
+      className='table'
       >
         <thead >
           {
@@ -43,7 +42,9 @@ const Table = ({ prop_columns=[],custom_data=[]}) =>{
                 {
                   headerGroup.headers.map((column,columnIndex)=>{
                     return (
-                      <th {...column.getHeaderProps()} key={columnIndex}>{column.render('Header')}</th>  
+                      <th {...column.getHeaderProps()} key={columnIndex}
+                      className={`${columnIndex % 2 === 0 ? "bg-primary-dark2" : "bg-primary-light2"} ${index === 0 && "rounded-tl-md rounded-bl-md"}  text-center  text-white relative min-w-[60px] text-sm font-semibold border-b capitalize pt-3 pl-[6px] pr-1 pb-4  max-w-[150px] sm:max-w-[200px] break-words  gap-2`}
+                      >{column.render('Header')}</th>  
                     )
                   })
                 }
@@ -67,7 +68,7 @@ const Table = ({ prop_columns=[],custom_data=[]}) =>{
             })
           }                
         </tbody>
-      </div>
+      </table>
     </div>
   )
 }
