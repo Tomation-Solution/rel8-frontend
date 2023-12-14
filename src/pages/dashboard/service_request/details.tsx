@@ -24,33 +24,33 @@ const ServiceRequestDetail =()=>{
             Header:'Approval Status',
             accessor:'status',
         },
-        {
-            Header:'Update Subbmission',
-            accessor:'a',
-            Cell:(tableProps:any)=>(
-                  <div>
+        // {
+        //     Header:'Update Subbmission',
+        //     accessor:'a',
+        //     Cell:(tableProps:any)=>(
+        //           <div>
 
 
-                    <Button
-                    onClick={e=>{
-                        e.preventDefault()
-                        if(tableProps.row.original.status=='pending'){
-                            // route.push(`/members/services/submission/update/${tableProps.row.original.id}/`)
-                        }
-                    }}
-                    // style={{'width':'150px'}} 
-                    className="w-[150px]"
-                    text=  {
-                        tableProps.row.original.status=='pending'?
-                        'edit request':"You can't edit aprroved request"
-                       }
-                    />
+        //             <Button
+        //             onClick={e=>{
+        //                 e.preventDefault()
+        //                 if(tableProps.row.original.status=='pending'){
+        //                     // route.push(`/members/services/submission/update/${tableProps.row.original.id}/`)
+        //                 }
+        //             }}
+        //             // style={{'width':'150px'}} 
+        //             className="w-[150px]"
+        //             text=  {
+        //                 tableProps.row.original.status=='pending'?
+        //                 'edit request':"You can't edit aprroved request"
+        //                }
+        //             />
                   
-                  </div>
-            )
-        },
+        //           </div>
+        //     )
+        // },
     ]
-
+    const hasPending = submission?.filter((d)=>d.status == 'pending').length!==0
     return (
         <div>
             { isLoading && <CircleLoader />}
@@ -83,12 +83,19 @@ const ServiceRequestDetail =()=>{
             // size="" 
             className="w-[280px]"
             onClick={()=>{
-                navigate(`/service-requests-submission/${service_id}`)
+                if(hasPending){
+                    //
+                    navigate(`/service-requests-submission/${service_id}?member_submission_id=${submission?.filter((d)=>d.status == 'pending')[0].id}`)
+                }else{
+
+                    navigate(`/service-requests-submission/${service_id}`)
+                }
                 // route.push(`/members/services/submission/${service_id}/`)
             }} 
-                text={`Apply for ${data?.service_name??""}`}
+                text={`${hasPending?'Update Pending':'Apply for'} ${data?.service_name??""}`}
             />
             </div>
+            <br /><br />
             <Table prop_columns={prop_columns} custom_data={submission?submission:[]} />
             </div>
                 </div>

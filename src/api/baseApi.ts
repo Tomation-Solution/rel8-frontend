@@ -14,9 +14,9 @@ export const apiPublic = axios.create({
 
 const apiTenant = axios.create({
   baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 apiTenant.interceptors.request.use(

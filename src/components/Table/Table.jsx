@@ -3,6 +3,7 @@ import {useTable} from 'react-table'
 // import {TableStyle} from './Table.style'
 // import MOCK_DATA from './mock.json';
 import PropTypes from 'prop-types';
+import './Table.css'
 
 
 
@@ -29,7 +30,7 @@ const Table = ({ prop_columns=[],custom_data=[]}) =>{
     //this would send the page to a detail page
   }
   return(
-    <div>
+    <div className='w-full'>
       {/* <Preloader loading={status==='pending'}/> */}
       <div  {...getTableProps()} 
       
