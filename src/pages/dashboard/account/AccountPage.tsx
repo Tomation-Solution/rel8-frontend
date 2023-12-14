@@ -2,7 +2,6 @@
 import accountWallet from "../../../assets/icons/account-wallet.png";
 import CompletedPaymentTable from "../../../components/tables/CompletedPaymentTable";
 import { useState } from "react";
-import PendingPaymentTable from "../../../components/tables/PendingPaymentTable";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 // import { TableDataType } from "../types/myTypes"
 import { useQuery } from "react-query";
@@ -10,6 +9,7 @@ import { fetchUserDues } from "../../../api/account/account-api";
 import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+// @ts-ignore
 import Table from '../../../components/Table/Table'
 import useDynamicPaymentApi from "../../../api/payment";
 

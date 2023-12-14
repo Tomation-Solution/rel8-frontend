@@ -37,14 +37,18 @@ const ServiceSubbmission =()=>{
     const { 
         register,setValue, 
         handleSubmit,control,
-        formState: { errors },
+        // formState: { errors },
       } = useForm<FormI>({ resolver: yupResolver(schema) });
 
-      const { fields:fields_subbission, append:fields_subbissionAppend, remove:fields_subbissionRemove } = useFieldArray({
+      const { fields:fields_subbission, 
+        // append:fields_subbissionAppend, remove:fields_subbissionRemove
+     } = useFieldArray({
         name: "fields_subbission",
         control,
       });
-      const { fields:file_submission, append:file_submissionAppend, remove:file_submissionRemove } = useFieldArray({
+      const { fields:file_submission, 
+        // append:file_submissionAppend, remove:file_submissionRemove
+     } = useFieldArray({
         name: "file_submission",
         control,
       });
@@ -63,13 +67,13 @@ const ServiceSubbmission =()=>{
                     setValue('custom_service',service_id)
                 }
                 
-                setValue('fields_subbission',data.fields_subbission.fields.map((d,index)=>({
+                setValue('fields_subbission',data.fields_subbission.fields.map((d,)=>({
                     'name':d,
                     // 'value':typeof edit=='string'?d
                     'value':''
                 })))
     
-                setValue('file_submission',data.file_subbission.fields.map((d,index)=>({
+                setValue('file_submission',data.file_subbission.fields.map((d,)=>({
                     'file':'',
                     'name_of_file':d
                 })))
@@ -82,13 +86,13 @@ const ServiceSubbmission =()=>{
         refetchOnWindowFocus:false,
         'onSuccess':(data)=>{
                         setValue('custom_service',data.custom_service.toString())
-            setValue('fields_subbission',data.fields_subbission.map((d,index)=>({
+            setValue('fields_subbission',data.fields_subbission.map((d,)=>({
                 'name':d.name,
                 'value':d.value,
                 'id':d.id
             })))
 
-            setValue('file_submission',data.files.map((d,index)=>({
+            setValue('file_submission',data.files.map((d,)=>({
                 'file':null,
                 'name_of_file':d.name,
                 'file_link':d.value
@@ -97,7 +101,7 @@ const ServiceSubbmission =()=>{
     })
 
     const {isLoading:submitting, mutate} = useMutation(memberServiceSubmission,{
-        'onSuccess':(d)=>{
+        'onSuccess':()=>{
             // console.log(d)
                 notifyUser('Our Staff would reach out to you soon','success')
                 navigate(`/service-requests/${service_id}`)
@@ -107,7 +111,7 @@ const ServiceSubbmission =()=>{
         // console.log(data)
         const form= new FormData()
         //we get all the files and rename it
-        data.file_submission.map((file,index)=>{
+        data?.file_submission?.map((file,)=>{
             // console.log(file.file)
             // console.log(file.file[0])
             form.append('files',file.file[0],file.name_of_file)  

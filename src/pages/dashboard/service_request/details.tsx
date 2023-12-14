@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { getAllSubmissionOfAService, getServiceDetail } from "../../../api/serviceRequestApi"
 import { useQuery } from "react-query"
 import Button from "../../../components/button/Button"
+// @ts-ignore
 import Table from '../../../components/Table/Table'
 import CircleLoader from "../../../components/loaders/CircleLoader"
 
@@ -53,7 +54,7 @@ const ServiceRequestDetail =()=>{
     const hasPending = submission?.filter((d)=>d.status == 'pending').length!==0
     return (
         <div>
-            { isLoading && <CircleLoader />}
+            { (isLoading||loadingSubbmission) && <CircleLoader />}
 
 
 
