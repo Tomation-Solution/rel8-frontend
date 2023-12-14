@@ -8,7 +8,10 @@ import DashboardLayout from "./layouts/DashboardLayout";
 
 
 function App() {
-
+  
+  const  ServiceRequestSubmission = lazy(()=> import( "./pages/dashboard/service_request/serviceSubbmission"));
+  const  ServiceRequest = lazy(()=> import( "./pages/dashboard/service_request"));
+  const  ServiceRequestDetail = lazy(()=> import( "./pages/dashboard/service_request/details"));
   const VerifyMemberPage = lazy(() => import("./pages/auth/VerifyMemberPage"));
   const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
   const RegistrationPage = lazy(() => import("./pages/auth/RegistrationPage"));
@@ -157,6 +160,40 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
+    {
+      path: "/service-requests",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <ServiceRequest />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/service-requests/:id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <ServiceRequestDetail />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/service-requests-submission/:id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <ServiceRequestSubmission />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    
     {
       path: "/event/:eventId",
       element: (

@@ -1,4 +1,8 @@
+import React from "react";
 import jwt_decode from "jwt-decode";
+import {
+  useLocation
+} from "react-router-dom";
 
 type UserRegistrationParticluarsDataType = {
     MEMBERSHIP_NO:string;
@@ -77,4 +81,12 @@ export const  getSubdomain =()=> {
     // No subdomain found
     return null;
   }
+}
+
+
+
+export function useQuery() {
+  const { search } = useLocation();
+
+  return React.useMemo(() => new URLSearchParams(search), [search]);
 }

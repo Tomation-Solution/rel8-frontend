@@ -95,7 +95,7 @@ export const sideBarData: SideBarLinkType[] = [
   {
     mainIcon: accountIcon,
     name: "My Account",
-    path: "/my-account",
+    path: "/account",
   },
   {
     mainIcon: serviceRequestsIcon,
