@@ -7,93 +7,142 @@ import ChatItem from './ChatItem';
 import { ChatMessageDataType } from '../../types/myTypes';
 import { useAppContext } from '../../context/authContext';
 import CircleLoader from '../loaders/CircleLoader';
-import {  useState } from 'react';
+import {  useState,useEffect } from 'react';
+import { TENANT, sitename } from '../../utils/constants';
+import {  getUserOrNull } from '../../utils/extra_functions';
 
 interface Props{
-    currentChatType:string;
+    currentChatType:chatRoomType;
     data:ChatMessageDataType[];
-    isLoading:boolean;
+    isLoading:boolean,
+    currentTab?:'group-chat'|'single-chat'
 }
 
 export type ChatBoxFormFields = {
     message: string;
   };
 
-  // const onSubmit: SubmitHandler<ChatBoxFormFields> = (data) => console.log(data)
+  // const onSubmit: SubmitHandler<ChatBoxFormFields> = (data) => console.log(data) 
 
+export  type chatRoomType ={
+    type:'general'|'commitee'|'exco'|'single-chat',
+    display:string,
+    value:number,
+  }
 
   
 
-const ChatBoxContainer = ({currentChatType,data,isLoading}:Props) => {
+const ChatBoxContainer = ({currentChatType,data,isLoading,}:Props) => {
 
   const { user } = useAppContext();
   // const [web_socket, setWeb_socket] = useState<WebSocket | null>(null);
 
   const [text,setText] = useState('')
  
-  // const [chatroom,setChatRoom] = useState<null|ChatRoomType>(null)
-  // const [web_socket,setWeb_socket] = useState<WebSocket | null>(null);
-  // const [connecting,setConnecting] = useState(false)
-  // const [socket, setSocket] = useState<WebSocket | null>(null);
-  // const [message, setMessage] = useState('');
+  // const [chatroom,setChatRoom] = useState<>(null)
+  const [web_socket,setWeb_socket] = useState<WebSocket | null>(null);
+  const [connecting,setConnecting] = useState(false)
+  const [newchats,setNewchats] = useState<ChatMessageDataType[]>([])
+
+// console.log({data})
 
 
+  useEffect(()=>{
+    if(web_socket){
+        //to avoid duplicate connection
+        web_socket.close()}
+
+    if(currentChatType){
+        let url =''
+        if(currentChatType.type=='general'){
+            // dispatch(get_old_chats(`?room_name=general`))
+            url = `wss://${sitename}/ws/chat/${TENANT}/general/`
+        }
+        if(currentChatType.type==='commitee'){
+            // dispatch(get_old_chats(`?room_name=${chatroom.value}commitee`))
+            url = `wss://${sitename}/ws/commitee_chat/${TENANT}/${currentChatType.value}/`
+        }
+        if(currentChatType.type==='exco'){
+            // dispatch(get_old_chats(`?room_name=${chatroom.value}exco`))
+        }
+        if(currentChatType.type ==='single-chat'){
+          const logged_in_user =  getUserOrNull()
+          // console.log(currentChatType)
+          const reciver_id:any = currentChatType.value
+          if(logged_in_user){
+            const room_name = logged_in_user?.user_id>reciver_id?`${logged_in_user?.user_id}and${reciver_id}`:`${reciver_id}and${logged_in_user?.user_id}`
+            url = `wss://${sitename}/ws/chat/${TENANT}/${room_name}/`
+
+          }
+        }
+
+        const ws = new WebSocket(url)
+        setWeb_socket(ws)
+        ws.onopen = (e) => {
+            console.log('connected',e)
+            setConnecting(false)
+          }
+          ws.onclose = (e) => {
+            console.log('err',e)
+          }
+
+    }
+},[currentChatType])
 
 
-  // useEffect(() => {
-  //   // Create a new WebSocket instance
-  //   const newSocket = new WebSocket('wss://rel8.watchdoglogisticsng.com/ws/chat/nimn');
+if(web_socket){
+  web_socket.onmessage = (e) => {
+      // a message was received
+      const response = JSON.parse(e.data)
+      console.log({response})
+      // dispatch(addChat({
+      //     'user__id':response.send_user_id,
+      //     'message':response.message,
+      //     'full_name':response.full_name
+      // }))
+    };
+}
 
-  //   // Set up event listeners for the WebSocket
-  //   newSocket.addEventListener('open', () => {
-  //     console.log('WebSocket connection opened');
-  //   });
+const sendMessage=()=>{
+  const logged_in_user =  getUserOrNull()
+  console.log({logged_in_user})
+  if(!logged_in_user) return 
+   const data ={
+       'message':text,
+       'send_user_id':logged_in_user.user_id,
+       'is_group':true
+   }
+   
+   try{
+       web_socket?.send(JSON.stringify(data))
+      }
+      catch(e){
+        console.log('catch',e)
+      }
 
-  //   newSocket.addEventListener('message', (event) => {
-  //     console.log('Received message:', event.data);
-  //     // Handle incoming messages
-  //   });
+      
 
-  //   newSocket.addEventListener('close', (event) => {
-  //     console.log('WebSocket connection closed:', event);
-  //   });
+}
 
-  //   newSocket.addEventListener('error', (error) => {
-  //     console.error('WebSocket error:', error);
-  //   });
-
-  //   // Save the WebSocket instance to state
-  //   setSocket(newSocket);
-
-  //   // Clean up WebSocket on component unmount
-  //   // return () => {
-  //   //   newSocket.close();
-  //   // };
-  // }, []); // Empty dependency array means this effect runs once on mount
-
-  // const sendMessage = () => {
-  //    const data ={
-  //           'message':text,
-  //           'send_user_id':19,
-  //           'is_group':true
-  //       }
-        
-  //   if (socket && socket.readyState === WebSocket.OPEN) {
-  //     socket.send(JSON.stringify(data));
-  //     console.log('Message sent successfully');
-  //   }
-  // };
-
-
-
-
-
-
-    
+if(web_socket){
+  web_socket.onmessage = (e) => {
+      // a message was received
+      const response = JSON.parse(e.data)
+      console.log({response})
+      setNewchats([
+        ...newchats,
+        {
+          'user__id':response.send_user_id,
+          'message':response.message,
+          'full_name':response.full_name
+      }
+      ])
+    };
+}
   return (
     <section className='border-2 border-neutral3 ' >
     <div className='border-b-2 border-[#ececec] flex items-center w-full  justify-between p-3' >
-       <h3 className='font-semibold text-[17px]' >{currentChatType === 'general-chat' ? "General Chat" : "Aweda Rian"}</h3>
+       <h3 className='font-semibold text-[17px]' >{currentChatType.display} Chat</h3>
        <div className='flex items-center justify-between gap-3 text-white' >
            <span className='bg-primary-blue p-2 rounded-md' >
 
@@ -106,11 +155,14 @@ const ChatBoxContainer = ({currentChatType,data,isLoading}:Props) => {
        </div>
    </div>
    <div className='overflow-y-auto max-h-[80vh]' >
-    {isLoading && <CircleLoader />}
-    {data?.map((chat:ChatMessageDataType,index:number)=>(
+    {(isLoading||connecting) && <CircleLoader />}
+{
+  data?
+  [...data,...newchats].map((chat:ChatMessageDataType,index:number)=>(
 
-       <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.user_id === chat.user__id} message={chat?.message} />
-    ))}
+     <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.user_id === chat.user__id} message={chat?.message} />
+  )):''
+}
       
    </div>
    <div className='flex items-center p-2 gap-2' >
@@ -125,7 +177,12 @@ const ChatBoxContainer = ({currentChatType,data,isLoading}:Props) => {
         <input type="text" className='form-control' placeholder="Type a message" value={text} onChange={(event) => setText(event.target.value)} />
 
     </div>
-     <button className='py-2 px-3 grid place-items-center bg-neutral3 rounded-md' >
+     <button className='py-2 px-3 grid place-items-center bg-neutral3 rounded-md' 
+     onClick={()=>{
+      if(!text) return 
+      sendMessage()
+     }}
+     >
        <AiOutlineSend className='w-5 h-5 text-textColor'  />
      </button>
     </div>
