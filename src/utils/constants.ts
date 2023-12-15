@@ -1,6 +1,8 @@
 
 import BpmiLogo from '../assets/cover-images/bpmi-logo.jpg'
 import anniLogo from '../assets/cover-images/aanilogo.png'
+import nimnLogo from '../assets/cover-images/nimnlogoo.svg'
+import bukaalogo from '../assets/cover-images/bukaalogo.png'
 
 import { getSubdomain } from './extra_functions';
 
@@ -16,6 +18,8 @@ export const  getTenantInfo = ()=>{
     const currentLogo:any = {
         'bpmi':BpmiLogo,
         'aani':anniLogo,
+        'nimn':nimnLogo,
+        'bukaa':bukaalogo,
     }
 
     return {
