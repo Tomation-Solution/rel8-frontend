@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { fetchOldGeneralChats, getAllChatsUsers, getChats } from "../../api/chats/chats";
-import { ChatUserDataType } from "../../types/myTypes";
+// import { ChatUserDataType } from "../../types/myTypes";
 import Button from "../../components/button/Button";
 import ChatUser from "../../components/chat/ChatUser";
 import ChatBoxContainer, { chatRoomType } from "../../components/chat/ChatBoxContainer";
