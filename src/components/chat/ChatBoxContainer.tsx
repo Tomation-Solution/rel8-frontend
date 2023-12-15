@@ -75,16 +75,18 @@ const ChatBoxContainer = ({currentChatType,data,isLoading,}:Props) => {
 
           }
         }
+        if(url){
 
-        const ws = new WebSocket(url)
-        setWeb_socket(ws)
-        ws.onopen = (e) => {
-            console.log('connected',e)
-            setConnecting(false)
-          }
-          ws.onclose = (e) => {
-            console.log('err',e)
-          }
+          const ws = new WebSocket(url)
+          setWeb_socket(ws)
+          ws.onopen = (e) => {
+              console.log('connected',e)
+              setConnecting(false)
+            }
+            ws.onclose = (e) => {
+              console.log('err',e)
+            }
+        }
 
     }
 },[currentChatType])
