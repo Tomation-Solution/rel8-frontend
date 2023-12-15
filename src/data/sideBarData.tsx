@@ -34,7 +34,7 @@ export const sideBarData: SideBarLinkType[] = [
   },
   {
     mainIcon:membersEnviroment,
-    name: "Registry",
+    name: "Directory",
     path: "/registry",
     activeLinkIcon: '',
     notActiveLinkIcon:'',
