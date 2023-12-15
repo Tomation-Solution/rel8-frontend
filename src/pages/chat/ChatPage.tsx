@@ -1,46 +1,59 @@
 import { useState } from "react";
-import { fetchOldGeneralChats, getAllChatsUsers } from "../../api/chats/chats";
+import { fetchOldGeneralChats, getAllChatsUsers, getChats } from "../../api/chats/chats";
 import { ChatUserDataType } from "../../types/myTypes";
 import Button from "../../components/button/Button";
 import ChatUser from "../../components/chat/ChatUser";
-import ChatBoxContainer from "../../components/chat/ChatBoxContainer";
+import ChatBoxContainer, { chatRoomType } from "../../components/chat/ChatBoxContainer";
 import { useQuery } from "react-query";
 import CircleLoader from "../../components/loaders/CircleLoader";
 // import { WSS } from "../../utils/constants";
 // import { useAppContext } from "../../context/authContext";
 // import Toast from "../../components/toast/Toast";
-// import Toast from "../../components/toast/Toast";
+// import Toast from "../../components/toast/Toast"
+import dummyImage from '../../assets/images/dummy.jpg';
+import { FetchName, getUserOrNull } from "../../utils/extra_functions";
 
 const ChatPage = () => {
 
-  const [currentChatType, setCurrentChatType] = useState('general-chat');
+  const [currentChatType, setCurrentChatType] = useState<chatRoomType>({
+    'type':'general',
+    'display':'General',
+    'value':-1// here we dont needd the value at all the word  general is enough
+});
+  const [currentChatTab,setCurrentChatTab] = useState<'group-chat'|'single-chat'>('group-chat')
   // const [open, setOpen] = useState(false);
   // const [web_socket, setWeb_socket] = useState<WebSocket | null>(null);
   // const [chatData,setChatData] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   // const [connecting,setConnecting] = useState(false)
 
+  const logged_in_user:any =  getUserOrNull()
 
   // const { user } = useAppContext();
   // const { notifyUser } = Toast();
 
 
-  const handleGeneralChat = () =>{
-    setCurrentChatType('general-chat')
-  }
-  const handlePrimaryChat = () =>{
-    setCurrentChatType('primary-chat')
-  }
 
 
   const allChatUsers = useQuery("chatUsers", getAllChatsUsers);
 
-  const queryKey = currentChatType === 'general-chat' ? 'fetchOldGeneralChats' : 'fetchOtherChats';
+  const queryKey = currentChatType.type === 'general' ? 'fetchOldGeneralChats' : 'fetchOtherChats';
 
   const { data,  isLoading } = useQuery(queryKey, () => {
-    if (currentChatType === 'general-chat') {
+    if (currentChatType.type === 'general') {
       return fetchOldGeneralChats();
-    } else {
+    } 
+    else if(currentChatType.type==='single-chat'){
+      const logged_in_user:any =  getUserOrNull()
+      // console.log({logged_in_user})
+      const reciver_id = currentChatType.value
+      if(logged_in_user){
+        const room_name = logged_in_user?.user_id>reciver_id?`${logged_in_user?.user_id}and${reciver_id}`:`${reciver_id}and${logged_in_user?.user_id}`
+        return getChats(room_name)
+      }
+      return
+    }
+    else {
       return ;
     }
   });
@@ -55,25 +68,59 @@ const ChatPage = () => {
 
 
 
-
-  
-
   return (
     <main className=''>
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 my-4">
           <div className='flex flex-col space-y-2 ' >
           <div className='grid grid-cols-2 gap-2' >
-            <Button onClick={handleGeneralChat} text="General Chat" type={currentChatType === 'general-chat' ? "primary":"secondary"} textColor={currentChatType === 'general-chat' ? "text-white":"text-Color"} /> 
-            <Button onClick={handlePrimaryChat} text="Primary Chat"  type={currentChatType === 'primary-chat' ? "primary":"secondary"} textColor={currentChatType === 'primary-chat' ? "text-white":"text-Color"}/> 
+            <Button onClick={()=>{
+              //
+              setCurrentChatTab('group-chat')
+            }} text="Group Chat" type={currentChatTab === 'group-chat' ? "primary":"secondary"} textColor={currentChatTab === 'group-chat' ? "text-white":"text-Color"} /> 
+            <Button onClick={()=>{
+              //
+              setCurrentChatTab('single-chat')
+            }} text="Primary Chat"  type={currentChatTab === 'single-chat' ? "primary":"secondary"} textColor={currentChatTab === 'single-chat'? "text-white":"text-Color"}/> 
             </div>
-            <div className={`space-y-2  w-full ${currentChatType === 'general-chat' ? "hidden":""}`} >
+            <div className={`space-y-2  w-full ${currentChatTab === 'group-chat' ? "hidden":""}`} >
               {allChatUsers.isLoading && <CircleLoader />}
 
              
 
-              {currentItems?.map((chatUser:ChatUserDataType,index:number)=>(
-
-              <ChatUser key={index}   chatUser={chatUser} online  selected />
+              {currentItems?.filter((d:any)=>d.user!==logged_in_user?.user_id)?.map((chatUser:any,index:number)=>(
+                <div
+              key={index}
+              onClick={()=>{
+                console.log({chatUser})
+                setCurrentChatType({
+                  'type':'single-chat',
+                  'display': FetchName(chatUser),
+                  
+                  'value':chatUser.user
+              })
+              }}
+                className={`relative hover:cursor-pointer p-2 flex items-center rounded-md
+                `} 
+                  //  ${selected ? "bg-primary-blue" : "bg-neutral-3"} gap-2 h-[50px]
+                >
+    <img src={ dummyImage} className="rounded-md w-fit h-10" alt="" />
+    <div className="flex-1" >
+        <h4 className={`font-medium text-capitalize 
+        `} 
+        // ${selected ? "text-white" : "text-textColor"} 
+        >
+          {
+          // chatUser?.email
+          FetchName(chatUser)
+          }</h4>
+        <small className={`text-capitalize text-textColor text-xs font-light `} 
+        //  ${selected ? "text-white" : "text-textColor"}
+        >
+          {/* {lastMessage} */}
+          </small>
+    </div>
+    {/* <div className={`absolute ${online ? "bg-green-500" :"bg-gray-400"} w-2 h-2 top-0 right-0 m-2 rounded-full`} ></div> */}
+</div>
               ))}
              
              
@@ -101,9 +148,26 @@ const ChatPage = () => {
               
 
             </div>
+
+            <div  className={`space-y-2  w-full ${currentChatTab === 'single-chat'  ? "hidden":""}`}>
+              
+              <div onClick={()=>{
+                  setCurrentChatType({
+                    'type':'general',
+                    'display':'General',
+                    'value':-1
+                })
+            }}>
+                <ChatUser    chatUser={{
+                'email':"Group Chat",
+                'id':1,
+                }} online  selected={false} />
+              </div>
+
+            </div>
           </div>
           <div>
-              <ChatBoxContainer isLoading={isLoading} data={data?.data} currentChatType={currentChatType} />
+              <ChatBoxContainer isLoading={isLoading} data={data?.data} currentChatType={currentChatType} currentTab={currentChatTab} />
           </div>
         </div>
     </main>

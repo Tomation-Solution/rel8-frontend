@@ -218,5 +218,5 @@ export interface ChatMessageDataType {
   message: string;
   user__id: number;
   full_name: string;
-  id: number;
+  id?: number;
 }
