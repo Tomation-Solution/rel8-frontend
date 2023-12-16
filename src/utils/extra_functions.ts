@@ -128,7 +128,7 @@ export type UserType = {
 type getUserOrNullResponse = null | UserType
 export const getUserOrNull = ():getUserOrNullResponse=>{
   try{
-    const user:any  = localStorage.getItem('token')
+    const user:any  = localStorage.getItem('rel8User')
     return JSON.parse(user)
 
   }catch(err:any){
