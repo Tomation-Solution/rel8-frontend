@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import ErrorPage from "./pages/ErrorPage";
 import Loader from "./components/Loader";
 import NotFoundPage from "./pages/NotFoundPage";
+import ActivateAccount from "./pages/ActivateAccount";
 import DashboardLayout from "./layouts/DashboardLayout";
 
 
@@ -593,6 +594,15 @@ function App() {
       element: (
           <Suspense fallback={<Loader/>}>
             <LoginPage />
+          </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/mailing",
+      element: (
+          <Suspense fallback={<Loader/>}>
+            <ActivateAccount />
           </Suspense>
       ),
       errorElement: <ErrorPage />,
