@@ -1,6 +1,6 @@
 import axios from "axios"
 import {useEffect, useState} from "react"
-import {ENDPOINT_URL} from "../utils/constants";
+import {ENDPOINT_URL,TENANT} from "../utils/constants";
 import CircleLoader from "../components/loaders/CircleLoader";
 
 
@@ -10,7 +10,7 @@ function ActivateAccount() {
     const [status, setStatus] = useState<'error' | 'okay' | 'loading'>('loading');
 
     async function activate(uidb64: string, token: string) {
-        return (await axios.get(`${ENDPOINT_URL}/mailing/activate/${uidb64}/${token}`));
+        return (await axios.get(`${ENDPOINT_URL}/tenant/${TENANT}/mailing/activate/${uidb64}/${token}`));
     }
 
     useEffect(() => {
