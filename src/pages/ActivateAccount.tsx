@@ -23,7 +23,7 @@ function ActivateAccount() {
 
         if (!uidb64 || !token || uidb64 === "" || token === "") return setStatus("error");
 
-        activate(uidb64, token).then((res) => {
+        activate(uidb64, token).then(() => {
             setStatus("okay");
         }).catch(() => setStatus("error"));
 
