@@ -20,6 +20,7 @@ export type VerifiedMembershipResponse = {
           TITLE: string;
           // alumni_year: string;
           name: string;
+          fullname:string
         };
       }
     ];
