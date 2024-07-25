@@ -3,12 +3,11 @@ import { UserDataType } from '../types/myTypes';
 import { useQuery } from 'react-query';
 import { fetchUserProfile } from '../api/profile/profile-api';
 
-
 interface AppContextType {
   user: UserDataType | null;
   setRel8LoginUserData: (data: UserDataType) => void;
-  userFullName:string;
-  userProfileData:any;
+  userFullName: string;
+  userProfileData: any[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,53 +26,49 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserDataType | null>(null);
-
-  const [userFullName,setUserFullName] = useState<string>("")
-  const [userProfileData,setUserProfileData] = useState([])
+  const [userFullName, setUserFullName] = useState<string>('');
+  const [userProfileData, setUserProfileData] = useState<any[]>([]);
 
   useEffect(() => {
-    // Load user data from local storage when the app starts
     const storedUserData = localStorage.getItem('rel8User');
     if (storedUserData) {
       setUser(JSON.parse(storedUserData));
     }
-    
   }, []);
 
-  const  userProfile = useQuery('userProfile', fetchUserProfile,{
-    // enabled:true
-    retry:1,
+  const userProfile = useQuery('userProfile', fetchUserProfile, {
+    retry: 1,
     staleTime: 10 * 60 * 1000,
   });
 
-  // console.log('data-->',userProfileData)
- 
-  useEffect(()=>{
-    setUserProfileData(userProfile?.data?.data)
-    if (userProfile && userProfile.data && userProfile.data.data.length > 0){
-      const parts = userProfile?.data?.data[0]?.more_info[5]?.value.split(' ');
-      if (parts.length > 0) {
-        setUserFullName(parts[0]);
+  useEffect(() => {
+    if (userProfile.data) {
+      const profileData = userProfile.data.data || [];
+      setUserProfileData(profileData);
+
+      if (profileData.length > 0) {
+        const moreInfo = profileData[0]?.more_info || [];
+        const fullNameValue = moreInfo[5]?.value || '';
+        const parts = fullNameValue.split(' ');
+
+        if (parts.length > 0) {
+          setUserFullName(parts[0]);
+        }
       }
     }
-  },[userProfile])
+  }, [userProfile.data]);
 
-  // console.log(userProfileData,'userProfile')
-
-
-
-   const setRel8LoginUserData = (data:UserDataType) =>{
+  const setRel8LoginUserData = (data: UserDataType) => {
     try {
       setUser(data);
-      localStorage.setItem('rel8User',JSON.stringify(data))
-  } catch (error) {
+      localStorage.setItem('rel8User', JSON.stringify(data));
+    } catch (error) {
       console.log(error);
-  }
-  }
+    }
+  };
 
   return (
-    <AppContext.Provider value={{ user, setRel8LoginUserData,userFullName,userProfileData}}>
-    {/* <AppContext.Provider value={{ user, setRel8LoginUserData}}> */}
+    <AppContext.Provider value={{ user, setRel8LoginUserData, userFullName, userProfileData }}>
       {children}
     </AppContext.Provider>
   );

@@ -14,6 +14,7 @@ import logoutIcon from '../assets/icons/logout.png'
 import homeIcon from '../assets/icons/home.png'
 import chatIcon from '../assets/icons/chat.png'
 import notificationsIcon from '../assets/icons/bell.png'
+import supportIcon from '../assets/icons/support.png'
 import { SideBarLinkType } from '../types/sidebarDataType'
 
 export const sideBarData: SideBarLinkType[] = [
@@ -109,11 +110,11 @@ export const sideBarData: SideBarLinkType[] = [
   //   name: "Subscribe",
   //   path: "/subscribe",
   // },
-  // {
-  //   mainIcon: supportIcon,
-  //   name: "Support",
-  //   path: "/support",
-  // },
+  {
+    mainIcon: supportIcon,
+    name: "Support",
+    path: "/support",
+  },
   {
     mainIcon: logoutIcon,
     name: "Logout",

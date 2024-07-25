@@ -32,7 +32,7 @@ const VerifyMemberPage = () => {
           const userRel8RegistrationData = data.data[0].user;
           const hasStoredUserInLocalStorage = setRel8UserRegistrationData(userRel8RegistrationData)
           if (hasStoredUserInLocalStorage){
-            notifyUser(`Membership Verification for ${userRel8RegistrationData.name} successful`,"success");
+            notifyUser(`Membership Verification for ${userRel8RegistrationData.fullname} successful`,"success");
             navigate("/register")
           }
         }
