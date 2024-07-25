@@ -1,23 +1,22 @@
 import SeeAll from "../../../components/SeeAll";
-// import NewsCard from "../../components/cards/NewsCard";
-// import { newsData } from "../../data/newsData";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { PublicationDataType,  } from "../../../types/myTypes";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
-import { fetchUserPublications } from "../../../api/publications/publications-api";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
+import { fetchAllUserNews } from "../../../api/news/news-api";
+import NewsCard from "../../../components/cards/NewsCard";
+
 const NewsDetailPage = () => {
 
   const { notifyUser } = Toast();
-  const { publicationId } = useParams();
-
-  const { data, isLoading, isError } = useQuery('publications', fetchUserPublications,{
+  const { newId } = useParams();
+  const { data, isLoading, isError } = useQuery('news', fetchAllUserNews,{
     // enabled: false,
   });
-  const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
+  const newsItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === newId);
 
   console.log('--->',data?.data)
 
@@ -38,13 +37,13 @@ const NewsDetailPage = () => {
                 <BreadCrumb title="News" />
                 <div className="relative" >
                   <img
-                    src={publicationItem?.image}
+                    src={newsItem?.image}
                     className="w-full object-cover max-h-[40vh] top-0 bottom-0 left-0 right-0  rounded-md border "
                     alt=""
                   />
                 </div>
                 <div className="col-span-1 mt-6">
-                    <h3 className=" font-semibold my-2" >{publicationItem?.name}</h3>
+                    <h3 className=" font-semibold my-2" >{newsItem?.name}</h3>
                     {/* {publicationItem?.paragraphs.map((item:PublicationParagraphType)=>(
                     <p className="text-textColor font-light text-justify" >
                       {item.paragragh}
@@ -52,10 +51,10 @@ const NewsDetailPage = () => {
                     ))} */}
                     <br />
                     {
-                publicationItem?.body?
+                newsItem?.body?
                 <div
                dangerouslySetInnerHTML={{
-                 __html: `${publicationItem.body}`,
+                 __html: `${newsItem.body}`,
                }}
              />:''
                 }
@@ -70,10 +69,9 @@ const NewsDetailPage = () => {
               <SeeAll title="Others" />
               <EventGrid numberOfItemsToShow={3} />
               <div  className="space-y-3" >
-  
-              {/* {[...newsData].splice(0,2).map((newsItem, index) => (
+              {[...data?.data].splice(0,2).map((newsItem, index) => (
                 <NewsCard hidePostDetails={true} key={index} newsItem={newsItem} />
-              ))} */}
+              ))}
               </div>
             </div>
           </div>

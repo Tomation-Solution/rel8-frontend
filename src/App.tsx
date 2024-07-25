@@ -285,7 +285,7 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/news/:publicationId",
+      path: "/news/:newId",
       element: (
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
