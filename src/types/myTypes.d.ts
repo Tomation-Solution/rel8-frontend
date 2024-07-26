@@ -59,6 +59,42 @@ export  type NewsResponseType = {
     data: DataItem[];
     success: boolean;
   };
+
+// -------------------------------------------- NewsComments-------------------------------
+export type NewsCommentProps = {
+  newsId: number; 
+}
+
+// Define types for comments
+export type Comment = {
+  id: number; 
+  comment: string;
+  member: {
+      full_name: string;
+      photo_url?: string;
+  };
+}
+
+interface NewsCommentDetails {
+  id: number;
+  paragraphs: any;
+  name: string;
+  is_exco: boolean;
+  is_committe: boolean;
+  is_member: boolean;
+  created_at: string;
+  updated_at: string;
+  likes: number;
+  dislikes: number | null;
+  body: string;
+  image: string;
+  danload: string | null;
+  exco: string | null;
+  commitee_name: string | null;
+  chapters: string | null;
+  membership_grade: string | null;
+  newsId: number;
+}
   
 
 
@@ -130,6 +166,7 @@ export  type NewsResponseType = {
     commitee_name: string | null;
     chapters: string | null;
     membership_grade: string | null;
+    newsId: number;
   }
   
 //  Excos Members
