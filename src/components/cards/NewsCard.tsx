@@ -18,7 +18,7 @@ const NewsCard = ({newsItem,hidePostDetails,linkTo='news'}:Props) => {
         <Link to={`/${linkTo}/${newsItem.id}/`} >
             <h5 className="mb-1 text-[15px] font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{newsItem.name}</h5>
         </Link>
-        <p className="text-[8px]">{newsItem.updated_at}</p>
+        <p className="text-[8px] line-clamp-1">{newsItem.updated_at}</p>
         {/* <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{newsItem.paragraphs[2].paragragh}</p> */}
        {!hidePostDetails && (
        <div className="flex items-center justify-between" >

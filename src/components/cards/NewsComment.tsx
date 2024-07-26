@@ -5,6 +5,7 @@ import avatarImage from '../../assets/images/avatar-1.jpg';
 import { useState } from 'react';
 import { NewsCommentProps, Comment } from "../../types/myTypes";
 import { useAppContext } from "../../context/authContext";
+import { AiOutlineSend } from "react-icons/ai";
 
 // Define the component with props type
 export default function NewsComment({ newsId }: NewsCommentProps) {
@@ -63,10 +64,10 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                         ></textarea>
                     </div>
                     <button
-                        className="bg-primary-blue text-white w-[90px] h-[50px] rounded-md"
+                        className="bg-primary-blue text-white w-[full] px-4 h-[50px] rounded-md"
                         onClick={handleCommentSubmit}
                     >
-                        Comment
+                        <AiOutlineSend />
                     </button>
                 </div>
             </div>

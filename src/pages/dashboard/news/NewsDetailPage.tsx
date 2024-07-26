@@ -21,7 +21,6 @@ const NewsDetailPage = () => {
   const [hasDisliked, setHasDisliked] = useState(false);
   const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
   const newsItem = data?.data?.find((item: NewsCommentDetails) => item.id.toString() === newsId);
-  console.log(newsItem)
 
   useEffect(() => {
     if (newsItem) {
@@ -29,7 +28,8 @@ const NewsDetailPage = () => {
       setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
     }
   }, [newsItem]);
-
+  
+// function is underconstruction please
   const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
     ({ id, like, dislike }) => likeDislikeNews(id, like, dislike),
     {
@@ -43,25 +43,27 @@ const NewsDetailPage = () => {
   );
 
   const handleLike = () => {
-    const id = parseInt(newsId || '0', 10);
-    setHasLiked(!hasLiked);
-    setHasDisliked(false);
-    likeDislikeMutation.mutate({
-      id,
-      like: !hasLiked,
-      dislike: false
-    });
+    // const id = parseInt(newsId || '0', 10);
+    // setHasLiked(!hasLiked);
+    // setHasDisliked(false);
+    // likeDislikeMutation.mutate({
+    //   id,
+    //   like: !hasLiked,
+    //   dislike: false
+    // });
+    toast.info("Like functionality coming soon", { autoClose: 2000 });
   };
 
   const handleDislike = () => {
-    const id = parseInt(newsId || '0', 10);
-    setHasDisliked(!hasDisliked);
-    setHasLiked(false);
-    likeDislikeMutation.mutate({
-      id,
-      like: false,
-      dislike: !hasDisliked
-    });
+    // const id = parseInt(newsId || '0', 10);
+    // setHasDisliked(!hasDisliked);
+    // setHasLiked(false);
+    // likeDislikeMutation.mutate({
+    //   id,
+    //   like: false,
+    //   dislike: !hasDisliked
+    // });
+    toast.info("Dislike functionality coming soon", { autoClose: 2000 });
   };
 
   const downloadPublication = () => {
