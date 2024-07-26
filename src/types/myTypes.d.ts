@@ -72,6 +72,7 @@ export type Comment = {
   member: {
       full_name: string;
       photo_url?: string;
+      id: number;
   };
 }
 

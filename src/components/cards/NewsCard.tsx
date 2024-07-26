@@ -16,8 +16,9 @@ const NewsCard = ({newsItem,hidePostDetails,linkTo='news'}:Props) => {
         <img className="rounded-t-lg w-full h-[180px] object-contain" src={newsItem.image} alt="" />
     <div className="p-5">
         <Link to={`/${linkTo}/${newsItem.id}/`} >
-            <h5 className="mb-2 text-[15px] font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{newsItem.name}</h5>
+            <h5 className="mb-1 text-[15px] font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{newsItem.name}</h5>
         </Link>
+        <p className="text-[8px]">{newsItem.updated_at}</p>
         {/* <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{newsItem.paragraphs[2].paragragh}</p> */}
        {!hidePostDetails && (
        <div className="flex items-center justify-between" >

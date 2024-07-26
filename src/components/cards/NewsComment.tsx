@@ -4,15 +4,15 @@ import Avatar from "../avatar/Avatar";
 import avatarImage from '../../assets/images/avatar-1.jpg';
 import { useState } from 'react';
 import { NewsCommentProps, Comment } from "../../types/myTypes";
+import { useAppContext } from "../../context/authContext";
 
 // Define the component with props type
 export default function NewsComment({ newsId }: NewsCommentProps) {
     const [commentText, setCommentText] = useState('');
     const queryClient = useQueryClient();
+    const { user } = useAppContext();
     
-    const { data, isLoading, isError } = useQuery(['news', newsId], () => fetchNewsComments(newsId?.toString() || null),
-        // {   enabled: !!newsId,}
-    );
+    const { data, isLoading, isError } = useQuery(['news', newsId], () => fetchNewsComments(newsId?.toString() || null));
     const comments: Comment[] = data?.data || [];
 
     const postMutation = useMutation((newComment: { comment: string; newsId: number }) => postNewsComment(newComment.comment, newComment.newsId), {
@@ -47,12 +47,12 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
         <div className="flex flex-col h-full justify-between gap-10">
             <div className="mt-10">
                 <div>
-                    <h3 className="font-semibold text-sm">Comments</h3>
+                    <h3 className="font-semibold text-xl">Comments</h3>
                 </div>
                 {/* This is the write a comment section */}
-                <div className="bg-[] h-[100px] flex items-center gap-2">
+                <div className="h-[100px] flex items-center gap-2">
                     <div className="rounded-full">
-                        <Avatar imageUrl={avatarImage} />
+                        <Avatar imageUrl={user?.profile_image ? user.profile_image : avatarImage} />
                     </div>
                     <div className="flex-1">
                         <textarea
@@ -71,7 +71,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                 </div>
             </div>
             {/* This is the get comments section */}
-            <div>
+            <div className="comments-container overflow-y-auto max-h-[300px]">
                 {comments.length > 0 ? (
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-2 mb-4 items-center">
@@ -81,17 +81,19 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                             <div className="flex flex-col gap-1">
                                 <h3 className="font-semibold text-sm">{comment.member.full_name}</h3>
                                 <p className="text-textColor font-light text-md">{comment.comment}</p>
-                                <button
-                                    className="text-red-500 text-sm text-end"
-                                    onClick={() => handleCommentDelete(comment.id)}
-                                >
-                                    Delete
-                                </button>
+                                {user?.member_id === comment.member.id && (
+                                    <button
+                                        className="text-red-500 text-sm text-end"
+                                        onClick={() => handleCommentDelete(comment.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div>No comments yet.</div>
+                    <div className="flex text-center text-[16px]">No comments yet.</div>
                 )}
             </div>
         </div>
