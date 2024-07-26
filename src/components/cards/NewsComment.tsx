@@ -94,7 +94,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                         </div>
                     ))
                 ) : (
-                    <div className="flex text-center text-[16px]">No comments yet.</div>
+                    <div className="flex justify-center text-[20px]">No comments yet.</div>
                 )}
             </div>
         </div>
