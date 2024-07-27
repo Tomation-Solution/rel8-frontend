@@ -38,6 +38,6 @@ export const likeDislikeNews = async (id: number, like: boolean, dislike: boolea
         dislike: dislike
     };
 
-    const response = await apiTenant.post(`/news/getyournews/`, requestBody);
+    const response = await apiTenant.patch(`/news/getyournews/`, requestBody);
     return response.data;
 };

@@ -43,27 +43,27 @@ const NewsDetailPage = () => {
   );
 
   const handleLike = () => {
-    // const id = parseInt(newsId || '0', 10);
-    // setHasLiked(!hasLiked);
-    // setHasDisliked(false);
-    // likeDislikeMutation.mutate({
-    //   id,
-    //   like: !hasLiked,
-    //   dislike: false
-    // });
-    toast.info("Like functionality coming soon", { autoClose: 2000 });
+    const id = parseInt(newsId || '0', 10);
+    setHasLiked(!hasLiked);
+    setHasDisliked(false);
+    likeDislikeMutation.mutate({
+      id,
+      like: !hasLiked,
+      dislike: false
+    });
+    // toast.info("Like functionality coming soon", { autoClose: 2000 });
   };
 
   const handleDislike = () => {
-    // const id = parseInt(newsId || '0', 10);
-    // setHasDisliked(!hasDisliked);
-    // setHasLiked(false);
-    // likeDislikeMutation.mutate({
-    //   id,
-    //   like: false,
-    //   dislike: !hasDisliked
-    // });
-    toast.info("Dislike functionality coming soon", { autoClose: 2000 });
+    const id = parseInt(newsId || '0', 10);
+    setHasDisliked(!hasDisliked);
+    setHasLiked(false);
+    likeDislikeMutation.mutate({
+      id,
+      like: false,
+      dislike: !hasDisliked
+    });
+    // toast.info("Dislike functionality coming soon", { autoClose: 2000 });
   };
 
   const downloadPublication = () => {
