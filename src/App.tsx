@@ -35,7 +35,7 @@ function App() {
   const PublicationsDetailPage = lazy(() => import("./pages/dashboard/publications/PublicationsDetailPage"));
 
   const NewsPage = lazy(() => import("./pages/dashboard/news/index"));
-  const NewsDetailPage = lazy(() => import("./pages/dashboard/news/details"));
+  const NewsDetailPage = lazy(() => import("./pages/dashboard/news/NewsDetailPage"));
 
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
@@ -285,7 +285,7 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/news/:publicationId",
+      path: "/news/:newsId",
       element: (
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
