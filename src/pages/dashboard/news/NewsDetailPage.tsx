@@ -1,11 +1,15 @@
 import SeeAll from "../../../components/SeeAll";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useQuery, 
+  // useMutation, useQueryClient
+ } from "react-query";
 import { useParams } from "react-router-dom";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
-import { fetchAllUserNews, likeDislikeNews } from "../../../api/news/news-api";
+import { fetchAllUserNews 
+  // likeDislikeNews 
+} from "../../../api/news/news-api";
 import NewsCard from "../../../components/cards/NewsCard";
 import NewsComment from "../../../components/cards/NewsComment";
 import { useState, useEffect } from "react";
@@ -16,7 +20,7 @@ import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 const NewsDetailPage = () => {
   const { notifyUser } = Toast();
   const { newsId } = useParams();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const [hasLiked, setHasLiked] = useState(false);
   const [hasDisliked, setHasDisliked] = useState(false);
   const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
@@ -30,17 +34,17 @@ const NewsDetailPage = () => {
   }, [newsItem]);
   
 // function is underconstruction please
-  const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
-    ({ id, like, dislike }) => likeDislikeNews(id, like, dislike),
-    {
-      onSuccess: (data) => {
-        const updatedNewsItem = data.data[0];
-        setHasLiked(updatedNewsItem.likes > 0);
-        setHasDisliked(updatedNewsItem.dislikes !== null && updatedNewsItem.dislikes > 0);
-        queryClient.invalidateQueries('news');
-      },
-    }
-  );
+  // const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
+  //   ({ id, like, dislike }) => likeDislikeNews(id, like, dislike),
+  //   {
+  //     onSuccess: (data) => {
+  //       const updatedNewsItem = data.data[0];
+  //       setHasLiked(updatedNewsItem.likes > 0);
+  //       setHasDisliked(updatedNewsItem.dislikes !== null && updatedNewsItem.dislikes > 0);
+  //       queryClient.invalidateQueries('news');
+  //     },
+  //   }
+  // );
 
   const handleLike = () => {
     // const id = parseInt(newsId || '0', 10);
