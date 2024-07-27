@@ -148,7 +148,7 @@ const HomePage = () => {
           </div>
           <div>
 
-          <SeeAll title='News' path="/gallery" />
+          <SeeAll title='Publications' path="/publications" />
           <div className="grid grid-cols-2 gap-6">
             {publication?.data?.data?.map((publicationItem:PublicationDataType, index:number) => (
               <PublicationCard key={index} publicationItem={publicationItem} />

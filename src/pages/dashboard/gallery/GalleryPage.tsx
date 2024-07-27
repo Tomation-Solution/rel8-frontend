@@ -12,7 +12,7 @@ const GalleryPage = () => {
 
     const { notifyUser } = Toast();
     const {   data, isError, isLoading } = useQuery("galleryData", fetchAllGalleryData);
-    console.log(data.data)
+    console.log(data?.data)
    
   if (isLoading){
     return <CircleLoader />
