@@ -156,16 +156,28 @@ export const getUserOrNull = ():getUserOrNullResponse=>{
 
 
 
-export const FetchName = (member:MemberType):string=>{
-  // @ts-ignore
-  const name:any = member.member_info.find(d=>{
-    return d.name.toLocaleLowerCase() == 'name' ||  d.name.toLocaleLowerCase() == 'first' ||d.name.toLocaleLowerCase() == 'first name' || d.name.toLocaleLowerCase() == 'surname'
-})['value']
-if(typeof name==='string'){
-  return name
-}
- return `Member (${member.id})`
-}
+// export const FetchName = (member:MemberType):string=>{
+//   // @ts-ignore
+//   const name:any = member.member_info.find(d=>{
+//     return d.name.toLocaleLowerCase() == 'name' ||  d.name.toLocaleLowerCase() == 'first' ||d.name.toLocaleLowerCase() == 'first name' || d.name.toLocaleLowerCase() == 'surname'
+// })['value']
+// if(typeof name==='string'){
+//   return name
+// }
+//  return `Member (${member.id})`
+// }
+
+export const FetchName = (user: any) => {
+  if (!user) {
+    return "Unknown User"; // Return a default value if user is undefined
+  }
+  // Check if member_info contains a fullname value
+  const memberInfoFullName = user.member_info?.find((info: any) => info.name === 'fullname')?.value;
+  if (memberInfoFullName) {
+    return memberInfoFullName;
+  }
+  return user.full_name || "Unknown User"; // Return user's full_name or default value
+};
 
 export const FetchNameByMemberInfo = (member_info:MemberType['member_info']):string=>{
   // @ts-ignore
