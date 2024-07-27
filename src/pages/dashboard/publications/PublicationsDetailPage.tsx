@@ -24,6 +24,8 @@ const PublicationsDetailPage = () => {
   const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
   console.log('--->',data?.data)
 
+  const formattedDate = new Date(publicationItem.updated_at).toLocaleDateString();
+
   useEffect(() => {
     if (publicationItem) {
       setHasLiked(publicationItem.likes > 0);
@@ -68,7 +70,9 @@ const PublicationsDetailPage = () => {
                 <div className="col-span-1 mt-6">
                 <div className="mb-3">
                 <h3 className="font-semibold my-2">{publicationItem?.name}</h3>
-                <p className="text-sm font-light">Date published: {publicationItem?.created_at}</p>
+                {/* <p className="text-sm font-light">Date published: {publicationItem?.created_at}</p> */}
+                <p className="text-sm font-light">Date published: {formattedDate}</p>
+
               </div>
                     <br />
                     {

@@ -32,6 +32,8 @@ const NewsDetailPage = () => {
       setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
     }
   }, [newsItem]);
+
+  const formattedDate = newsItem ? new Date(newsItem.updated_at).toLocaleDateString() : '';
   
 // function is underconstruction please
   // const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
@@ -98,7 +100,7 @@ const NewsDetailPage = () => {
             <div className="col-span-1 mt-6">
               <div className="mb-3">
                 <h3 className="font-semibold my-2">{newsItem?.name}</h3>
-                <p className="text-sm font-light">Date published: {newsItem?.created_at}</p>
+                <p className="text-sm font-light">Date published: {formattedDate}</p>
               </div>
               <div dangerouslySetInnerHTML={{ __html: `${newsItem?.body}` }}></div>
             </div>
