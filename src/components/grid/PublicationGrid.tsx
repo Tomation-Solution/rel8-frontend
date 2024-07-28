@@ -1,8 +1,10 @@
 import { useQuery } from "react-query";
-import { fetchAllGalleryData } from "../../api/gallery/gallery-api";
+// import { fetchAllGalleryData } from "../../api/gallery/gallery-api";
 import GalleryCard from "../cards/GalleryCard";
 import CircleLoader from "../loaders/CircleLoader";
 import Toast from "../../components/toast/Toast";
+import { fetchUserPublications } from "../../api/publications/publications-api";
+// fetchUserPublications
 interface Props {
   numberOfItemsToShow?: number;
   heightOfCard?:string;
@@ -14,7 +16,7 @@ const PublicationGrid = ({ numberOfItemsToShow,heightOfCard }: Props) => {
   
   const {error, data, isError, isLoading } = useQuery(
     "galleryData",
-    fetchAllGalleryData,
+    fetchUserPublications,
 
   );
 

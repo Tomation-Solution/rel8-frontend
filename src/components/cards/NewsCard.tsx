@@ -15,7 +15,7 @@ const NewsCard = ({newsItem,hidePostDetails,linkTo='news'}:Props) => {
 
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-        <img className="rounded-t-lg w-full h-[180px] object-contain" src={newsItem.image} alt="" />
+        <img className="rounded-t-lg w-full md:h-[180px] object-contain" src={newsItem.image} alt="" />
     <div className="p-5">
         <Link to={`/${linkTo}/${newsItem.id}/`} >
             <h5 className="mb-1 text-[15px] font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{newsItem.name}</h5>

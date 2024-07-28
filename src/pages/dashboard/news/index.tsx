@@ -25,9 +25,9 @@ const NewsPage = () => {
   return (
     <main>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-      <div className="col-span-1 md:col-span-3">
+      <div className="col-span-1 md:col-span-3 px-10">
           <BreadCrumb title={"News"} />
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {data?.data?.map((publicationItem:PublicationDataType, index:number) => (
               <PublicationCard key={index} publicationItem={publicationItem}  linkTo="news"/>
             ))}

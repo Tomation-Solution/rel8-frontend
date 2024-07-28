@@ -71,7 +71,7 @@ export default function PublicationComment({ newsId }: NewsCommentProps) {
                 </div>
             </div>
             {/* This is the get comments section */}
-            <div className="comments-container overflow-y-auto max-h-[300px]">
+            <div className="comments-container overflow-y-auto max-h-[300px] py-5">
                 {comments.length > 0 ? (
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-2 mb-4 items-center">

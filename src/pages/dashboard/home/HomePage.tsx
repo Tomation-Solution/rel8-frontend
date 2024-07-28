@@ -149,7 +149,7 @@ const HomePage = () => {
           <div>
 
           <SeeAll title='Publications' path="/publications" />
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
             {publication?.data?.data?.map((publicationItem:PublicationDataType, index:number) => (
               <PublicationCard key={index} publicationItem={publicationItem} />
             ))}
