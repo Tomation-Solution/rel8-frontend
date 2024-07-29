@@ -87,7 +87,7 @@ const NewsDetailPage = () => {
   if (data) {
     return (
       <main>
-        <div className="grid md:grid-cols-4 space-x-7 px-5">
+        <div className="grid md:grid-cols-4 md:gap-0 gap-[50px] px-5">
           <div className="col-span-3">
             <BreadCrumb title="News" />
             <div className="relative">
@@ -127,7 +127,7 @@ const NewsDetailPage = () => {
               <NewsComment newsId={parseInt(newsId || '0', 10)} />
             </div>
           </div>
-          <div className="col-span-1">
+          <div className="md:col-span-1 col-span-3">
             <SeeAll title="Others" />
             <EventGrid numberOfItemsToShow={3} />
             <div className="space-y-3">

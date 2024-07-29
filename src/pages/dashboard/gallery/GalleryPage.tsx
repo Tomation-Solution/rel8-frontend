@@ -15,16 +15,17 @@ interface GalleryItem {
     imageUrl: string;
 }
 
+interface Link {
+    label: number;
+    active: boolean;
+}
+
 const GalleryPage = () => {
     const [page, setPage] = useState<number>(1);
     const { notifyUser } = Toast();
     const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
         keepPreviousData: true,
     });
-
-    const handlePageChange = (newPage: number) => {
-        setPage(newPage);
-    };
 
     if (isLoading) {
         return <CircleLoader />;
@@ -34,11 +35,21 @@ const GalleryPage = () => {
         notifyUser("An error occurred while trying to fetch gallery items", "error");
     }
 
-    const totalPages = data?.data?.pages_number || 1;
+    const handlePreviousPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (data?.data?.links?.some((link: Link) => link.label === page + 1)) {
+            setPage(page + 1);
+        }
+    };
 
     return (
         <main>
-            <div className="md:grid md:grid-cols-4 gap-x-[50px] flex flex-col gap-10 px-2">
+            <div className="md:grid md:grid-cols-4 gap-x-[50px] flex flex-col gap-[50px] px-2">
                 <div className='col-span-3'>
                     <BreadCrumb title={"Albums"} />
 
@@ -50,23 +61,28 @@ const GalleryPage = () => {
                         ))}
                     </div>
 
-                    <div className="flex justify-between mt-4 items-center">
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            className="px-4 py-2 bg-[#0070f3] text-white rounded disabled:opacity-50"
-                        >
-                            Previous
-                        </button>
-                        <span>{page} of {totalPages}</span>
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            className="px-4 py-2 bg-[#0070f3] text-white rounded disabled:opacity-50"
-                        >
-                            Next
-                        </button>
-                    </div>
+                    <nav>
+                        <ul className="flex justify-center gap-4 mt-4">
+                            <li>
+                                <button
+                                    onClick={handlePreviousPage}
+                                    disabled={page === 1}
+                                    className={`px-4 py-2 rounded-md ${page === 1 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Previous
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={!data?.data?.links?.some((link: Link) => link.label === page + 1)}
+                                    className={`px-4 py-2 rounded-md ${!data?.data?.links?.some((link: Link) => link.label === page + 1) ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Next
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
                 <div className="col-span-1">
                     <SeeAll title='Highlights' path='/' />

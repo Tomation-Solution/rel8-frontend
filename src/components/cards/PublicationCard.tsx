@@ -13,7 +13,7 @@ const PublicationCard = ({publicationItem, hidePostDetails, linkTo='publication'
    
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-        <img className="rounded-t-lg w-full md:h-[180px] h-[70px] object-contain" src={publicationItem.image} alt="" />
+        <img className="rounded-t-lg w-full md:h-[180px] h-[170px] object-contain" src={publicationItem.image} alt="" />
     <div className="md:p-5 p-2">
         <Link to={`/${linkTo}/${publicationItem.id}/`} >
             <h5 className="mb-2 md:text-[15px] text-sm font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{publicationItem.name}</h5>
