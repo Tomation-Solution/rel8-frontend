@@ -15,16 +15,17 @@ interface GalleryItem {
     imageUrl: string;
 }
 
+interface Link {
+    label: number;
+    active: boolean;
+}
+
 const GalleryPage = () => {
     const [page, setPage] = useState<number>(1);
     const { notifyUser } = Toast();
     const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
         keepPreviousData: true,
     });
-
-    const handlePageChange = (newPage: number) => {
-        setPage(newPage);
-    };
 
     if (isLoading) {
         return <CircleLoader />;
@@ -34,7 +35,9 @@ const GalleryPage = () => {
         notifyUser("An error occurred while trying to fetch gallery items", "error");
     }
 
-    const totalPages = data?.data?.pages_number || 1;
+    const handlePageClick = (label: number) => {
+        setPage(label);
+    };
 
     return (
         <main>
@@ -50,23 +53,17 @@ const GalleryPage = () => {
                         ))}
                     </div>
 
-                    <div className="flex justify-between mt-4 items-center">
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            className="px-4 py-2 bg-[#0070f3] text-white rounded disabled:opacity-50"
-                        >
-                            Previous
-                        </button>
-                        <span>{page} of {totalPages}</span>
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            className="px-4 py-2 bg-[#0070f3] text-white rounded disabled:opacity-50"
-                        >
-                            Next
-                        </button>
-                    </div>
+                    <nav>
+                        <ul className="flex justify-center gap-10 mt-4">
+                            {data?.data?.links?.map((link: Link, index: number) => (
+                                <li key={index} className={`mx-1 ${link.active ? 'font-bold' : ''}`}>
+                                    <button onClick={() => handlePageClick(link.label)}>
+                                        {link.label}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
                 </div>
                 <div className="col-span-1">
                     <SeeAll title='Highlights' path='/' />
