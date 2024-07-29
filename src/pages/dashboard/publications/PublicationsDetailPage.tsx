@@ -24,7 +24,7 @@ const PublicationsDetailPage = () => {
   const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
   console.log('--->',data?.data)
 
-  const formattedDate = new Date(publicationItem.updated_at).toLocaleDateString();
+  const formattedDate = publicationItem ? new Date(publicationItem.updated_at).toLocaleDateString() : '';
 
   useEffect(() => {
     if (publicationItem) {
@@ -57,7 +57,7 @@ const PublicationsDetailPage = () => {
 
     return (
       <main>
-          <div className="grid md:grid-cols-4 space-x-7 px-5">
+          <div className="grid md:grid-cols-4 md:gap-0 gap-[50px] px-5">
             <div className="col-span-3">
                 <BreadCrumb title="Publications" />
                 <div className="relative" >
@@ -106,10 +106,10 @@ const PublicationsDetailPage = () => {
               <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
             </div>
             </div>
-            <div className="col-span-1">
+            <div className="md:col-span-1 col-span-3">
               <SeeAll title="Others" />
               <EventGrid numberOfItemsToShow={3} />
-              <div  className="space-y-3" >
+              <div  className="" >
   
               {[...data.data].splice(0,2).map((publicationItem, index) => (
                 <PublicationCard hidePostDetails={true} key={index} publicationItem={publicationItem} />
