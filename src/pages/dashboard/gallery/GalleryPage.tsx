@@ -35,13 +35,21 @@ const GalleryPage = () => {
         notifyUser("An error occurred while trying to fetch gallery items", "error");
     }
 
-    const handlePageClick = (label: number) => {
-        setPage(label);
+    const handlePreviousPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (data?.data?.links?.some((link: Link) => link.label === page + 1)) {
+            setPage(page + 1);
+        }
     };
 
     return (
         <main>
-            <div className="md:grid md:grid-cols-4 gap-x-[50px] flex flex-col gap-10 px-2">
+            <div className="md:grid md:grid-cols-4 gap-x-[50px] flex flex-col gap-[50px] px-2">
                 <div className='col-span-3'>
                     <BreadCrumb title={"Albums"} />
 
@@ -54,14 +62,25 @@ const GalleryPage = () => {
                     </div>
 
                     <nav>
-                        <ul className="flex justify-center gap-10 mt-4">
-                            {data?.data?.links?.map((link: Link, index: number) => (
-                                <li key={index} className={`mx-1 ${link.active ? 'font-bold' : ''}`}>
-                                    <button onClick={() => handlePageClick(link.label)}>
-                                        {link.label}
-                                    </button>
-                                </li>
-                            ))}
+                        <ul className="flex justify-center gap-4 mt-4">
+                            <li>
+                                <button
+                                    onClick={handlePreviousPage}
+                                    disabled={page === 1}
+                                    className={`px-4 py-2 rounded-md ${page === 1 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Previous
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={!data?.data?.links?.some((link: Link) => link.label === page + 1)}
+                                    className={`px-4 py-2 rounded-md ${!data?.data?.links?.some((link: Link) => link.label === page + 1) ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Next
+                                </button>
+                            </li>
                         </ul>
                     </nav>
                 </div>
