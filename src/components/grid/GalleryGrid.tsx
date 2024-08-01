@@ -76,13 +76,13 @@ const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   }
 
   return (
-    <>
+    <div className=" xl/lg:px-0 md:px-10 px-6">
       {data?.data?.data
         ?.slice(0, numberOfItemsToShow)
         .map((galleryItem: any, index: number) => (
           <GalleryCard height={heightOfCard} key={index} galleryItem={galleryItem} />
         ))}
-    </>
+    </div>
   );
 };
 

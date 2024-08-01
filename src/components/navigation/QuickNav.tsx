@@ -15,12 +15,12 @@ const QuickNav = () => {
     {
       title: "Events",
       image: eventsIcon,
-      path: "/publications",
+      path: "/events",
     },
     {
       title: "Meetings",
       image: meetingsIcon,
-      path: "/meetings",
+      path: "/",
     },
     {
       title: "Gallery",
@@ -45,7 +45,7 @@ const QuickNav = () => {
         {QuickNavData.map((data, index) => (
           <div key={index} className="grid place-items-center">
             <Link
-              to=""
+              to={data.path}
               className=" w-fit h-fit p-3 rounded-full bg-primary-blue"
               key={index}
             >
