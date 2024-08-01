@@ -258,3 +258,18 @@ export interface ChatMessageDataType {
   full_name: string;
   id?: number;
 }
+
+// ----------------------------------- Notifications
+
+export interface NotificationDataType {
+  id: string;
+  created_on: string;
+  title: string;
+  body:string;
+  created_on?: string;
+  latest_update_table_name: string;
+}
+
+export interface Props {
+  notificationItem: NotificationDataType;
+}

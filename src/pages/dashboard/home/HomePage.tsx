@@ -7,7 +7,6 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 import SeeAll from "../../../components/SeeAll";
 import { fetchAllUserEvents } from "../../../api/events/events-api";
 import EventsCard from "../../../components/cards/EventsCard";
-import { notificationData } from "../../../data/notificationData";
 import HomePageNotification from "../../../components/homepage/HomePageNotification";
 import QuickNav from "../../../components/navigation/QuickNav";
 import GalleryGrid from "../../../components/grid/GalleryGrid";
@@ -16,10 +15,14 @@ import HomePageNewsCard from "../../../components/cards/HomePageNewsCard";
 import { fetchUserPublications } from "../../../api/publications/publications-api";
 import { PublicationDataType } from "../../../types/myTypes";
 import PublicationCard from "../../../components/cards/PublicationCard";
+import { fetchAllNotifications } from "../../../api/notifications/notifications-api";
+import { NotificationDataType } from "../../../types/myTypes";
 
 const HomePage = () => {
-
+  const { data, isError, isLoading } = useQuery('notifications', fetchAllNotifications);
   const { notifyUser } = Toast();
+
+  if(isError) return <div>Error loading notifications</div>;
 
   const eventsResponsiveCarousel = {
     superLargeDesktop: {
@@ -115,8 +118,6 @@ const HomePage = () => {
             <div className="flex flex-col " >
               <SeeAll title="Events" path="/events" />
 
-              
-              
                 <div className={`grid place items-center`} >
                 {events.isLoading && <CircleLoader />}
                 { events.data && (
@@ -139,8 +140,8 @@ const HomePage = () => {
             <div className="hidden  md:flex flex-col" >
               <SeeAll title="Notifications" path="/notifications" />
               <div className="grid justify-between " >
-
-                {notificationData.map((notificationItem,index)=>(
+              {isLoading && <CircleLoader />}
+                {data && data.map((notificationItem:NotificationDataType, index:number) => (
                   <HomePageNotification key={index} notificationItem={notificationItem} />
                 ))}
               </div>
@@ -160,12 +161,8 @@ const HomePage = () => {
         <div className='hidden xl:inline col-span-1'  >
         <SeeAll title='Gallery' path="/gallery" />
         <GalleryGrid numberOfItemsToShow={3} />
-     
 
         <QuickNav />
-        
-
-          
         </div>
     </main>
      
