@@ -23,13 +23,13 @@ const EventGrid = ({numberOfItemsToShow=2,heightOfCard}:Props) => {
   }
 
   return (
-    <>
+    <div className=" xl/lg:px-0 md:px-10 px-5">
    
     {data?.data?.slice(0, numberOfItemsToShow)
       .map((eventItem: any, index: number) => (
         <EventsCard height={heightOfCard} hideButton={true} key={index} eventItem={eventItem} />
       ))}
-  </>
+  </div>
   )
 }
 

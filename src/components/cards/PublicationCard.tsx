@@ -12,7 +12,7 @@ const PublicationCard = ({publicationItem, hidePostDetails, linkTo='publication'
     const formattedDate = new Date(publicationItem.updated_at).toLocaleDateString();
    
   return (
-    <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
+    <div className="max-w- bg-white border border-gray-200 rounded-lg shadow">
         <img className="rounded-t-lg w-full md:h-[180px] h-[170px] object-contain" src={publicationItem.image} alt="" />
     <div className="md:p-5 p-2">
         <Link to={`/${linkTo}/${publicationItem.id}/`} >

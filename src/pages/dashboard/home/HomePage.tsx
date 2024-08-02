@@ -85,8 +85,9 @@ const HomePage = () => {
   }
 
   return (
-    <main className='grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:px-0 px-5'>
-      <div className="col-span-1 xl:col-span-3 relative">
+    <main className='grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:gap-8 gap-10 md:px-0 px-5'>
+      <div className="col-span-1 xl:col-span-3 relative flex flex-col gap-8 ">
+        <div className="">
         <BreadCrumb title='Latest Updates' />
         {/* Latest Updates */}
         <div className={`relative py-6 ${news.isLoading ? "flex items-center justify-center" : ""}`}>
@@ -105,8 +106,10 @@ const HomePage = () => {
             </Carousel>
           }
         </div>
+        </div>
+
         {/* Events & Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 my-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 my-7">
           <div className="flex flex-col">
             <SeeAll title="Events" path="/events" />
             <div className={`grid place items-center`}>
