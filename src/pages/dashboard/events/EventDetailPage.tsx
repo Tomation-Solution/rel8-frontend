@@ -172,7 +172,7 @@ const EventDetailPage = () => {
                 />
                 <div>
                   <h3 className="text-base ">
-                   { event?.organzier_name? event?.organzier_name:"Not Available"} <span className="text-xs">~ Organizer</span>{" "}
+                   { event?.organiser_name? event?.organiser_name:"Not Available"} <span className="text-xs">~ Organizer</span>{" "}
                   </h3>
                   <p className="text-sm text-neutral1">
                     {event?.organiser_extra_info ? event.organiser_extra_info : "Organiser Info not available"}
@@ -184,19 +184,19 @@ const EventDetailPage = () => {
               </Link>
             </div>
             <div className="" >
-                <h3 className="text-sm" >Event Fee: <span className="font-bold text-sm" >₦{event?.amount ?  parseFloat(event.amount).toFixed(2) :  "Not Available"}</span></h3>
+              <h3 className="text-sm">Event Fee: <span className="font-bold text-sm">
+                  {event?.amount && parseFloat(event.amount) > 0 ? `₦${parseFloat(event.amount).toFixed(2)}` : "Free"}
+                  </span>
+              </h3>
                 <div className="grid grid-cols-2 gap-2 my-3 text-sm">
                 <button className="bg-primary-blue text-white  border border-white h-[40px] rounded-md  ">
                Add Participants
               </button>
               {/* <Button type="outlined"  text="xjnasj" className="!h-[40px] grid  place-items-center" />  */}
               
-                <button onClick={event?.is_paid_event ? handleRegisterUserForPaidEvents :handleRegisterUserForFreeEvents}  className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
-               Register
-               {
-                event?.is_paid_event?"Pay for event":"Register for free"
-               }
-              </button>
+              <button onClick={event?.is_paid_event ? handleRegisterUserForPaidEvents : handleRegisterUserForFreeEvents} className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
+                                {event?.is_paid_event ? "Pay for event" : "Register for free"}
+                            </button>
                 </div>
             </div>
           </div>
