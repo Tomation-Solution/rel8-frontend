@@ -49,8 +49,8 @@ const GalleryPage = () => {
 
     return (
         <main>
-            <div className="md:grid md:grid-cols-4 gap-x-[50px] flex flex-col gap-[50px] px-2">
-                <div className='col-span-3'>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
+                <div className='col-span-1 md:col-span-3 md:px-0'>
                     <BreadCrumb title={"Albums"} />
 
                     <div className={`${isLoading && `place-items-center`} grid grid-cols-2 md:grid-cols-4 gap-2`}>
@@ -84,7 +84,7 @@ const GalleryPage = () => {
                         </ul>
                     </nav>
                 </div>
-                <div className="col-span-1">
+                <div className="col-span-1 md:col-span-1">
                     <SeeAll title='Highlights' path='/' />
                     <EventGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />
                     <QuickNav />

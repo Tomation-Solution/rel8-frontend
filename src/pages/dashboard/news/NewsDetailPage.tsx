@@ -87,7 +87,7 @@ const NewsDetailPage = () => {
   if (data) {
     return (
       <main>
-        <div className="grid md:grid-cols-4 md:gap-0 gap-[50px] px-5">
+        <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] px-5">
           <div className="col-span-3">
             <BreadCrumb title="News" />
             <div className="relative">

@@ -11,6 +11,7 @@ import Toast from "../../../components/toast/Toast"
 const EventsPage = () => {
     const { notifyUser } = Toast();
     const {   data, isError, isLoading } = useQuery("events",fetchAllUserEvents);
+    console.log(data?.data[0])
 
       if (isError){
         notifyUser("An error occured while fetching events","error")
