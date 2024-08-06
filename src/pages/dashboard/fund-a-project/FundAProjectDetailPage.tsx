@@ -35,7 +35,7 @@ const FundAProjectDetailPage = () => {
 
   return (
     <main>
-      <div className="grid grid-cols-4 gap-x-[80px]">
+      <div className="grid grid-cols-4 gap-x-[80px] px-5 md:px-0">
         <div className="col-span-4 xl:col-span-3">
           <BreadCrumb title="Fund A Project" />
           <div className='flex flex-col my-3 h-fit'>

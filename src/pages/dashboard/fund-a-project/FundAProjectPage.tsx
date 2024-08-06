@@ -21,19 +21,19 @@ const FundAProjectPage = () => {
   console.log('fund', data);
 
   return (
-    <main className="grid grid-cols-1 lg:grid-cols-4 space-x-5 text-textColor">
-      <div className="col-span-1 lg:col-span-3">
+    <main className="grid grid-cols-1 md:grid-cols-4 gap-7 text-textColor px-5 md:px-5">
+      <div className="col-span-1 md:col-span-3 md:px-0">
         <BreadCrumb title="Fund a Project" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading && <CircleLoader />}
           {data?.results?.map((projectItem: FundAProjectDataType, index: number) => (
             <FundAProjectCard key={index} projectItem={projectItem} />
           ))}
         </div>
       </div>
-      <div className="col-span-1 hidden lg:inline">
+      <div className="col-span-1 md:col-span-1">
         <SeeAll title="Events" />
-        <EventGrid numberOfItemsToShow={2} />
+        <EventGrid heightOfCard="h-[170px]" numberOfItemsToShow={2} />
         <QuickNav />
       </div>
     </main>
