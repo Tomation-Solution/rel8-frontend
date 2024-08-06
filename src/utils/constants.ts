@@ -4,7 +4,7 @@ import anniLogo from '../assets/cover-images/aanilogo.png'
 import nimnLogo from '../assets/cover-images/nimnlogoo.svg'
 import bukaalogo from '../assets/cover-images/bukaalogo.png'
 
-// import { getSubdomain } from './extra_functions';
+import { getSubdomain } from './extra_functions';
 
 
 export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
