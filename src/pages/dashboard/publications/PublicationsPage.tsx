@@ -27,9 +27,9 @@ const PublicationsPage = () => {
     <main>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
          {/* Publications column */}
-        <div className="col-span-1 md:col-span-3 md:px-0 px-10">
+        <div className="col-span-1 md:col-span-3 md:px-0 px-5">
           <BreadCrumb title={"Publications"} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {data?.data?.map((publicationItem:PublicationDataType, index:number) => (
               <PublicationCard key={index} publicationItem={publicationItem} />
             ))}

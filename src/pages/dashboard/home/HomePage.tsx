@@ -135,7 +135,7 @@ const HomePage = () => {
             <SeeAll title="Notifications" path="/notifications" />
             <div className="grid justify-between">
               {isLoading && <CircleLoader />}
-              {data && data.map((notificationItem: NotificationDataType, index: number) => (
+              {data && data.slice(0, 4).map((notificationItem: NotificationDataType, index: number) => (
                 <HomePageNotification key={index} notificationItem={notificationItem} />
               ))}
             </div>

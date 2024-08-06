@@ -54,8 +54,7 @@ export type SupportInKindFields = {
   return (
     <div>
         <BreadCrumb title="Support in Kind" />
-        <form className="flex flex-col w-full max-w-md gap-y-4" onSubmit={handleSubmit(onSubmit)}  >
-              
+        <form className="flex flex-col w-full max-w-md gap-y-4" onSubmit={handleSubmit(onSubmit)}  > 
             <div className='grid'>   
                 {errors.heading?.type === 'required' && (<FormError message="Support Item is required" />)}
                 <small>Heading</small>
@@ -66,37 +65,13 @@ export type SupportInKindFields = {
                 <small>About</small>
                 <TextInputWithImage   register={register} name="about" placeHolder=""  />
              </div>
-            {/* <div>   
-                <small>Quantity</small>
-                {errors.quantity?.type === 'required' && (<FormError message="Quantity is required" />)}
-                <div className="mt-1 relative rounded-md shadow-sm">
-                    <select
-                    id="deliveryOption"
-                    name="deliveryOption"
-                    className="form-control"
-                    >
-                    <option value="pickup">Pickup</option>
-                    <option value="delivery">Delivery</option>
-                    </select>
-      </div>
-             </div> */}
             <div className='grid' > 
                 {errors.delivery_date?.type === 'required' && (<FormError message="Delivery Date is required" />)}
                 <small>Delivery Date</small>
                 <TextInputWithImage  inputType='date'  register={register} name="delivery_date" placeHolder="" />
                
              </div>
-            {/* <div> 
-                <small>Message</small>
-                {errors.quantity?.type === 'required' && (<FormError message="Quantity is required" />)}
-                <textarea className='form-control'  {...register("message")} ></textarea>
-             </div> */}
              <Button isLoading={isLoading} text='Submit' />
-              
-             
-              
-              
-              
             </form>
     </div>
   )

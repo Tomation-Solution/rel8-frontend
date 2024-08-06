@@ -1,5 +1,5 @@
 import EventGrid from "../../../components/grid/EventGrid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import Toast from "../../../components/toast/Toast";
 import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
@@ -27,13 +27,15 @@ const GalleryPage = () => {
         keepPreviousData: true,
     });
 
-    if (isLoading) {
-        return <CircleLoader />;
-    }
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [page]);
 
-    if (isError) {
-        notifyUser("An error occurred while trying to fetch gallery items", "error");
-    }
+    useEffect(() => {
+        if (isError) {
+            notifyUser("An error occurred while trying to fetch gallery items", "error");
+        }
+    }, [isError, notifyUser]);
 
     const handlePreviousPage = () => {
         if (page > 1) {
@@ -50,8 +52,8 @@ const GalleryPage = () => {
     return (
         <main>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-                <div className='col-span-1 md:col-span-3 md:px-0'>
-                    <BreadCrumb title={"Albums"} />
+                <div className="col-span-1 md:col-span-3 md:px-0">
+                    <BreadCrumb title="Albums" />
 
                     <div className={`${isLoading && `place-items-center`} grid grid-cols-2 md:grid-cols-4 gap-2`}>
                         {isLoading && <CircleLoader />}
@@ -85,8 +87,8 @@ const GalleryPage = () => {
                     </nav>
                 </div>
                 <div className="col-span-1 md:col-span-1">
-                    <SeeAll title='Highlights' path='/' />
-                    <EventGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />
+                    <SeeAll title="Highlights" path="/" />
+                    <EventGrid heightOfCard="h-[170px]" numberOfItemsToShow={2} />
                     <QuickNav />
                 </div>
             </div>

@@ -20,7 +20,7 @@ const QuickNav = () => {
     {
       title: "Meetings",
       image: meetingsIcon,
-      path: "/",
+      path: "/meeting",
     },
     {
       title: "Gallery",
@@ -30,14 +30,18 @@ const QuickNav = () => {
     {
       title: "Fund a Project",
       image: fundAProjectIcon,
-      path: "/",
+      path: "/fund-a-project",
     },
     {
       title: "Service Request",
       image: serviceRequestIcon,
-      path: "/",
+      path: "/service-requests",
     },
   ];
+
+  const scrollToTop = () => {
+    window.scrollTo(0, 0);
+  };
   return (
     <div className="grid broder border-t border-gray-300 ">
         <h3 className="font-bold text-center  my-3" >Quick Nav</h3>
@@ -46,6 +50,7 @@ const QuickNav = () => {
           <div key={index} className="grid place-items-center">
             <Link
               to={data.path}
+              onClick={scrollToTop}
               className=" w-fit h-fit p-3 rounded-full bg-primary-blue"
               key={index}
             >

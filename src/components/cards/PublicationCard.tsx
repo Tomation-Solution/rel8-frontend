@@ -18,7 +18,7 @@ const PublicationCard = ({publicationItem, hidePostDetails, linkTo='publication'
         <Link to={`/${linkTo}/${publicationItem.id}/`} >
             <h5 className="mb-2 md:text-[15px] text-sm font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{publicationItem.name}</h5>
         </Link>
-        <p className="mb-2 text-[9px] line-clamp-1">{formattedDate}</p>
+        <p className="mb-2 text-[10px] line-clamp-1">{formattedDate}</p>
         {/* <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{publicationItem.paragraphs[2].paragragh}</p> */}
        {!hidePostDetails && (
        <div className="flex items-center justify-between" >
