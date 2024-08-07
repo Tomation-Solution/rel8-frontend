@@ -7,6 +7,7 @@ import FundAProjectCard from "../../../components/cards/FundAProjectCard";
 import { Link, useParams } from "react-router-dom";
 import { FundAProjectDataType } from "../../../types/myTypes";
 import Button from "../../../components/button/Button";
+import CircleLoader from "../../../components/loaders/CircleLoader";
 
 const FundAProjectDetailPage = () => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -18,8 +19,8 @@ const FundAProjectDetailPage = () => {
 
   const { data: projectData, isLoading, isError } = useQuery("fund-a-project-item", fundAProject);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (isLoading){
+    return <CircleLoader />
   }
 
   if (isError) {
@@ -35,11 +36,11 @@ const FundAProjectDetailPage = () => {
 
   return (
     <main>
-      <div className="grid grid-cols-4 gap-x-[80px] px-5 md:px-0">
-        <div className="col-span-4 xl:col-span-3">
+      <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5">
+        <div className="col-span-3">
           <BreadCrumb title="Fund A Project" />
           <div className='flex flex-col my-3 h-fit'>
-            <p className='font-semibold'>{projectItem.heading}</p>
+            <p className='font-semibold text-sm md:text-[17px]'>{projectItem.heading}</p>
           </div>
           <div>
             <img
@@ -86,14 +87,14 @@ const FundAProjectDetailPage = () => {
             )}
           </div>
         </div>
-        <div className="hidden xl:inline col-span-1">
+        <div className="md:col-span-1 col-span-3">
           <SeeAll title="Others" />
           <div className="space-y-3">
             {otherProjects?.map((projectItem: FundAProjectDataType, index: number) => (
               <FundAProjectCard key={index} projectItem={projectItem} />
             ))}
             {otherProjects?.length <= 0 && (
-              <h3 className="text-primary-blue text-xl font-medium">No Project Available</h3>
+              <h3 className="text-primary-blue text-xl font-medium">No other Project Available</h3>
             )}
           </div>
         </div>

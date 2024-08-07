@@ -44,7 +44,7 @@ const SupportInCashPage = () => {
         <form className="flex flex-col w-full max-w-md gap-y-4" onSubmit={handleSubmit(onSubmit)}  >
             <div className='grid'>   
                 {errors.amount?.type === 'required' && (<FormError message="Amount is required" />)}
-                <small>Support Item</small>
+                <small>Amount</small>
                 <TextInputWithImage inputType='number' register={register} name="amount" placeHolder=""  />
              </div>
             <div className='grid' > 

@@ -21,8 +21,10 @@ const PublicationsDetailPage = () => {
   const { data, isLoading, isError } = useQuery('publications', fetchUserPublications,{
     // enabled: false,
   });
+
   const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
   console.log('--->',data?.data)
+  const otherPublicationItems = data?.data?.filter((item:PublicationDataType) => item.id.toString() !== publicationId);
 
   const formattedDate = publicationItem ? new Date(publicationItem.updated_at).toLocaleDateString() : '';
 
@@ -57,7 +59,7 @@ const PublicationsDetailPage = () => {
 
     return (
       <main>
-          <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] px-5">
+          <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5">
             <div className="col-span-3">
                 <BreadCrumb title="Publications" />
                 <div className="relative" >
@@ -111,7 +113,7 @@ const PublicationsDetailPage = () => {
               <EventGrid numberOfItemsToShow={3} />
               <div  className="" >
   
-              {[...data.data].splice(0,2).map((publicationItem, index) => (
+              {otherPublicationItems?.map((publicationItem: PublicationDataType, index: number) => (
                 <PublicationCard hidePostDetails={true} key={index} publicationItem={publicationItem} />
               ))}
               </div>

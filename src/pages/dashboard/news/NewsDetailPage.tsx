@@ -25,6 +25,7 @@ const NewsDetailPage = () => {
   const [hasDisliked, setHasDisliked] = useState(false);
   const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
   const newsItem = data?.data?.find((item: NewsCommentDetails) => item.id.toString() === newsId);
+  const otherNewsItems = data?.data?.filter((item: NewsCommentDetails) => item.id.toString() !== newsId);
 
   useEffect(() => {
     if (newsItem) {
@@ -131,7 +132,7 @@ const NewsDetailPage = () => {
             <SeeAll title="Others" />
             <EventGrid numberOfItemsToShow={3} />
             <div className="space-y-3">
-              {[...data?.data].splice(0, 2).map((newsItem, index) => (
+              {otherNewsItems?.map((newsItem, index) => (
                 <NewsCard hidePostDetails={true} key={index} newsItem={newsItem} />
               ))}
             </div>
