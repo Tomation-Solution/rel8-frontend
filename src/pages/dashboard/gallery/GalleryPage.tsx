@@ -1,50 +1,99 @@
+import EventGrid from "../../../components/grid/EventGrid";
+import { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import Toast from "../../../components/toast/Toast";
-import { fetchAllGalleryData} from "../../../api/gallery/gallery-api";
+import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import GalleryCard from "../../../components/cards/GalleryCard";
 import SeeAll from "../../../components/SeeAll";
 import QuickNav from "../../../components/navigation/QuickNav";
-import EventGrid from "../../../components/grid/EventGrid";
 
-const GalleryPage = () => {
-
-    const { notifyUser } = Toast();
-    const {   data, isError, isLoading } = useQuery("galleryData", fetchAllGalleryData);
-    console.log(data.data)
-   
-  if (isLoading){
-    return <CircleLoader />
-  }
-
-  if (isError){
-    notifyUser("An error occured while trying to fetch galey items","error")
-  }
-    
-  return (
-    <main>
-    <div className="grid grid-cols-4  gap-x-[50px]">
-        <div className='col-span-3' >
-        <BreadCrumb title={"Albums"} />
-
-        <div className={`${isLoading && `place-items-center`} grid grid-cols-4 gap-2`}>
-        {isLoading && <CircleLoader />}
-
-        {data?.data?.data?.map((galleryItem:any,index:number)=>(
-         <GalleryCard key={index}   galleryItem={galleryItem} />
-       ))}
-          
-        </div>
-        </div>
-        <div className="hidden xl:inline col-span-1">
-            <SeeAll title='Highlights' path='/' /> 
-            <EventGrid heightOfCard={"h-[170px]"}  numberOfItemsToShow={2} />
-            <QuickNav />
-        </div>
-    </div>
-</main>
-  )
+interface GalleryItem {
+    id: number;
+    title: string;
+    imageUrl: string;
 }
 
-export default GalleryPage
+interface Link {
+    label: number;
+    active: boolean;
+}
+
+const GalleryPage = () => {
+    const [page, setPage] = useState<number>(1);
+    const { notifyUser } = Toast();
+    const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
+        keepPreviousData: true,
+    });
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [page]);
+
+    useEffect(() => {
+        if (isError) {
+            notifyUser("An error occurred while trying to fetch gallery items", "error");
+        }
+    }, [isError, notifyUser]);
+
+    const handlePreviousPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (data?.data?.links?.some((link: Link) => link.label === page + 1)) {
+            setPage(page + 1);
+        }
+    };
+
+    return (
+        <main>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
+                <div className="col-span-1 md:col-span-3 md:px-0">
+                    <BreadCrumb title="Albums" />
+
+                    <div className={`${isLoading && `place-items-center`} grid grid-cols-2 md:grid-cols-4 gap-2`}>
+                        {isLoading && <CircleLoader />}
+
+                        {data?.data?.data?.map((galleryItem: GalleryItem, index: number) => (
+                            <GalleryCard key={index} galleryItem={galleryItem} />
+                        ))}
+                    </div>
+
+                    <nav>
+                        <ul className="flex justify-center gap-4 mt-4">
+                            <li>
+                                <button
+                                    onClick={handlePreviousPage}
+                                    disabled={page === 1}
+                                    className={`px-4 py-2 rounded-md ${page === 1 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Previous
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={!data?.data?.links?.some((link: Link) => link.label === page + 1)}
+                                    className={`px-4 py-2 rounded-md ${!data?.data?.links?.some((link: Link) => link.label === page + 1) ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                >
+                                    Next
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div className="col-span-1 md:col-span-1">
+                    <SeeAll title="Highlights" path="/" />
+                    <EventGrid heightOfCard="h-[170px]" numberOfItemsToShow={2} />
+                    <QuickNav />
+                </div>
+            </div>
+        </main>
+    );
+};
+
+export default GalleryPage;

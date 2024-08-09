@@ -14,7 +14,7 @@ export const sitename='rel8.watchdoglogisticsng.com'
 
 
 export const  getTenantInfo = ()=>{
-    const currentTenant = getSubdomain()|| TENANT
+    const currentTenant = TENANT
     const currentLogo:any = {
         'bpmi':BpmiLogo,
         'aani':anniLogo,

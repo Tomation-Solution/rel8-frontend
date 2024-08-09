@@ -1,6 +1,4 @@
 import SeeAll from "../../../components/SeeAll";
-// import NewsCard from "../../components/cards/NewsCard";
-// import { newsData } from "../../data/newsData";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { PublicationDataType,  } from "../../../types/myTypes";
 import { useQuery } from "react-query";
@@ -9,17 +7,45 @@ import { fetchUserPublications } from "../../../api/publications/publications-ap
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
+import PublicationCard from "../../../components/cards/PublicationCard";
+import { toast } from "react-toastify";
+import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
+import { useState, useEffect } from "react";
+import PublicationComment from "../../../components/cards/PublicationComment";
 const PublicationsDetailPage = () => {
 
   const { notifyUser } = Toast();
   const { publicationId } = useParams();
-
+  const [hasLiked, setHasLiked] = useState(false);
+  const [hasDisliked, setHasDisliked] = useState(false);
   const { data, isLoading, isError } = useQuery('publications', fetchUserPublications,{
     // enabled: false,
   });
-  const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
 
+  const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
   console.log('--->',data?.data)
+  const otherPublicationItems = data?.data?.filter((item:PublicationDataType) => item.id.toString() !== publicationId);
+
+  const formattedDate = publicationItem ? new Date(publicationItem.updated_at).toLocaleDateString() : '';
+
+  useEffect(() => {
+    if (publicationItem) {
+      setHasLiked(publicationItem.likes > 0);
+      setHasDisliked(publicationItem.dislikes !== null && publicationItem.dislikes > 0);
+    }
+  }, [publicationItem]);
+
+  const handleLike = () => {
+    toast.info("Like functionality coming soon", { autoClose: 2000 });
+  };
+
+  const handleDislike = () => {
+    toast.info("Dislike functionality coming soon", { autoClose: 2000 });
+  };
+
+  const downloadPublication = () => {
+    toast.info("Download functionality coming soon", { autoClose: 2000 });
+  };
 
   if (isLoading){
     return <CircleLoader/>
@@ -33,7 +59,7 @@ const PublicationsDetailPage = () => {
 
     return (
       <main>
-          <div className="grid grid-cols-4  space-x-7">
+          <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5">
             <div className="col-span-3">
                 <BreadCrumb title="Publications" />
                 <div className="relative" >
@@ -44,12 +70,12 @@ const PublicationsDetailPage = () => {
                   />
                 </div>
                 <div className="col-span-1 mt-6">
-                    <h3 className=" font-semibold my-2" >{publicationItem?.name}</h3>
-                    {/* {publicationItem?.paragraphs.map((item:PublicationParagraphType)=>(
-                    <p className="text-textColor font-light text-justify" >
-                      {item.paragragh}
-                    </p>
-                    ))} */}
+                <div className="mb-3">
+                <h3 className="font-semibold my-2">{publicationItem?.name}</h3>
+                {/* <p className="text-sm font-light">Date published: {publicationItem?.created_at}</p> */}
+                <p className="text-sm font-light">Date published: {formattedDate}</p>
+
+              </div>
                     <br />
                     {
                 publicationItem?.body?
@@ -60,24 +86,39 @@ const PublicationsDetailPage = () => {
              />:''
                 }
                 </div>
-                <div>
-                <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue">
-                Download Publication
-              </button>
+                <div className="flex gap-2 mt-4">
+                  <button className={`px-2 py-1 rounded-md ${hasLiked ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+                    onClick={handleLike}
+                  >
+                    <AiOutlineLike />
+                  </button>
+                  <button
+                  className={`px-2 py-1 rounded-md ${hasDisliked ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+                  onClick={handleDislike}
+                  >
+                    <AiOutlineDislike />
+                  </button>
                 </div>
+                <div>
+                  <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue" onClick={downloadPublication}>
+                    Download Publication
+                  </button>
+                </div>
+                <div>
+              <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
             </div>
-            <div className="col-span-1">
+            </div>
+            <div className="md:col-span-1 col-span-3">
               <SeeAll title="Others" />
               <EventGrid numberOfItemsToShow={3} />
-              <div  className="space-y-3" >
+              <div  className="" >
   
-              {/* {[...newsData].splice(0,2).map((newsItem, index) => (
-                <NewsCard hidePostDetails={true} key={index} newsItem={newsItem} />
-              ))} */}
+              {otherPublicationItems?.map((publicationItem: PublicationDataType, index: number) => (
+                <PublicationCard hidePostDetails={true} key={index} publicationItem={publicationItem} />
+              ))}
               </div>
             </div>
           </div>
-  
       </main>
     )
   }

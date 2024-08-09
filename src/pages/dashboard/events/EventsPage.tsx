@@ -11,14 +11,15 @@ import Toast from "../../../components/toast/Toast"
 const EventsPage = () => {
     const { notifyUser } = Toast();
     const {   data, isError, isLoading } = useQuery("events",fetchAllUserEvents);
+    console.log(data?.data[0])
 
       if (isError){
         notifyUser("An error occured while fetching events","error")
       }
 
   return (
-    <main  className='grid grid-cols-4 space-x-[60px]'>
-        <div className='col-span-4 xl:col-span-3 flex flex-col'  >
+    <main  className='grid grid-cols-1 md:grid-cols-4 gap-7'>
+        <div className='col-span-1 md:col-span-3 md:px-0 px-5'  >
         <BreadCrumb title='Events' />
      
 
@@ -29,7 +30,7 @@ const EventsPage = () => {
        ))}
         </div>
         </div>
-        <div className="col-span-1 hidden xl:inline">
+        <div className="col-span-1 md:col-span-1">
             <SeeAll title='Gallery' path='/gallery' />
             <div className='relative ' >
              <GalleryGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />

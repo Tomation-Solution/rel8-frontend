@@ -1,19 +1,18 @@
 import apiTenant from "../baseApi";
 
-export const fetchAllGalleryData = async () =>{
-    const response = await apiTenant.get(`/extras/gallery_version2/`);
-    return response.data
-}
+// Fetch all gallery data with pagination
+export const fetchAllGalleryData = async (page: number) => {
+  const response = await apiTenant.get(`/extras/gallery_version2/?not_chapters=True&page=${page}`);
+  // if (!response.ok) {
+  //     throw new Error("Failed to fetch gallery data");
+  // }
+  return response.data;
+};
 
-// export const fetchAllGalleryDataNotChAPTER = async () =>{
-//     const response = await apiTenant.get(`/extras/gallery_version2/?not_chapters=True`);
-//     return response.data
-// }
-export const fetchGalleryItem = async (id:string|null) =>{
-    if (id){
-
-        const response = await apiTenant.get(`/extras/gallery_version2/${id}/`);
-        return response.data
-    }
-}
-
+// Fetch gallery data by id
+export const fetchGalleryItem = async (id: string | null) => {
+  if (id) {
+    const response = await apiTenant.get(`/extras/gallery_version2/${id}/`);
+    return response.data;
+  }
+};

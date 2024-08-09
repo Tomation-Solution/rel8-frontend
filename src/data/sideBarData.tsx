@@ -15,6 +15,7 @@ import homeIcon from '../assets/icons/home.png'
 import chatIcon from '../assets/icons/chat.png'
 import notificationsIcon from '../assets/icons/bell.png'
 import supportIcon from '../assets/icons/support.png'
+import fundaProjectIcon from '../assets/icons/fund-a-project.png'
 import { SideBarLinkType } from '../types/sidebarDataType'
 
 export const sideBarData: SideBarLinkType[] = [
@@ -94,6 +95,11 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: accountIcon,
     name: "My Account",
     path: "/account",
+  },
+  {
+    mainIcon: fundaProjectIcon,
+    name: "Fund a Project",
+    path: "/fund-a-project",
   },
   {
     mainIcon: serviceRequestsIcon,

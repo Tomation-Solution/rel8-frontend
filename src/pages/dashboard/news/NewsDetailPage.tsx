@@ -25,6 +25,7 @@ const NewsDetailPage = () => {
   const [hasDisliked, setHasDisliked] = useState(false);
   const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
   const newsItem = data?.data?.find((item: NewsCommentDetails) => item.id.toString() === newsId);
+  const otherNewsItems = data?.data?.filter((item: NewsCommentDetails) => item.id.toString() !== newsId);
 
   useEffect(() => {
     if (newsItem) {
@@ -32,6 +33,8 @@ const NewsDetailPage = () => {
       setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
     }
   }, [newsItem]);
+
+  const formattedDate = newsItem ? new Date(newsItem.updated_at).toLocaleDateString() : '';
   
 // function is underconstruction please
   // const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
@@ -85,7 +88,7 @@ const NewsDetailPage = () => {
   if (data) {
     return (
       <main>
-        <div className="grid grid-cols-4 space-x-7">
+        <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] px-5">
           <div className="col-span-3">
             <BreadCrumb title="News" />
             <div className="relative">
@@ -98,7 +101,7 @@ const NewsDetailPage = () => {
             <div className="col-span-1 mt-6">
               <div className="mb-3">
                 <h3 className="font-semibold my-2">{newsItem?.name}</h3>
-                <p className="text-sm font-light">Date published: {newsItem?.created_at}</p>
+                <p className="text-sm font-light">Date published: {formattedDate}</p>
               </div>
               <div dangerouslySetInnerHTML={{ __html: `${newsItem?.body}` }}></div>
             </div>
@@ -125,11 +128,11 @@ const NewsDetailPage = () => {
               <NewsComment newsId={parseInt(newsId || '0', 10)} />
             </div>
           </div>
-          <div className="col-span-1">
+          <div className="md:col-span-1 col-span-3">
             <SeeAll title="Others" />
             <EventGrid numberOfItemsToShow={3} />
             <div className="space-y-3">
-              {[...data?.data].splice(0, 2).map((newsItem, index) => (
+              {otherNewsItems?.map((newsItem, index) => (
                 <NewsCard hidePostDetails={true} key={index} newsItem={newsItem} />
               ))}
             </div>
