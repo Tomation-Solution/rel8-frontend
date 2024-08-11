@@ -57,10 +57,12 @@ export const sideBarData: SideBarLinkType[] = [
   },
   {
     mainIcon: comiteeEnviromentIcon,
-    name: "Committee Envirmoment",
+    name: "Committee Environment",
     activeLinkIcon: togglerIcon,
     notActiveLinkIcon: togglerIcon,
+    subMenu: [] // This will be filled with committee data fetched from the backend
   },
+
   {
     mainIcon: eventsIcon,
     name: "Events",

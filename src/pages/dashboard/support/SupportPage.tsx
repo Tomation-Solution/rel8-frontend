@@ -10,10 +10,10 @@ const SupportPage = () => {
    
     <span className="font-light text-base" >FAQ</span>
 </Link>
-<Link to='/contact' className="flex items-center   bg-neutral-3 px-3 py-4 w-full lg:w-3/4 rounded-md my-2 whitespace-nowrap gap-2">
+{/* <Link to='/contact' className="flex items-center   bg-neutral-3 px-3 py-4 w-full lg:w-3/4 rounded-md my-2 whitespace-nowrap gap-2">
     
     <span className="font-light text-base" >Contact</span>
-</Link>
+</Link> */}
 <Link to='/admin-support' className="flex items-center   bg-neutral-3 px-3 py-4 w-full lg:w-3/4 rounded-md my-2 whitespace-nowrap gap-2">
     
     <span className="font-light text-base" >Admin Support</span>

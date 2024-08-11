@@ -63,6 +63,8 @@ function App() {
   const FAQPage = lazy(() => import("./pages/dashboard/support/FAQPage"));
   const TechnicalSupportPage = lazy(() => import("./pages/dashboard/support/TechnicalSupportPage"));
   const AdminSupportPage = lazy(() => import("./pages/dashboard/support/AdminSupportPage"));
+
+  const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
   
   const router = createBrowserRouter([
     {
@@ -585,6 +587,16 @@ function App() {
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
             <ChatPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+    },
+    {
+      path: "/committees/:id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <CommitteeDetails />
           </DashboardLayout>
         </Suspense>
       ),
