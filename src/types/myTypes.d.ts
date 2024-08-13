@@ -273,3 +273,10 @@ export interface NotificationDataType {
 export interface Props {
   notificationItem: NotificationDataType;
 }
+//-------Contact Us --------
+
+export interface SupportData {
+  name: string;
+  email: string;
+  message: string;
+}
