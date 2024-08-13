@@ -26,7 +26,7 @@ const Navbar = ({isMobileSidebarOpen,setIsMobileSidebarOpen}:Props) => {
       <span className="lg:hidden cursor-pointer " onClick={()=>setIsMobileSidebarOpen(!isMobileSidebarOpen)} >
            {isMobileSidebarOpen ? <AiOutlineClose className='w-7  h-7 cursor-pointer' /> :  <FaBars className='w-7  h-7 cursor-pointer' /> }
           </span>
-        <h3 className='font-bold text-neutral-1 capitalize' ><span className=' text-textColor !capitalize' >Hello</span> <span className='!capitalize' >{user?.userName}</span></h3>
+        <h3 className='font-bold text-neutral-1 capitalize md:text-xl text-[16px] ' ><span className=' text-textColor !capitalize' >Hello</span> <span className='!capitalize' >{user?.userName}</span></h3>
       </div>
       <div className='hidden lg:inline-flex flex-[0.6]  items-center justify-center h-[65%] ' >
         <form action="" className='h-full w-full  flex items-center justify-between gap-1' >

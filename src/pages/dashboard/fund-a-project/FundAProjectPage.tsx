@@ -26,6 +26,11 @@ const FundAProjectPage = () => {
         <BreadCrumb title="Fund a Project" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading && <CircleLoader />}
+          {!isLoading && data?.results?.length === 0 && (
+                        <div className="py-10 text-center col-span-full md:text-[25px]">
+                            No projects available, enjoy the silence.
+                        </div>
+                    )}
           {data?.results?.map((projectItem: FundAProjectDataType, index: number) => (
             <FundAProjectCard key={index} projectItem={projectItem} />
           ))}

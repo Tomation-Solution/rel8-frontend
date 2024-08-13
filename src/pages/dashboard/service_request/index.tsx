@@ -19,6 +19,11 @@ const ServiceRequest = ()=>{
             <CircleLoader />
             }
           <br />
+          {!isLoading && services?.length === 0 && (
+                        <div className="py-10 text-center col-span-full md:text-[25px]">
+                            No services-request available, enjoy the silence.
+                        </div>
+                    )}
           {
             services?.map((d,index)=>(
                 <div

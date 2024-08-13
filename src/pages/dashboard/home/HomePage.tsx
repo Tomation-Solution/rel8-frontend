@@ -114,6 +114,11 @@ const HomePage = () => {
             <SeeAll title="Events" path="/events" />
             <div className={`grid place items-center`}>
               {events.isLoading && <CircleLoader />}
+              {!events.isLoading && events?.data?.data?.length === 0 && (
+                  <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
+                      No events available, enjoy the silence.
+                  </div>
+              )}
               {events.data && (
                 <Carousel
                   responsive={eventsResponsiveCarousel}
@@ -133,8 +138,13 @@ const HomePage = () => {
           </div>
           <div className="flex flex-col">
             <SeeAll title="Notifications" path="/notifications" />
-            <div className="grid justify-between">
+            <div className="grid md:justify-betwee">
               {isLoading && <CircleLoader />}
+              {!isLoading && data?.length === 0 && (
+                  <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
+                      No notifications available, enjoy the silence.
+                  </div>
+              )}
               {data && data.slice(0, 4).map((notificationItem: NotificationDataType, index: number) => (
                 <HomePageNotification key={index} notificationItem={notificationItem} />
               ))}
