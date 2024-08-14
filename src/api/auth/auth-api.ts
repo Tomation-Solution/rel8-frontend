@@ -23,3 +23,9 @@ export const requestPassword = async(data:{email:string})=>{
     const response = await apiPublic.post('/user/forgot-password/request_password_change/',data)
     return response.data
 }
+
+export const getAllChapters = async () =>{
+    const response = await apiPublic.get(`/user/chapters`);
+    // console.log(response.data)
+    return response.data
+}

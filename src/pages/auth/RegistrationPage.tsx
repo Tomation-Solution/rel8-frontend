@@ -16,9 +16,11 @@ import { useEffect } from "react";
 import Toast from "../../components/toast/Toast";
 import { getRel8UserRegistrationData} from "../../utils/extra_functions";
 import { useMutation } from "react-query";
-import { createMember } from "../../api/auth/auth-api";
+import { createMember, getAllChapters } from "../../api/auth/auth-api";
 import Button from "../../components/button/Button";
 import { toast } from "react-toastify";
+import { useQuery } from "react-query";
+import SelectInputWithImage from "../../components/form/SelectInputWithImage";
 
 export type RegistrationFormFields = {
   fullname: string;
@@ -46,6 +48,10 @@ const RegistrationPage = () => {
       const data: any = error.response.data;
       notifyUser(data.message.error, "error");
     }
+  });
+
+  const { data: chapters } = useQuery("chapters", getAllChapters, {
+    enabled: true,
   });
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegistrationFormFields>();
@@ -122,14 +128,42 @@ const RegistrationPage = () => {
                   {errors.department?.type === 'required' && (<FormError message="Department is required" />)}
                   <TextInputWithImage disabled={isLoading} register={register} name="department" defaultValue={data['programme']} placeHolder="Department" />
                 </div>
+                <div>
+                  {/* {errors.department?.type === 'required' && (<FormError message="Department is required" />)} */}
+                  <TextInputWithImage disabled={isLoading} register={register} name="state" placeHolder="State of Origin" />
+                </div>
+                <div>
+                  {/* {errors.department?.type === 'required' && (<FormError message="Department is required" />)} */}
+                  <TextInputWithImage disabled={isLoading} register={register} name="address" placeHolder="Physical Address" />
+                </div>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  <div>
+                    {/* {errors.graduation_year?.type === 'required' && (<FormError message="Graduation Year is required" />)} */}
+                    <TextInputWithImage disabled={isLoading} register={register} name="countryOfResidence" placeHolder="Country of Residence" />
+                  </div>
+                  <div>
+                    {/* {errors.graduation_year?.type === 'required' && (<FormError message="Graduation Year is required" />)} */}
+                    <TextInputWithImage disabled={isLoading} register={register} name="stateOfResidence"  placeHolder="State of Residence" />
+                  </div>
+                  </div>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   <div>
                     {errors.graduation_year?.type === 'required' && (<FormError message="Graduation Year is required" />)}
                     <TextInputWithImage disabled={isLoading} register={register} name="graduation_year" defaultValue={data['yog']} placeHolder="Graduation Year" />
                   </div>
+                    {/* <div>
+                      {errors.chapter?.type === 'required' && (<FormError message="Chapter is required" />)}
+                      <TextInputWithImage disabled={isLoading} register={register} name="chapter" placeHolder="Chapter" />
+                    </div> */}
                   <div>
                     {errors.chapter?.type === 'required' && (<FormError message="Chapter is required" />)}
-                    <TextInputWithImage disabled={isLoading} register={register} name="chapter" placeHolder="Chapter" />
+                      <SelectInputWithImage
+                        disabled={isLoading}
+                        register={register}
+                        name="chapter"
+                        placeHolder="Select Chapter"
+                        options={chapters?.data || []}
+                        />
                   </div>
                 </div>
                 <div className="grid">
