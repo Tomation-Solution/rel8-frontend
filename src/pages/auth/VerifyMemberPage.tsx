@@ -32,7 +32,7 @@ const VerifyMemberPage = () => {
           const userRel8RegistrationData = data.data[0].user;
           const hasStoredUserInLocalStorage = setRel8UserRegistrationData(userRel8RegistrationData)
           if (hasStoredUserInLocalStorage){
-            notifyUser(`Membership Verification for ${userRel8RegistrationData.fullname} successful`,"success");
+            notifyUser(`Membership Verification for ${userRel8RegistrationData.name} successful`,"success");
             navigate("/register")
           }
         }
@@ -62,13 +62,13 @@ const VerifyMemberPage = () => {
         <div className="auth-form-container">
           <AuthPageHeader
             authPageHeader="Verify Membership"
-            authPageText="Enter Membership No. to verify account"
+            authPageText="Enter Matriculation No. to verify account"
           />
           <form  className="flex flex-col w-full max-w-md gap-y-4 "  onSubmit={handleSubmit(onSubmit)}>
 
             <div>   
-              {errors.MEMBERSHIP_NO?.type === 'required' && (<FormError message="Membership No. is required" />)}
-              <TextInputWithImage disabled={isLoading}  register={register} name="MEMBERSHIP_NO" placeHolder="Membership No" image={userIcon} />
+              {errors.MEMBERSHIP_NO?.type === 'required' && (<FormError message="Matriculation No. is required" />)}
+              <TextInputWithImage disabled={isLoading}  register={register} name="MEMBERSHIP_NO" placeHolder="Matriculation No" image={userIcon} />
             </div>  
 
            

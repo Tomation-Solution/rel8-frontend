@@ -37,7 +37,7 @@ const ProfilePage = () => {
             <h4 className="font-semibold text-xl capitalize my-1">{userProfile?.data?.data[0]?.more_info[0]?.value}</h4>
             {/* <p className="text-sm my-1" >Employed full time since 2005</p> */}
             <p className="text-sm my-1">{userProfile?.data?.data[0]?.more_info[1]?.value}</p>
-            <p className="text-sm font-medium my-1">Membership No. : <span className="font-light" > {userProfile?.data?.data[0]?.more_info[5]?.value}</span></p>
+            <p className="text-sm font-medium my-1">Matriculation No. : <span className="font-light" > {userProfile?.data?.data[0]?.more_info[5]?.value}</span></p>
             <p className="text-sm font-medium my-1">Chapter : <span className="font-light">{user?.chapter.name}</span></p>
           </div>
           {/* <div className="w-full " >
