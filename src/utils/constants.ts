@@ -8,7 +8,7 @@ import { getSubdomain } from './extra_functions';
 
 
 export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
-export const TENANT = getSubdomain()||'bukaa';
+export const TENANT = getSubdomain()||'aani';
 export const WSS = `ws://rel8.watchdoglogisticsng.com/ws/chat/${TENANT}/`;
 export const sitename='rel8.watchdoglogisticsng.com'
 

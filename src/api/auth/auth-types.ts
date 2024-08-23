@@ -7,6 +7,7 @@ export type AluminiRegistrationResponse = {
 
 export type VerifiedMembershipResponse = {
     message: string;
+    success?: boolean;
     status_code: number; // Use the appropriate number type
     data: [
       {
@@ -21,6 +22,7 @@ export type VerifiedMembershipResponse = {
           // alumni_year: string;
           name: string;
           fullname:string
+          email:string
         };
       }
     ];
