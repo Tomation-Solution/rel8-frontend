@@ -64,6 +64,19 @@ export const setRel8LoginUserData = (data:{item:string, value:any}) =>{
 }
 }
 
+export const getRel8LoginUserMemberId = () => {
+  try {
+    const data = localStorage.getItem('rel8User');
+    if (data) {
+      const memberId = JSON.parse(data)?.member_id;
+      return memberId;
+    }
+  } catch (err: any) {
+    return null;
+  }
+};
+
+
 
 
 
