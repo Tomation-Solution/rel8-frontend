@@ -51,6 +51,7 @@ function App() {
   const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
   const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
   const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
+  const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
   const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
@@ -440,7 +441,7 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/fund-a-project/success/:projectId",
+      path: "/fund-a-project/success",
       element: (
         <Suspense fallback={<Loader />} >
           {/* <DashboardLayout > */}
@@ -449,7 +450,18 @@ function App() {
         </Suspense>
       ),
       errorElement: <ErrorPage />,
-    },    
+    },
+    {
+      path: "/fund-a-project/thank-you/:project_id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          {/* <DashboardLayout > */}
+            <ThankYouSuccessPage />
+          {/* </DashboardLayout> */}
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },     
     {
       path: "/services",
       element: (
