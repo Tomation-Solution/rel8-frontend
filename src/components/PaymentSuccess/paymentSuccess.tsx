@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { postPaymentSuccess } from '../../api/support/api-support';
@@ -6,6 +5,7 @@ import { useMutation } from 'react-query';
 import Toast from '../../components/toast/Toast';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../button/Button';
+import CircleLoader from '../loaders/CircleLoader';
 
 const PaymentSuccessPage = () => {
     const [searchParams] = useSearchParams();
@@ -50,6 +50,10 @@ const PaymentSuccessPage = () => {
         }
     }, [paystackKey, projectId, amount, memberRemark, mutate]);
 
+    if (isLoading) {
+        return <CircleLoader />;
+      }
+
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-lg w-full">
@@ -63,7 +67,7 @@ const PaymentSuccessPage = () => {
                 <Button text="Go to Homepage" onClick={() => navigate('/')} />
             </div>
             
-            {isLoading && <p>Processing payment...</p>}
+            {/* {isLoading && <p>Processing payment...</p>} */}
         </div>
     );
 };

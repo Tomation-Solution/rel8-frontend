@@ -5,6 +5,7 @@ import dummyOrganizerImage from "../../../assets/images/dummy.jpg";
 import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { Link, useParams } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'react-query';
 import { fetchAllUserEvents, registerForFreeEvent, registerForPaidEvent } from "../../../api/events/events-api";
 import Toast from "../../../components/toast/Toast";
@@ -17,6 +18,7 @@ const EventDetailPage = () => {
 
     const { eventId } = useParams();
     const { notifyUser } = Toast();
+    const navigate = useNavigate(); // To handle navigation after success
 
     const singleEvent  = useQuery("events",fetchAllUserEvents,{
         refetchOnMount: false,
@@ -41,35 +43,55 @@ const EventDetailPage = () => {
     
     // const { data: event, isLoading: eventLoading } = useQuery('yourEventQueryKey', fetchEventData);
   
-    const registerForPaidEventMutation = useMutation(()=>registerForPaidEvent(eventId), {
+    // const registerForPaidEventMutation = useMutation(()=>registerForPaidEvent(eventId), {
+    //   onSuccess: (data) => {
+    //     // Redirect the user to the authentication URL
+    //     // const authenticationUrl = data?.authentication_url;
+    //     // if (authenticationUrl) {
+    //     //   window.location.href = authenticationUrl;
+    //     // }
+    //     // console.log('paid for event on paystack o data',data?.data?.data?.authorization_url)
+    //     if (!event?.event_access.has_paid) {
+    //       const authorizationURL = data?.data?.data?.authorization_url
+    //       ;
+    //       if (authorizationURL) {
+    //         window.location.href = authorizationURL;
+    //       }
+    //     } else {
+    //       // Notify the user that they have paid for the event
+    //       notifyUser("Congratulations, you have paid for the event", "success");
+    //       // Optionally, you can refetch the event data after a successful registration
+    //       // queryClient.invalidateQueries('yourEventQueryKey');
+    //     }
+
+    //   },
+    //   onError: (error) => {
+    //     // Handle error, notify user, etc.
+    //     console.log(error)
+    //     notifyUser('An error occured while registering for the event','error');
+    //   },
+    // });
+  
+
+    const registerForPaidEventMutation = useMutation(() => registerForPaidEvent(eventId, event.amount), {
       onSuccess: (data) => {
-        // Redirect the user to the authentication URL
-        // const authenticationUrl = data?.authentication_url;
-        // if (authenticationUrl) {
-        //   window.location.href = authenticationUrl;
-        // }
-        // console.log('paid for event on paystack o data',data?.data?.data?.authorization_url)
         if (!event?.event_access.has_paid) {
-          const authorizationURL = data?.data?.data?.authorization_url
-          ;
+          const authorizationURL = data?.data?.data?.authorization_url;
           if (authorizationURL) {
             window.location.href = authorizationURL;
           }
         } else {
-          // Notify the user that they have paid for the event
           notifyUser("Congratulations, you have paid for the event", "success");
-          // Optionally, you can refetch the event data after a successful registration
-          // queryClient.invalidateQueries('yourEventQueryKey');
+          // Navigate
+          navigate(`/event/success/${eventId}`);
         }
-
       },
       onError: (error) => {
-        // Handle error, notify user, etc.
-        console.log(error)
-        notifyUser('An error occured while registering for the event','error');
+        console.log(error);
+        notifyUser('An error occurred while registering for the event', 'error');
       },
     });
-  
+    
 
    
     const handleRegisterUserForFreeEvents = ()=>{
@@ -81,27 +103,36 @@ const EventDetailPage = () => {
         handleFreeEventMutation.mutate(formData)
       }
     }
-    const handleRegisterUserForPaidEvents = ()=>{
-      if (eventId && event?.is_paid_event && event?.event_access.has_paid) {
-        {
-          // you can use this format to send the details to a new created paid event url
-          // const formData = new FormData();
-          // formData.append('event_id', eventId);
-          // formData.append(
-          //   'proxy_participants',
-          //   JSON.stringify([{ email: userProfileData[0]?.more_info[0]?.value, full_name: userProfileData[0]?.more_info[5]?.value }])
-          // );
-        }
-        notifyUser('You have paid already',"success")
+    // const handleRegisterUserForPaidEvents = ()=>{
+    //   if (eventId && event?.is_paid_event && event?.event_access.has_paid) {
+    //     {
+    //       // you can use this format to send the details to a new created paid event url
+    //       // const formData = new FormData();
+    //       // formData.append('event_id', eventId);
+    //       // formData.append(
+    //       //   'proxy_participants',
+    //       //   JSON.stringify([{ email: userProfileData[0]?.more_info[0]?.value, full_name: userProfileData[0]?.more_info[5]?.value }])
+    //       // );
+    //     }
+    //     notifyUser('You have paid already',"success")
   
-        // Use the mutate function from React Query to handle the post request
-        // mutation.mutate(formData);
-      }else if(eventId && event?.is_paid_event && !event?.event_access.has_paid){
-        registerForPaidEventMutation.mutate()
-      }
+    //     // Use the mutate function from React Query to handle the post request
+    //     // mutation.mutate(formData);
+    //   }else if(eventId && event?.is_paid_event && !event?.event_access.has_paid){
+    //     registerForPaidEventMutation.mutate()
+    //   }
        
       
-    }
+    // }
+
+    const handleRegisterUserForPaidEvents = () => {
+      if (eventId && event?.is_paid_event && !event?.event_access.has_paid) {
+        registerForPaidEventMutation.mutate(); // The amount is already being used in the mutation
+      } else if (event?.event_access.has_paid) {
+        notifyUser('You have already paid for this event', "success");
+      }
+    };
+    
 
 
 
@@ -154,7 +185,7 @@ const EventDetailPage = () => {
                 <div className=" col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 h-fit">
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={eventsIcon} className="w-6 h-6" alt="" />{" "}
-                    <span>{event.startDate}</span>
+                    <span className="overflow-y-auto">{event.startDate}</span>
                   </span>
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={clockIcon} className="w-6 h-6" alt="" />{" "}

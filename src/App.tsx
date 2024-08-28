@@ -52,6 +52,7 @@ function App() {
   const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
   const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
   const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
+  const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
   const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
@@ -206,6 +207,17 @@ function App() {
           <DashboardLayout >
             <EventDetailPage />
           </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/event/success/:eventId",
+      element: (
+        <Suspense fallback={<Loader />} >
+          {/* <DashboardLayout > */}
+            <EventPaymentSuccess />
+          {/* </DashboardLayout> */}
         </Suspense>
       ),
       errorElement: <ErrorPage />,
