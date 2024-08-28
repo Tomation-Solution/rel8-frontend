@@ -12,51 +12,28 @@ export async function  supportInKind(data:{"heading":string,"about":string,"deli
 }
 
 
-// export const supportInCashss = async (projectId: string | number, data: any) => {
-//     try {
-//         const response = await apiTenant.post(`/extras/project/payment/`, {
-//             amount: data.amount,
-//             project_id: projectId,
-//             member_remark: data.remark,
-//         });
-
-//         return response.data;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
-
-export const supportInCash = async (projectId: string | number, data: any, memberId: string | number) => {
+export const supportInCash = async (projectId: string | number, data: any) => {
     try {
         const response = await apiTenant.post(`/extras/project/payment/`, {
             amount: data.amount,
             project_id: projectId,
             member_remark: data.remark,
-            callback_url: `${window.location.origin}/payment-success?project_id=${projectId}&amount=${data.amount}`,
-            metadata: {
-                member_id: memberId,
-            },
+            callback_url: `${window.location.origin}/fund-a-project/success?project_id=${projectId}&amount=${data.amount}&remark=${data.remark}`,
         });
-
+        // console.log(response.data)
         return response.data;
     } catch (error) {
         throw error;
     }
 };
 
+// import apiTenant from '../../../utils/apiTenant'; // Make sure the import path is correct
 
-
-// export const supportInCash = async (projectId: string | number, data: any) => {
-//     try {
-//         const response = await apiTenant.post(`/extras/project/payment/`, {
-//             amount: data.amount,
-//             project_id: projectId,
-//             member_remark: data.remark,
-//             callback_url: `${window.location.origin}/payment-success?project_id=${projectId}&amount=${data.amount}`,
-//         });
-
-//         return response.data;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
+export const postPaymentSuccess = async (data: any) => {
+    try {
+        const response = await apiTenant.post(`/extras/member_support_project_cash/support_in_cash/`, data);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
