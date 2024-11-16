@@ -40,6 +40,7 @@ function App() {
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
+  const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
   const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
   const ElectionsContestantDetailPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantDetailPage"));
   const ElectionsContestantsPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantsPage"));
@@ -345,6 +346,20 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
+
+    {
+      path: "/meeting/:meetingId",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <MeetingDetailsPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+
+
     {
       path: "/election",
       element: (

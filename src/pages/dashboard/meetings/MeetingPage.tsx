@@ -18,7 +18,7 @@ const MeetingPage = () => {
           <BreadCrumb title="Meeting" />
           {data?.data?.length > 0 &&
             data.data.map((meeting: any, index: number) => (
-              <MeetingCard key={index} meeting={meeting} />
+              <MeetingCard key={index} meeting={meeting} linkTo="meeting" />
             ))}
           {data?.data?.length <= 0 && (
             <h3 className="text-primary-blue font-light">No Meetings Available</h3>
