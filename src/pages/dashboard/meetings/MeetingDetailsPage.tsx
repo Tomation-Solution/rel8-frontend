@@ -127,6 +127,15 @@ const MeetingDetailsPage = () => {
           )}
         </div>
 
+
+        {meetingItem.is_attending ? (
+          <Button text="You're Attending" borderRadius="rounded-md" padding="py-2 px-3" />
+        ) : (
+          <Button text="Remind me to Join" borderRadius="rounded-md" padding="py-2 px-3" />
+        )}
+
+
+
         {/* Registration Form */}
         <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
           <h3 className="text-lg font-semibold">Register for this Meeting</h3>
