@@ -7,24 +7,51 @@ import AttachmentIcon from "../../../assets/icons/attachment.png";
 import SeeAll from "../../../components/SeeAll";
 import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { useParams } from "react-router-dom";
-import { useQuery } from "react-query";
-import { fetchUserMeetingById } from "../../../api/meetings/api-meetings";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import Toast from "../../../components/toast/Toast";
+import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
+import { useQuery, useMutation } from "react-query";
+import { fetchUserMeetingById, registerForMeeting } from "../../../api/meetings/api-meetings";
+import Button from "../../../components/button/Button";
 
 const MeetingDetailsPage = () => {
   const { meetingId } = useParams();
-  const { data, isLoading, isError } = useQuery("meetingDetails",fetchUserMeetingById,{
+  const { notifyUser } = Toast();
 
+  // Fetch meeting details
+  const { data, isLoading, isError } = useQuery(["meetingDetails", meetingId], () =>
+    fetchUserMeetingById(meetingId)
+  );
+
+  const meetingItem = data?.data?.find((item: any) => item.id.toString() === meetingId);
+
+  // Form handling
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: { full_name: "", email: "" },
   });
 
-  const meetingItem = data?.data?.find((item:any) => item.id.toString() === meetingId);
-  console.log(meetingItem)
+  // Registration mutation
+  const { mutate, isLoading: isSubmitting } = useMutation(registerForMeeting, {
+    onSuccess: () => {
+      notifyUser("Registration successful!", "success");
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message?.error || "An error occurred.";
+      console.error(errorMessage); // For debugging
+      notifyUser(errorMessage, "error");
+    },
+  });
 
-  if (isLoading) {
-    return <CircleLoader />;
-  }
+  const onSubmit = (formData: any) => {
+    const payload = {
+      meeting: meetingId,
+      proxy_participants: [formData],
+    };
+    mutate(payload);
+  };
 
+  if (isLoading) return <CircleLoader />;
   if (isError || !data?.data?.[0]) {
     return <div className="text-center py-10 text-red-500">Meeting not found or an error occurred.</div>;
   }
@@ -35,7 +62,7 @@ const MeetingDetailsPage = () => {
   });
 
   return (
-    <main className="grid grid-cols-1 md:grid-cols-4 gap-5 text-textColor px-4 sm:px-2 md:px-4">
+    <main className="grid grid-cols-1 md:grid-cols-4 gap-5 text-textColor px-5 sm:px-2 md:px-4">
       {/* Main Content */}
       <div className="col-span-1 md:col-span-3">
         <BreadCrumb title={meetingItem.name} />
@@ -99,11 +126,39 @@ const MeetingDetailsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Registration Form */}
+        <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
+          <h3 className="text-lg font-semibold">Register for this Meeting</h3>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="full_name">Full Name</label>
+              <input
+                id="full_name"
+                type="text"
+                {...register("full_name", { required: true })}
+                className="p-2 border rounded w-full"
+              />
+              {errors.full_name && <p className="text-red-500 text-sm">Full name is required.</p>}
+            </div>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                {...register("email", { required: true })}
+                className="p-2 border rounded w-full"
+              />
+              {errors.email && <p className="text-red-500 text-sm">Email is required.</p>}
+            </div>
+            <Button isLoading={isSubmitting} text="Register" />
+          </form>
+        </div>
       </div>
 
       {/* Sidebar */}
       <div className="col-span-1">
-        <SeeAll title="Other Meetings" />
+        <SeeAll title="Other Events" />
         <EventGrid numberOfItemsToShow={4} heightOfCard="h-[170px]" />
       </div>
     </main>

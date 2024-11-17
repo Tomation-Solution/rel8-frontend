@@ -11,3 +11,8 @@ export const fetchUserMeetingById = async (id:any) =>{
         return response.data
     }
 }
+
+export const registerForMeeting = async (payload: any) => {
+  const response = await apiTenant.post(`/meeting/meeting_member/`, payload);
+  return response.data;
+};
