@@ -94,6 +94,11 @@ export const sideBarData: SideBarLinkType[] = [
     path: "/gallery",
   },
   {
+    mainIcon: eventsIcon,
+    name: "Meetings",
+    path: "/meeting",
+  },
+  {
     mainIcon: accountIcon,
     name: "My Account",
     path: "/account",
