@@ -2,8 +2,9 @@ import { sideBarData as initialSideBarData } from "../../data/sideBarData";
 import NavItem from "./NavItem";
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { fetchAllCommittees } from '../../api/committee/committee'; // Adjust the import path according to your structure
+import { fetchAllCommittees } from '../../api/committee/committee';
 import { useEffect, useState } from 'react';
+import { SubMenuItem, SideBarLinkType } from '../../types/sidebarDataType';
 
 interface Committee {
     id: string;
@@ -17,23 +18,32 @@ interface Props {
 
 const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
     const navigate = useNavigate();
-    const [committees, setCommittees] = useState<{ name: string; path: string }[]>([]);
-    const [sideBarData, setSideBarData] = useState(initialSideBarData);
+    const [committees, setCommittees] = useState<SubMenuItem[]>([]); // Updated type
+    const [sideBarData, setSideBarData] = useState<SideBarLinkType[]>(initialSideBarData);
 
     const { data } = useQuery('committees', fetchAllCommittees);
 
     useEffect(() => {
         if (data && data.data) {
-            const committeeItems = data.data.map((committee: Committee) => ({
-                name: committee.name,
-                path: `/committees/${committee.id}`,
-            }));
-            setCommittees(committeeItems); // Update state with committee array
+            if (data.data.length === 0) {
+                const messageItem: SubMenuItem = {
+                    name: "You are not part of any committee",
+                    path: "#",
+                    isMessage: true
+                };
+                setCommittees([messageItem]);
+            } else {
+                const committeeItems: SubMenuItem[] = data.data.map((committee: Committee) => ({
+                    name: committee.name,
+                    path: `/committees/${committee.id}`,
+                    isMessage: false
+                }));
+                setCommittees(committeeItems);
+            }
         }
     }, [data]);
 
     useEffect(() => {
-        // Update the subMenu of Committee Environment in sideBarData
         const updatedSideBarData = initialSideBarData.map(item => {
             if (item.name === 'Committee Environment') {
                 return { ...item, subMenu: committees };
@@ -67,11 +77,14 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
             {/* Mobile Navbar */}
             {isMobileSidebarOpen && (
                 <div
-                    onClick={() => setIsMobileSidebarOpen(false)} // Close only when outside the sidebar is clicked
-                    className={`lg:hidden fixed top-0 w-full min-h-screen h-full bg-black/70 transition-transform z-10 ${isMobileSidebarOpen ? 'translate-x-0 ease-in duration-900' : '-translate-x-full ease-out duration-900'}`}
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                    className={`lg:hidden fixed top-0 w-full min-h-screen h-full bg-black/70 transition-transform z-10 ${
+                        isMobileSidebarOpen ? 'translate-x-0 ease-in duration-900' : '-translate-x-full ease-out duration-900'
+                    }`}
                 >
-                    <nav className="lg:hidden fixed top-[60px] w-[80%] sm:w-[40%] md:w-[36%] overflow-y-auto min-h-screen h-full bg-white px-3 py-6"
-                        onClick={(e) => e.stopPropagation()} // Prevent sidebar from closing when clicking inside
+                    <nav 
+                        className="lg:hidden fixed top-[60px] w-[80%] sm:w-[40%] md:w-[36%] overflow-y-auto min-h-screen h-full bg-white px-3 py-6"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {sideBarData.map((item, index) => (
                             <NavItem
