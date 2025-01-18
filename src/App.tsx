@@ -336,6 +336,17 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
+      path: "/members",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <MembersPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
       path: "/meeting",
       element: (
         <Suspense fallback={<Loader />} >

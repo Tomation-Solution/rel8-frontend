@@ -44,7 +44,7 @@ export const sideBarData: SideBarLinkType[] = [
   {
     mainIcon:membersEnviroment,
     name: "Members Enviroment",
-    path: "#",
+    path: "/members",
     activeLinkIcon: activeLinkIcon,
     notActiveLinkIcon:nonActiveLinkIcon,
   },

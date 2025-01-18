@@ -67,11 +67,11 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
           <div className="relative bg-primary-blue grid place-items-center rounded-full p-2 cursor-pointer"
           onClick={() => navigate('/notifications')}>
             <IoNotificationsOutline className="text-white bg-primary-blue w-6 h-6" />
-            {notificationCount > 0 && (
+            {/* {notificationCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
                 {notificationCount}
               </span>
-            )}
+            )} */}
           </div>
           <Avatar imageUrl={user?.profile_image ? user.profile_image : avatarImage} />
         </div>
