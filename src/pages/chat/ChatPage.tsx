@@ -70,10 +70,10 @@ const ChatPage = () => {
 
   return (
     <main className=''>
-      <div className="fixed bottom-4 right-4 bg-yellow-300 text-black p-4 rounded-lg shadow-lg z-50">
+      {/* <div className="fixed bottom-4 right-4 bg-yellow-300 text-black p-4 rounded-lg shadow-lg z-50">
         <h2 className="text-lg font-bold mb-2">Coming Soon</h2>
         <p>This page is still in development.</p>
-      </div>
+      </div> */}
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 my-4">
           <div className='flex flex-col space-y-2 ' >
           <div className='grid grid-cols-2 gap-2' >
