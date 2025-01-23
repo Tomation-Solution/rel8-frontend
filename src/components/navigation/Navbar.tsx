@@ -24,6 +24,8 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
   // Calculate the number of notifications
   const notificationCount = notifications?.length || 0;
+  console.log(notificationCount); // Or integrate it into your JSX
+
 
   return (
     <header className="h-[70px] z-[999] w-full px-2 border fixed top-0 bg-white max-w-[inherit]">
