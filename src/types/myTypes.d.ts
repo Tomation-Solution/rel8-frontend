@@ -268,6 +268,7 @@ export interface NotificationDataType {
   body:string;
   created_on?: string;
   latest_update_table_name: string;
+  latest_update_table_id: number;
 }
 
 export interface Props {
