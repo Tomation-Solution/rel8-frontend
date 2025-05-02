@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "react-query";
-import { fetchFileForDownload } from "../../api/publications/publications-api";
+import { fetchFileForDownload } from "../../api/baseApi";
 import Toast from "../toast/Toast";
 
 const { notifyUser } = Toast();
@@ -8,9 +8,10 @@ const { notifyUser } = Toast();
 interface Props {
     fileUrl: string;
     fileName: string;
+    buttonText: string;
 }
 
-const DownloadPublicationButton = ({ fileUrl, fileName }: Props) => {
+const DownloadFileButton = ({ fileUrl, fileName, buttonText }: Props) => {
     const [isDownloading, setIsDownloading] = useState(false);
 
     const { refetch, isLoading } = useQuery(
@@ -44,7 +45,7 @@ const DownloadPublicationButton = ({ fileUrl, fileName }: Props) => {
         }
     );
 
-    const downloadPublication = () => {
+    const downloadFile = () => {
         if (isLoading || isDownloading) {
             return;
         }
@@ -56,13 +57,13 @@ const DownloadPublicationButton = ({ fileUrl, fileName }: Props) => {
     return (
         <div>
             <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue"
-                onClick={downloadPublication}
+                onClick={downloadFile}
                 disabled={isLoading || isDownloading}
             >
-                {isLoading || isDownloading ? 'Downloading...' : 'Download Publication'}
+                {isLoading || isDownloading ? 'Downloading...' : `Download ${buttonText}`}
             </button>
         </div>
     )
 }
 
-export default DownloadPublicationButton;
+export default DownloadFileButton;

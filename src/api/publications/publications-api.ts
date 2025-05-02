@@ -1,14 +1,4 @@
-import axios from 'axios';
 import apiTenant from "../baseApi";
-
-export const fetchFileForDownload = async (fileUrl: string) => {
-    const response = await axios.get(fileUrl, {
-        method: 'GET',
-        responseType: 'blob'
-    });
-
-    return response.data;
-}
 
 export const fetchUserPublications = async () =>{
     const response = await apiTenant.get(`/publication/getyourpublication/`);

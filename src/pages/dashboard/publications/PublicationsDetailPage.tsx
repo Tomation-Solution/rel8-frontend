@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import PublicationComment from "../../../components/cards/PublicationComment";
-import DownloadPublicationButton from "../../../components/button/DownloadPublicationButton";
+import DownloadFileButton from "../../../components/button/DownloadFileButton";
 
 const PublicationsDetailPage = () => {
 
@@ -100,7 +100,7 @@ const PublicationsDetailPage = () => {
                     <AiOutlineDislike />
                   </button>
                 </div>
-                < DownloadPublicationButton fileUrl={fileUrl} fileName={fileName} />
+                < DownloadFileButton fileUrl={fileUrl} fileName={fileName} buttonText="Publication" />
                 <div>
               <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
             </div>
