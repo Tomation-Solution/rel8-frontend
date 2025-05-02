@@ -4,12 +4,13 @@ import clockIcon from "../../../assets/icons/clock.png";
 import dummyOrganizerImage from "../../../assets/images/dummy.jpg";
 import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {  useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'react-query';
 import { fetchAllUserEvents, registerForFreeEvent, registerForPaidEvent } from "../../../api/events/events-api";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import DownloadFileButton from "../../../components/button/DownloadFileButton";
 
 const EventDetailPage = () => {
 
@@ -90,6 +91,9 @@ const EventDetailPage = () => {
     }
 
     if (event){
+        const fileUrl = event.event_docs || "";
+        const fileNameArr: string[] = fileUrl.split('/') || [];
+        const fileName = fileNameArr[fileNameArr.length - 1];
 
         return (
           <main className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5 text-textColor ">
@@ -150,9 +154,7 @@ const EventDetailPage = () => {
                 </div>
               </div>
 
-              <Link to={`${event?.event_docs}`} className="bg-primary-blue text-center grid place-items-center text-white  border border-white h-[40px] rounded-md  hover:border-primary-blue">
-                Download Event Atachment
-              </Link>
+              < DownloadFileButton fileName={fileName} fileUrl={fileUrl} buttonText="Event Attachment" />
             </div>
             
             <div className="" >
