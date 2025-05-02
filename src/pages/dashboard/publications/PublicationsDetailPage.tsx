@@ -12,6 +12,8 @@ import { toast } from "react-toastify";
 import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import PublicationComment from "../../../components/cards/PublicationComment";
+import DownloadPublicationButton from "../../../components/button/DownloadPublicationButton";
+
 const PublicationsDetailPage = () => {
 
   const { notifyUser } = Toast();
@@ -43,10 +45,6 @@ const PublicationsDetailPage = () => {
     toast.info("Dislike functionality coming soon", { autoClose: 2000 });
   };
 
-  const downloadPublication = () => {
-    toast.info("Download functionality coming soon", { autoClose: 2000 });
-  };
-
   if (isLoading){
     return <CircleLoader/>
   }
@@ -56,6 +54,9 @@ const PublicationsDetailPage = () => {
   }
 
   if (data){
+    const fileUrl = publicationItem.danload || "";
+    const fileNameArr: string[] = fileUrl.split('/') || [];
+    const fileName = fileNameArr[fileNameArr.length - 1];
 
     return (
       <main>
@@ -99,11 +100,7 @@ const PublicationsDetailPage = () => {
                     <AiOutlineDislike />
                   </button>
                 </div>
-                <div>
-                  <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue" onClick={downloadPublication}>
-                    Download Publication
-                  </button>
-                </div>
+                < DownloadPublicationButton fileUrl={fileUrl} fileName={fileName} />
                 <div>
               <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
             </div>
