@@ -64,6 +64,12 @@ apiTenantAxiosForm.interceptors.request.use(
   }
 );
 
+export const fetchFileForDownload = async (fileUrl: string) => {
+    const response = await axios.get(fileUrl, {
+        method: 'GET',
+        responseType: 'blob'
+    });
 
-
+    return response.data;
+}
 

@@ -100,6 +100,8 @@ const getNotificationLink = (notification: NotificationDataType) => {
       return `/news/${notification.latest_update_table_id}/`;
     case 'events':
       return `/events/${notification.latest_update_table_id}/`;
+    case 'publication':
+      return `/publication/${notification.latest_update_table_id}/`;
     default:
       return '/notifications';
   }

@@ -14,6 +14,32 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "react-query";
 import { fetchUserMeetingById, registerForMeeting } from "../../../api/meetings/api-meetings";
 import Button from "../../../components/button/Button";
+import styled from "styled-components";
+
+const AttendDiv = styled.div<AttendButtonProps>`
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+`;
+
+interface AttendButtonProps {
+  primary: boolean
+}
+
+const AttendItem = styled.button<AttendButtonProps>`
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: ${props => props.primary ? "#1890ff" : "#f0f0f0"};
+  color: ${props => props.primary ? "white" : "#333"};
+
+  &:hover {
+    background-color: ${props => props.primary ? "#40a9ff" : "#d9d9d9"};
+  }
+`;
 
 const MeetingDetailsPage = () => {
   const { meetingId } = useParams();
@@ -127,42 +153,47 @@ const MeetingDetailsPage = () => {
           )}
         </div>
 
-
         {meetingItem.is_attending ? (
-          <Button text="You're Attending" borderRadius="rounded-md" padding="py-2 px-3" />
+          <AttendDiv primary={false}>
+            <AttendItem primary={false} className="text-base font-medium">You have successfully registered for the event.</AttendItem>
+            {meetingItem.url && (
+              <a target="_blank" rel="noopener noreferrer" href={meetingItem.url}>
+                <AttendItem primary={true}>Click to join meeting</AttendItem>
+              </a>
+            )}
+          </AttendDiv>
         ) : (
-          <Button text="Remind me to Join" borderRadius="rounded-md" padding="py-2 px-3" />
-        )}
-
-
-
-        {/* Registration Form */}
-        <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
-          <h3 className="text-lg font-semibold">Register for this Meeting</h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div>
-              <label htmlFor="full_name">Full Name</label>
-              <input
-                id="full_name"
-                type="text"
-                {...register("full_name", { required: true })}
-                className="p-2 border rounded w-full"
-              />
-              {errors.full_name && <p className="text-red-500 text-sm">Full name is required.</p>}
-            </div>
-            <div>
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                {...register("email", { required: true })}
-                className="p-2 border rounded w-full"
-              />
-              {errors.email && <p className="text-red-500 text-sm">Email is required.</p>}
-            </div>
-            <Button isLoading={isSubmitting} text="Register" />
-          </form>
-        </div>
+          <>
+          {/* Registration Form */}
+          {/* <AttendItem primary={false} className="text-base font-medium border-t-4">Fill the form to register for the event.</AttendItem> */}
+          <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
+            <h3 className="text-lg font-semibold">Register for this Meeting</h3>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <div>
+                <label htmlFor="full_name">Full Name</label>
+                <input
+                  id="full_name"
+                  type="text"
+                  {...register("full_name", { required: true })}
+                  className="p-2 border rounded w-full"
+                />
+                {errors.full_name && <p className="text-red-500 text-sm">Full name is required.</p>}
+              </div>
+              <div>
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  {...register("email", { required: true })}
+                  className="p-2 border rounded w-full"
+                />
+                {errors.email && <p className="text-red-500 text-sm">Email is required.</p>}
+              </div>
+              <Button isLoading={isSubmitting} text="Register" />
+            </form>
+          </div>
+        </>)}
+        
       </div>
 
       {/* Sidebar */}
