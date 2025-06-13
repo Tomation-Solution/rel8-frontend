@@ -1,5 +1,5 @@
 import { ExcoMemberDataType } from "../../types/myTypes";
-import profileImage from '../../assets/images/dummy.jpg';
+import profileImage from "../../assets/images/dummy.jpg";
 
 interface Props {
   item: ExcoMemberDataType;
@@ -14,17 +14,17 @@ const ExcosMemberCard = ({ item }: Props) => {
         alt=""
       />
       <div className="my-3">
-        <h6 className="font-semibold">{item?.full_name}</h6>
+        <h6 className="font-semibold">{item?.name}</h6>
         <p className="text-sm text-textColor">
-          {item?.member_info && item.member_info[3]?.position_held
-            ? item.member_info[3].position_held
+          {item?.exco?.isExco
+            ? `Exco ${item?.exco?.position}`
             : "Position Not Available"}
         </p>
-        <small className="text-xs text-primaryBlue">
+        {/* <small className="text-xs text-primaryBlue">
           {item?.member_info && item.member_info[4]?.value
             ? item.member_info[4].value
             : "Grade Not Available"}
-        </small>
+        </small> */}
         <p className="text-sm line-clamp-2 text-textColor">{item.bio}</p>
       </div>
     </div>

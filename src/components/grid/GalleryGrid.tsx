@@ -1,51 +1,19 @@
-// import { useQuery } from "react-query";
-// import { fetchAllGalleryData } from "../../api/gallery/gallery-api";
-// import GalleryCard from "../cards/GalleryCard";
-// import CircleLoader from "../loaders/CircleLoader";
-// import Toast from "../../components/toast/Toast";
-// interface Props {
-//   numberOfItemsToShow?: number;
-//   heightOfCard?:string;
-// }
-
-// const GalleryGrid = ({ numberOfItemsToShow,heightOfCard }: Props) => {
-
-//   const { notifyUser } = Toast();
-  
-//   const { data, isError, isLoading } = useQuery(
-//     "galleryData",
-//     fetchAllGalleryData,
-//     {
-//       retry: 2,
-//       retryDelay: 3000, 
-//     }
-
-//   );
-
-//   if (isError){
-//     notifyUser("An error occured while fetching gallery data",'error')
-//   }
-//   if (isLoading){
-//     return <CircleLoader />
-//   }
-
-//   return (
-//     <>
-//       {data?.data?.data
-//         ?.slice(0, numberOfItemsToShow)
-//         .map((galleryItem: any, index: number) => (
-//           <GalleryCard height={heightOfCard} key={index} galleryItem={galleryItem} />
-//         ))}
-//     </>
-//   );
-// };
-
-// export default GalleryGrid;
-import { useQuery, QueryFunctionContext } from "react-query";
+import { useQuery } from "react-query";
 import { fetchAllGalleryData } from "../../api/gallery/gallery-api";
 import GalleryCard from "../cards/GalleryCard";
 import CircleLoader from "../loaders/CircleLoader";
 import Toast from "../../components/toast/Toast";
+
+interface GalleryItem {
+  id: string;
+  // Add other gallery item properties here
+  [key: string]: any;
+}
+
+interface GalleryResponse {
+  data: GalleryItem[];
+  // Add other response properties if needed
+}
 
 interface Props {
   numberOfItemsToShow?: number;
@@ -55,32 +23,45 @@ interface Props {
 const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   const { notifyUser } = Toast();
 
-  const { data, isError, isLoading } = useQuery(
-    ["galleryData", { page: 1 }],
-    ({ queryKey }: QueryFunctionContext<[string, { page: number }]>) => {
-      const [, { page }] = queryKey;
-      return fetchAllGalleryData(page);
-    },
+  const { data, isError, isLoading, error } = useQuery<GalleryResponse>(
+    "galleryData",
+    fetchAllGalleryData,
     {
       retry: 2,
       retryDelay: 3000,
+      onError: (err: Error) => {
+        notifyUser(
+          `An error occurred while fetching gallery data: ${err.message}`,
+          "error"
+        );
+      },
     }
   );
 
-  if (isError) {
-    notifyUser("An error occurred while fetching gallery data", 'error');
-  }
+  console.log(data, "Data");
 
   if (isLoading) {
     return <CircleLoader />;
   }
 
+  if (isError) {
+    return (
+      <div className="text-red-500 text-center py-4">
+        Failed to load gallery data
+      </div>
+    );
+  }
+
   return (
-    <div className=" xl/lg:px-0 md:px-10 px-5">
-      {data?.data?.data
+    <div className="xl/lg:px-0 md:px-10 px-5">
+      {data?.data
         ?.slice(0, numberOfItemsToShow)
-        .map((galleryItem: any, index: number) => (
-          <GalleryCard height={heightOfCard} key={index} galleryItem={galleryItem} />
+        .map((galleryItem: GalleryItem, index: number) => (
+          <GalleryCard
+            height={heightOfCard}
+            key={galleryItem.id || index}
+            galleryItem={galleryItem}
+          />
         ))}
     </div>
   );

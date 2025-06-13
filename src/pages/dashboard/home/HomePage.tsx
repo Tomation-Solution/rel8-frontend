@@ -1,7 +1,7 @@
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb"
+import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { useQuery } from 'react-query';
+import { useQuery } from "react-query";
 import { fetchAllUserNews } from "../../../api/news/news-api";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import SeeAll from "../../../components/SeeAll";
@@ -19,10 +19,11 @@ import { fetchAllNotifications } from "../../../api/notifications/notifications-
 import { NotificationDataType } from "../../../types/myTypes";
 
 const HomePage = () => {
-  const { data, isError, isLoading } = useQuery('notifications', fetchAllNotifications);
+  // const { data, isError, isLoading } = useQuery(
+  //   "notifications",
+  //   fetchAllNotifications
+  // );
   const { notifyUser } = Toast();
-
-  if (isError) return <div>Error loading notifications</div>;
 
   const eventsResponsiveCarousel = {
     superLargeDesktop: {
@@ -59,53 +60,67 @@ const HomePage = () => {
     mobile: {
       breakpoint: { max: 464, min: 0 },
       items: 1,
-    }
+    },
   };
 
-  const news = useQuery('news', fetchAllUserNews, {
+  const news = useQuery("news", fetchAllUserNews, {
     retry: 1,
     retryDelay: 3000,
   });
 
-  const events = useQuery('events', fetchAllUserEvents, {
+  const events = useQuery("events", fetchAllUserEvents, {
     retry: 1,
     retryDelay: 3000,
   });
 
-  const publication = useQuery('publications', fetchUserPublications, {
+  const publication = useQuery("publications", fetchUserPublications, {
     retry: 1,
     retryDelay: 3000,
   });
 
   if (news.isError) {
-    notifyUser('Sorry, an error occured when fetching news', 'error');
+    notifyUser("Sorry, an error occured when fetching news", "error");
   }
   if (events.isError) {
-    notifyUser('Sorry, an error occured when fetching events', 'error');
+    notifyUser("Sorry, an error occured when fetching events", "error");
   }
 
+  // if (isError) return <div>Error loading notifications</div>;
+
+  console.log(publication?.data, "Publication");
+
   return (
-    <main className='grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:gap-8 gap-10 md:px-0 px-5'>
+    <main className="grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:gap-8 gap-10 md:px-0 px-5">
       <div className="col-span-1 xl:col-span-3 relative flex flex-col gap-8 ">
         <div className="">
-        <BreadCrumb title='Latest Updates' />
-        {/* Latest Updates */}
-        <div className={`relative py-6 ${news.isLoading ? "flex items-center justify-center" : ""}`}>
-          {news.isLoading && <CircleLoader />}
-          {news?.data?.data && news?.data?.data.length > 0 &&
-            <Carousel
-              removeArrowOnDeviceType={["tablet", "mobile"]}
-              dotListClass="flex items-center !bg-white absolute top-0 h-fit w-fit bg-red-400 main-class"
-              renderDotsOutside
-              showDots
-              arrows={false}
-              className="" responsive={newResponsiveCarousel}>
-              {news?.data?.data.map((newsItem, index) => (
-                <HomePageNewsCard key={index} newsItem={newsItem} index={index} />
-              ))}
-            </Carousel>
-          }
-        </div>
+          <BreadCrumb title="Latest Updates" />
+          {/* Latest Updates */}
+          <div
+            className={`relative py-6 ${
+              news.isLoading ? "flex items-center justify-center" : ""
+            }`}
+          >
+            {news.isLoading && <CircleLoader />}
+            {news?.data && news?.data?.length > 0 && (
+              <Carousel
+                removeArrowOnDeviceType={["tablet", "mobile"]}
+                dotListClass="flex items-center !bg-white absolute top-0 h-fit w-fit bg-red-400 main-class"
+                renderDotsOutside
+                showDots
+                arrows={false}
+                className=""
+                responsive={newResponsiveCarousel}
+              >
+                {news?.data?.map((newsItem: any, index: number) => (
+                  <HomePageNewsCard
+                    key={index}
+                    newsItem={newsItem}
+                    index={index}
+                  />
+                ))}
+              </Carousel>
+            )}
+          </div>
         </div>
 
         {/* Events & Notifications */}
@@ -114,10 +129,10 @@ const HomePage = () => {
             <SeeAll title="Events" path="/events" />
             <div className={`grid place items-center`}>
               {events.isLoading && <CircleLoader />}
-              {!events.isLoading && events?.data?.data?.length === 0 && (
-                  <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
-                      No events available, enjoy the silence.
-                  </div>
+              {!events.isLoading && events?.data?.length === 0 && (
+                <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
+                  No events available, enjoy the silence.
+                </div>
               )}
               {events.data && (
                 <Carousel
@@ -129,7 +144,7 @@ const HomePage = () => {
                   keyBoardControl={true}
                   className="container"
                 >
-                  {events?.data?.data.map((eventItem:any, index:number) => (
+                  {events?.data?.map((eventItem: any, index: number) => (
                     <EventsCard key={index} eventItem={eventItem} />
                   ))}
                 </Carousel>
@@ -139,36 +154,49 @@ const HomePage = () => {
           <div className="flex flex-col">
             <SeeAll title="Notifications" path="/notifications" />
             <div className="grid md:justify-betwee">
-              {isLoading && <CircleLoader />}
-              {!isLoading && data?.length === 0 && (
-                  <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
-                      No notifications available, enjoy the silence.
-                  </div>
-              )}
-              {data && data.slice(0, 4).map((notificationItem: NotificationDataType, index: number) => (
-                <HomePageNotification key={index} notificationItem={notificationItem} />
-              ))}
+              {/* {isLoading && <CircleLoader />} */}
+              {/* {!isLoading && data?.length === 0 && (
+                <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
+                  No notifications available, enjoy the silence.
+                </div>
+              )} */}
+              {/* {data &&
+                data
+                  .slice(0, 4)
+                  .map(
+                    (notificationItem: NotificationDataType, index: number) => (
+                      <HomePageNotification
+                        key={index}
+                        notificationItem={notificationItem}
+                      />
+                    )
+                  )} */}
             </div>
           </div>
         </div>
         {/* Publications */}
         <div>
-          <SeeAll title='Publications' path="/publications" />
+          <SeeAll title="Publications" path="/publications" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
-            {publication?.data?.data?.map((publicationItem: PublicationDataType, index: number) => (
-              <PublicationCard key={index} publicationItem={publicationItem} />
-            ))}
+            {publication?.data?.map(
+              (publicationItem: PublicationDataType, index: number) => (
+                <PublicationCard
+                  key={index}
+                  publicationItem={publicationItem}
+                />
+              )
+            )}
           </div>
         </div>
       </div>
       {/* Gallery */}
-      <div className='col-span-1'>
-        <SeeAll title='Gallery' path="/gallery" />
+      <div className="col-span-1">
+        <SeeAll title="Gallery" path="/gallery" />
         <GalleryGrid numberOfItemsToShow={3} />
         <QuickNav />
       </div>
     </main>
-  )
-}
+  );
+};
 
 export default HomePage;

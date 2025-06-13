@@ -6,35 +6,38 @@ import { ElectionPositionDataType } from "../../../types/myTypes";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 
-
 const ElectionsPage = () => {
-
   const { notifyUser } = Toast();
 
-  const { data,isLoading,isError}  = useQuery('elections', fetchElections,{
+  const { data, isLoading, isError } = useQuery("elections", fetchElections, {
     // enabled: false,
   });
   // console.log('--->',data)
 
-  if (isLoading){
-    return <CircleLoader />
+  if (isLoading) {
+    return <CircleLoader />;
   }
 
-  if (isError){
-    notifyUser('Sorry, an error occured when fetching election positions','error')
+  if (isError) {
+    notifyUser(
+      "Sorry, an error occured when fetching election positions",
+      "error"
+    );
   }
   return (
     <main>
       <BreadCrumb title="Elections" />
       <p>Below are the available electable position in this organization</p>
       {/* Item */}
-      { data?.data?.map((item:ElectionPositionDataType,index:number)=>(
+      {data?.data?.map((item: ElectionPositionDataType, index: number) => (
         <ElectionPositionCard key={index} item={item} />
       ))}
 
-      {data?.data?.length<=0 && <h3 className='text-primary-blue font-medium' >No Elections Position Available</h3>}
-    
-    
+      {data?.data?.length <= 0 && (
+        <h3 className="text-primary-blue font-medium">
+          No Elections Position Available
+        </h3>
+      )}
     </main>
   );
 };
