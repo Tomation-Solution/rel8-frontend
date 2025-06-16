@@ -55,6 +55,9 @@
     .table{
         @apply w-full border-collapse overflow-x-auto text-black
     }
+    a {
+        @apply text-blue-600 underline;
+    }
 }
 
 
