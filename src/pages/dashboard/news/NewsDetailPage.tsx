@@ -121,7 +121,7 @@ const NewsDetailPage = () => {
             </div>
             <div>
               <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue hover:border-primary-blue" onClick={downloadPublication}>
-                Download Publication
+                Download Attachment
               </button>
             </div>
             <div>
