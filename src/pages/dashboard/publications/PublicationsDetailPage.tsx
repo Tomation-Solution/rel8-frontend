@@ -100,7 +100,7 @@ const PublicationsDetailPage = () => {
                     <AiOutlineDislike />
                   </button>
                 </div>
-                < DownloadFileButton fileUrl={fileUrl} fileName={fileName} buttonText="Publication" />
+                < DownloadFileButton fileUrl={fileUrl} fileName={fileName} buttonText="Attachment" />
                 <div>
               <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
             </div>
