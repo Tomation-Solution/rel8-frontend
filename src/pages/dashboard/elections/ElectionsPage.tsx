@@ -12,7 +12,7 @@ const ElectionsPage = () => {
   const { data, isLoading, isError } = useQuery("elections", fetchElections, {
     // enabled: false,
   });
-  // console.log('--->',data)
+  console.log(data, "Elections Data");
 
   if (isLoading) {
     return <CircleLoader />;
@@ -29,9 +29,11 @@ const ElectionsPage = () => {
       <BreadCrumb title="Elections" />
       <p>Below are the available electable position in this organization</p>
       {/* Item */}
-      {data?.data?.map((item: ElectionPositionDataType, index: number) => (
-        <ElectionPositionCard key={index} item={item} />
-      ))}
+      {data?.map((election: any) =>
+        election.positions.map((position: any, index: number) => (
+          <ElectionPositionCard key={index} item={position} />
+        ))
+      )}
 
       {data?.data?.length <= 0 && (
         <h3 className="text-primary-blue font-medium">

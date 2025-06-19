@@ -5,6 +5,11 @@ export const fetchAllUserNews = async (): Promise<NewsResponseType> => {
   const response = await apiTenant.get(`api/content/news`);
   return response.data;
 };
+
+export const fetchSingleNews = async (id: any): Promise<NewsResponseType> => {
+  const response = await apiTenant.get(`api/content/news/${id}`);
+  return response.data;
+};
 // Fetch comments for a specific news item
 export const fetchNewsComments = async (id: string | null) => {
   if (id) {

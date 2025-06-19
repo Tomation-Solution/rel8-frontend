@@ -9,39 +9,42 @@ import QuickNav from "../../../components/navigation/QuickNav";
 import Toast from "../../../components/toast/Toast";
 
 const EventsPage = () => {
-    const { notifyUser } = Toast();
-    const { data, isError, isLoading } = useQuery("events", fetchAllUserEvents);
+  const { notifyUser } = Toast();
+  const { data, isError, isLoading } = useQuery("events", fetchAllUserEvents);
 
-    if (isError) {
-        notifyUser("An error occurred while fetching events", "error");
-    }
+  console.log(data, "Events Data");
 
-    return (
-        <main className='grid grid-cols-1 md:grid-cols-4 gap-7'>
-            <div className='col-span-1 md:col-span-3 md:px-0 px-5'>
-                <BreadCrumb title='Events' />
+  if (isError) {
+    notifyUser("An error occurred while fetching events", "error");
+  }
 
-                <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
-                    {isLoading && <CircleLoader />}
-                    {!isLoading && data?.data?.length === 0 && (
-                        <div className="py-10 text-center col-span-full md:text-[25px]">
-                            No events available, enjoy the silence.
-                        </div>
-                    )}
-                    {!isLoading && data?.data?.map((eventItem: any, index: number) => (
-                        <EventsCard key={index} eventItem={eventItem} />
-                    ))}
-                </div>
+  return (
+    <main className="grid grid-cols-1 md:grid-cols-4 gap-7">
+      <div className="col-span-1 md:col-span-3 md:px-0 px-5">
+        <BreadCrumb title="Events" />
+
+        <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
+          {isLoading && <CircleLoader />}
+          {!isLoading && data?.length === 0 && (
+            <div className="py-10 text-center col-span-full md:text-[25px]">
+              No events available, enjoy the silence.
             </div>
-            <div className="col-span-1 md:col-span-1">
-                <SeeAll title='Gallery' path='/gallery' />
-                <div className='relative'>
-                    <GalleryGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />
-                </div>
-                <QuickNav />
-            </div>
-        </main>
-    );
-}
+          )}
+          {!isLoading &&
+            data?.map((eventItem: any, index: number) => (
+              <EventsCard key={index} eventItem={eventItem} />
+            ))}
+        </div>
+      </div>
+      <div className="col-span-1 md:col-span-1">
+        <SeeAll title="Gallery" path="/gallery" />
+        <div className="relative">
+          <GalleryGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />
+        </div>
+        <QuickNav />
+      </div>
+    </main>
+  );
+};
 
 export default EventsPage;

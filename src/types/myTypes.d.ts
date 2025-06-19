@@ -1,80 +1,80 @@
 // ----------------------------------------------- UserData Type --------------
 export interface UserDataType {
-    token: string;
-    user_type: string;
+  token: string;
+  user_type: string;
+  chapter: {
+    name: string;
+    id: number;
+  };
+  council: {
+    name: string;
+    id: number;
     chapter: {
-        name: string;
-        id: number;
-    };
-    council: {
-        name: string;
-        id: number;
-        chapter: {
-            name: string;
-            id: number | null;
-        } | null;
-    }[];
-    commitee: {
-        name: string;
-        id: number;
-    }[];
-    userSecret: string;
-    userName: string;
-    user_id: number;
-    member_id: number;
-    has_updated: boolean;
-    profile_image: string;
+      name: string;
+      id: number | null;
+    } | null;
+  }[];
+  commitee: {
+    name: string;
+    id: number;
+  }[];
+  userSecret: string;
+  userName: string;
+  user_id: number;
+  member_id: number;
+  has_updated: boolean;
+  profile_image: string;
 }
 
 //  ---------------------------------------- Types of data-----------------------
 type NewsParagraphItem = {
-    id: number;
-    paragraph: string;
-    heading: string;
-  };
-  
-  type NewsDataItem = {
-    id: number;
-    paragraphs: NewsDataItem[];
-    has_reacted: boolean;
-    name: string;
-    is_exco: boolean;
-    is_committee: boolean;
-    is_member: boolean;
-    created_at: string;
-    updated_at: string;
-    likes: number | null;
-    dislikes: number | null;
-    body: string;
-    image: string;
-    danload: string | null;
-    committee_name: string | null;
-    chapters: string | null;
-    user_that_have_reacted: any[]; // Replace with the correct type
-  };
-  
-export  type NewsResponseType = {
-    message: string;
-    status_code: number;
-    data: DataItem[];
-    success: boolean;
-  };
+  id: number;
+  paragraph: string;
+  heading: string;
+};
+
+type NewsDataItem = {
+  id: number;
+  paragraphs: NewsDataItem[];
+  has_reacted: boolean;
+  name: string;
+  is_exco: boolean;
+  is_committee: boolean;
+  is_member: boolean;
+  created_at: string;
+  updated_at: string;
+  likes: number | null;
+  dislikes: number | null;
+  body: string;
+  image: string;
+  danload: string | null;
+  committee_name: string | null;
+  chapters: string | null;
+  user_that_have_reacted: any[]; // Replace with the correct type
+};
+
+export type NewsResponseType = {
+  message: string;
+  status_code: number;
+  data: DataItem[];
+  success: boolean;
+};
 
 // -------------------------------------------- NewsComments-------------------------------
 export type NewsCommentProps = {
-  newsId: number; 
-}
+  newsId: number;
+};
 
 // Define types for comments
 export type Comment = {
-  id: number; 
+  id: number;
   comment: string;
   member: {
-      full_name: string;
-      photo_url?: string;
-      id: number;
+    full_name: string;
+    photo_url?: string;
+    id: number;
   };
-}
+};
 
 interface NewsCommentDetails {
   id: number;
@@ -96,80 +96,77 @@ interface NewsCommentDetails {
   membership_grade: string | null;
   newsId: number;
 }
-  
-
 
 // -------------------------------------------- Events-------------------------------
 
-  export interface EventDataType {
-    id: number;
-    image: string;
-    name: string;
-    is_paid_event: boolean;
-    re_occuring: boolean;
-    is_virtual: boolean;
-    commitee_id: number | null;
-    exco_id: number | null;
-    amount: string; // Consider using a more specific numeric type if possible
-    is_active: boolean;
-    startDate: string; // Consider using Date type
-    startTime: string; // Consider using Time type
-    scheduletype: string; // Replace with an enum or specific type if available
-    schedule: string[]; // Consider using a more specific type
-    event_access: {
-      has_paid: boolean;
-      link: string;
-    };
-    organiser_extra_info: string;
-    organiser_name: string;
-    event_extra_details: string;
-    event_docs: string;
-    organiserImage: string | null;
-    is_special: boolean;
-  }
-  
-  
-//----------------------------- Table Type
-  export interface TableDataType {
-    id: number;
-    user__email: string;
-    is_overdue: boolean;
-    amount: string;
-    is_paid: boolean;
-    due__startDate: string;
-    due__Name: string;
-    customAccessorProperty: string;
-  }
-  
-  // ---------------------------- Publications
+export interface EventDataType {
+  id: number;
+  image: string;
+  name: string;
+  is_paid_event: boolean;
+  re_occuring: boolean;
+  is_virtual: boolean;
+  commitee_id: number | null;
+  exco_id: number | null;
+  amount: string; // Consider using a more specific numeric type if possible
+  is_active: boolean;
+  startDate: string; // Consider using Date type
+  startTime: string; // Consider using Time type
+  scheduletype: string; // Replace with an enum or specific type if available
+  schedule: string[]; // Consider using a more specific type
+  event_access: {
+    has_paid: boolean;
+    link: string;
+  };
+  organiser_extra_info: string;
+  organiser_name: string;
+  event_extra_details: string;
+  event_docs: string;
+  organiserImage: string | null;
+  is_special: boolean;
+}
 
-  export interface PublicationParagraphType {
-    id: number;
-    paragragh: string;
-    heading: string;
-  }
-  
-  export interface PublicationDataType {
-    id: number;
-    paragraphs: PublicationParagraphType[];
-    name: string;
-    is_exco: boolean;
-    is_committe: boolean;
-    is_member: boolean;
-    created_at: string;
-    updated_at: string;
-    likes: number;
-    dislikes: number | null;
-    body: string;
-    image: string;
-    danload: string | null;
-    exco: string | null;
-    commitee_name: string | null;
-    chapters: string | null;
-    membership_grade: string | null;
-    newsId: number;
-  }
-  
+//----------------------------- Table Type
+export interface TableDataType {
+  id: number;
+  user__email: string;
+  is_overdue: boolean;
+  amount: string;
+  is_paid: boolean;
+  due__startDate: string;
+  due__Name: string;
+  customAccessorProperty: string;
+}
+
+// ---------------------------- Publications
+
+export interface PublicationParagraphType {
+  id: number;
+  paragragh: string;
+  heading: string;
+}
+
+export interface PublicationDataType {
+  id: number;
+  paragraphs: PublicationParagraphType[];
+  name: string;
+  is_exco: boolean;
+  is_committe: boolean;
+  is_member: boolean;
+  created_at: string;
+  updated_at: string;
+  likes: number;
+  dislikes: number | null;
+  body: string;
+  image: string;
+  danload: string | null;
+  exco: string | null;
+  commitee_name: string | null;
+  chapters: string | null;
+  membership_grade: string | null;
+  newsId: number;
+}
+
 //  Excos Members
 
 interface ExcoMemberInfoType {
@@ -215,8 +212,7 @@ export interface ElectionPositionDataType {
   election_startTime: string | null;
 }
 
-
-// User Profile Types 
+// User Profile Types
 
 interface MoreInfoAboutProfileDataType {
   value: string | number | boolean;
@@ -232,11 +228,9 @@ export interface UserProfileDataType {
   more_info: MoreInfoAboutProfileDataType[];
 }
 
+//  Fund a Project
 
-//  Fund a Project 
-
-
-interface FundAProjectDataType  {
+interface FundAProjectDataType {
   heading: string;
   about: string;
   id: number;
@@ -244,12 +238,11 @@ interface FundAProjectDataType  {
   what_project_needs: string[];
 }
 
+// chat user type
 
-// chat user type 
-
-export interface ChatUserDataType{
-  id:number,
-    email:string;
+export interface ChatUserDataType {
+  id: number;
+  email: string;
 }
 
 export interface ChatMessageDataType {
@@ -262,13 +255,10 @@ export interface ChatMessageDataType {
 // ----------------------------------- Notifications
 
 export interface NotificationDataType {
-  id: string;
-  created_on: string;
+  audience: string[];
+  createdAt: string;
   title: string;
-  body:string;
-  created_on?: string;
-  latest_update_table_name: string;
-  latest_update_table_id: number;
+  message: string;
 }
 
 export interface Props {

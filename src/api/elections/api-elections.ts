@@ -1,9 +1,7 @@
 import apiTenant from "../baseApi";
 
 export const fetchElections = async () => {
-  const response = await apiTenant.get(
-    `/election/adminmanageballotbox/list_of_elections/`
-  );
+  const response = await apiTenant.get(`api/elections/`);
   return response.data;
 };
 export const fetchElectionContestants = async (id: string | null) => {

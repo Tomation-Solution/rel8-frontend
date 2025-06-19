@@ -1,22 +1,22 @@
-import membersEnviroment from '../assets/icons/members-enviroment.png'
-import activeLinkIcon from '../assets/icons/active-link-icon.png'
-import nonActiveLinkIcon from '../assets/icons/non-active-link-icon.png'
-import excosEnviromentIcon from '../assets/icons/excos-enviroment.png'
-import comiteeEnviromentIcon from '../assets/icons/comittee-enviroment.png'
-import togglerIcon from '../assets/icons/toggler.png'
-import eventsIcon from '../assets/icons/events.png'
-import newsIcon from '../assets/icons/news.png'
-import galleryIcon from '../assets/icons/gallery.png'
-import accountIcon from '../assets/icons/my-account.png'
-import serviceRequestsIcon from '../assets/icons/service-request.png'
-import electionIcon from '../assets/icons/election.png'
-import logoutIcon from '../assets/icons/logout.png'
-import homeIcon from '../assets/icons/home.png'
-import chatIcon from '../assets/icons/chat.png'
-import notificationsIcon from '../assets/icons/bell.png'
-import supportIcon from '../assets/icons/support.png'
-import fundaProjectIcon from '../assets/icons/fund-a-project.png'
-import { SideBarLinkType } from '../types/sidebarDataType'
+import membersEnviroment from "../assets/icons/members-enviroment.png";
+import activeLinkIcon from "../assets/icons/active-link-icon.png";
+import nonActiveLinkIcon from "../assets/icons/non-active-link-icon.png";
+import excosEnviromentIcon from "../assets/icons/excos-enviroment.png";
+import comiteeEnviromentIcon from "../assets/icons/comittee-enviroment.png";
+import togglerIcon from "../assets/icons/toggler.png";
+import eventsIcon from "../assets/icons/events.png";
+import newsIcon from "../assets/icons/news.png";
+import galleryIcon from "../assets/icons/gallery.png";
+import accountIcon from "../assets/icons/my-account.png";
+import serviceRequestsIcon from "../assets/icons/service-request.png";
+import electionIcon from "../assets/icons/election.png";
+import logoutIcon from "../assets/icons/logout.png";
+import homeIcon from "../assets/icons/home.png";
+import chatIcon from "../assets/icons/chat.png";
+import notificationsIcon from "../assets/icons/bell.png";
+import supportIcon from "../assets/icons/support.png";
+import fundaProjectIcon from "../assets/icons/fund-a-project.png";
+import { SideBarLinkType } from "../types/sidebarDataType";
 
 export const sideBarData: SideBarLinkType[] = [
   {
@@ -34,33 +34,33 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Notifications",
     path: "/notifications",
   },
+  // {
+  //   mainIcon:membersEnviroment,
+  //   name: "Directory",
+  //   path: "/registry",
+  //   activeLinkIcon: '',
+  //   notActiveLinkIcon:'',
+  // },
   {
-    mainIcon:membersEnviroment,
-    name: "Directory",
-    path: "/registry",
-    activeLinkIcon: '',
-    notActiveLinkIcon:'',
-  },
-  {
-    mainIcon:membersEnviroment,
+    mainIcon: membersEnviroment,
     name: "Members Enviroment",
     path: "/members",
     activeLinkIcon: activeLinkIcon,
-    notActiveLinkIcon:nonActiveLinkIcon,
+    notActiveLinkIcon: nonActiveLinkIcon,
   },
   {
     mainIcon: excosEnviromentIcon,
     name: "Excos Enviroment",
     path: "/excos",
     activeLinkIcon: activeLinkIcon,
-    notActiveLinkIcon:nonActiveLinkIcon,
+    notActiveLinkIcon: nonActiveLinkIcon,
   },
   {
     mainIcon: comiteeEnviromentIcon,
     name: "Committee Environment",
     activeLinkIcon: togglerIcon,
     notActiveLinkIcon: togglerIcon,
-    subMenu: [] // This will be filled with committee data fetched from the backend
+    subMenu: [], // This will be filled with committee data fetched from the backend
   },
 
   {
@@ -74,12 +74,12 @@ export const sideBarData: SideBarLinkType[] = [
   //   path: "/special-events",
   // },
   {
-    mainIcon:newsIcon,
+    mainIcon: newsIcon,
     name: "Publication",
     path: "/publications",
   },
   {
-    mainIcon:newsIcon,
+    mainIcon: newsIcon,
     name: "News",
     path: "/news",
   },
@@ -93,26 +93,26 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Gallery",
     path: "/gallery",
   },
-  {
-    mainIcon: eventsIcon,
-    name: "Meetings",
-    path: "/meeting",
-  },
+  // {
+  //   mainIcon: eventsIcon,
+  //   name: "Meetings",
+  //   path: "/meeting",
+  // },
   {
     mainIcon: accountIcon,
     name: "My Account",
     path: "/account",
   },
-  {
-    mainIcon: fundaProjectIcon,
-    name: "Fund a Project",
-    path: "/fund-a-project",
-  },
-  {
-    mainIcon: serviceRequestsIcon,
-    name: "Service Requests",
-    path: "/service-requests",
-  },
+  // {
+  //   mainIcon: fundaProjectIcon,
+  //   name: "Fund a Project",
+  //   path: "/fund-a-project",
+  // },
+  // {
+  //   mainIcon: serviceRequestsIcon,
+  //   name: "Service Requests",
+  //   path: "/service-requests",
+  // },
   {
     mainIcon: electionIcon,
     name: "Election",

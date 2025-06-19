@@ -1,14 +1,17 @@
 import SeeAll from "../../../components/SeeAll";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { useQuery, 
+import {
+  useQuery,
   // useMutation, useQueryClient
- } from "react-query";
+} from "react-query";
 import { useParams } from "react-router-dom";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
-import { fetchAllUserNews 
-  // likeDislikeNews 
+import {
+  fetchAllUserNews,
+  fetchSingleNews,
+  // likeDislikeNews
 } from "../../../api/news/news-api";
 import NewsCard from "../../../components/cards/NewsCard";
 import NewsComment from "../../../components/cards/NewsComment";
@@ -23,20 +26,33 @@ const NewsDetailPage = () => {
   // const queryClient = useQueryClient();
   const [hasLiked, setHasLiked] = useState(false);
   const [hasDisliked, setHasDisliked] = useState(false);
-  const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
-  const newsItem = data?.data?.find((item: NewsCommentDetails) => item.id.toString() === newsId);
-  const otherNewsItems = data?.data?.filter((item: NewsCommentDetails) => item.id.toString() !== newsId);
+  const { data, isLoading, isError } = useQuery<
+    { data: NewsCommentDetails[] },
+    Error
+  >("news", fetchAllUserNews);
 
-  useEffect(() => {
-    if (newsItem) {
-      setHasLiked(newsItem.likes > 0);
-      setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
+  const { data: newsItem, isLoading: singleNewsIsloading } = useQuery(
+    ["news", newsId], // Use a unique key for the query
+    () => fetchSingleNews(newsId),
+    {
+      enabled: !!newsId, // Only fetch data when newsId is available
     }
-  }, [newsItem]);
+  );
 
-  const formattedDate = newsItem ? new Date(newsItem.updated_at).toLocaleDateString() : '';
-  
-// function is underconstruction please
+  console.log(newsItem, "News Item");
+
+  // useEffect(() => {
+  //   if (newsItem) {
+  //     setHasLiked(newsItem.likes > 0);
+  //     setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
+  //   }
+  // }, [newsItem]);
+
+  // const formattedDate = newsItem
+  //   ? new Date(newsItem?.createdAt)?.toLocaleDateString()
+  //   : "";
+
+  // function is underconstruction please
   // const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
   //   ({ id, like, dislike }) => likeDislikeNews(id, like, dislike),
   //   {
@@ -82,7 +98,10 @@ const NewsDetailPage = () => {
   }
 
   if (isError) {
-    return notifyUser("An error occurred while fetching publication details", "error");
+    return notifyUser(
+      "An error occurred while fetching publication details",
+      "error"
+    );
   }
 
   if (data) {
@@ -93,49 +112,62 @@ const NewsDetailPage = () => {
             <BreadCrumb title="News" />
             <div className="relative">
               <img
-                src={newsItem?.image}
+                src={newsItem?.bannerUrl}
                 className="w-full object-cover max-h-[40vh] top-0 bottom-0 left-0 right-0 rounded-md border"
                 alt=""
               />
             </div>
             <div className="col-span-1 mt-6">
               <div className="mb-3">
-                <h3 className="font-semibold my-2">{newsItem?.name}</h3>
-                <p className="text-sm font-light">Date published: {formattedDate}</p>
+                <h3 className="font-semibold my-2">{newsItem?.topic}</h3>
+                {/* <p className="text-sm font-light">
+                  Date published: {formattedDate}
+                </p> */}
               </div>
-              <div dangerouslySetInnerHTML={{ __html: `${newsItem?.body}` }}></div>
+              <div className="text-sm text-justify">{newsItem?.content}</div>
             </div>
             <div className="flex gap-2 mt-4">
               <button
-                className={`px-2 py-1 rounded-md ${hasLiked ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+                className={`px-2 py-1 rounded-md ${
+                  hasLiked ? "bg-green-500 text-white" : "bg-gray-200"
+                }`}
                 onClick={handleLike}
               >
                 <AiOutlineLike />
               </button>
               <button
-                className={`px-2 py-1 rounded-md ${hasDisliked ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+                className={`px-2 py-1 rounded-md ${
+                  hasDisliked ? "bg-red-500 text-white" : "bg-gray-200"
+                }`}
                 onClick={handleDislike}
               >
                 <AiOutlineDislike />
               </button>
             </div>
             <div>
-              <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue hover:border-primary-blue" onClick={downloadPublication}>
+              <button
+                className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue hover:border-primary-blue"
+                onClick={downloadPublication}
+              >
                 Download Publication
               </button>
             </div>
             <div>
-              <NewsComment newsId={parseInt(newsId || '0', 10)} />
+              <NewsComment newsId={parseInt(newsId || "0", 10)} />
             </div>
           </div>
           <div className="md:col-span-1 col-span-3">
             <SeeAll title="Others" />
             <EventGrid numberOfItemsToShow={3} />
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               {otherNewsItems?.map((newsItem, index) => (
-                <NewsCard hidePostDetails={true} key={index} newsItem={newsItem} />
+                <NewsCard
+                  hidePostDetails={true}
+                  key={index}
+                  newsItem={newsItem}
+                />
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </main>

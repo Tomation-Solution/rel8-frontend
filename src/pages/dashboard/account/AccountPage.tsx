@@ -11,6 +11,7 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 // @ts-ignore
 import Table from "../../../components/Table/Table";
 import useDynamicPaymentApi from "../../../api/payment";
+import moment from "moment";
 
 const AccountPage = () => {
   const [showCompleted, setShowCompleted] = useState(true);
@@ -54,16 +55,17 @@ const AccountPage = () => {
   const prop_columns = [
     {
       Header: "Due Name",
-      accessor: "due__Name",
+      accessor: "purpose",
     },
     {
       Header: "Amount",
       accessor: "amount",
     },
     {
-      Header: "Date",
-      accessor: "due__startDate",
+      Header: "Due Date",
+      accessor: "dueDate",
       id: 44,
+      Cell: ({ value }: any) => moment(value).format("MMM D, YYYY"),
     },
     {
       Header: "Update Subbmission",
@@ -127,7 +129,7 @@ const AccountPage = () => {
         {/* {showCompleted ? "" : <PendingPaymentTable tableData={pendingDues} />} */}
         {/* {!showCompleted && pendingDues && <PendingPaymentTable  isLoading={isLoading} tableData={pendingDues} /> } */}
         {!showCompleted && pendingDues && (
-          <Table prop_columns={prop_columns} custom_data={pendingDues} />
+          <Table prop_columns={prop_columns} custom_data={data} />
         )}
         {showCompleted && paidDues && (
           <CompletedPaymentTable isLoading={isLoading} tableData={paidDues} />
