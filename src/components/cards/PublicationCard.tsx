@@ -2,6 +2,7 @@
 import { FaRegCommentDots } from "react-icons/fa";
 import { PublicationDataType } from "../../types/myTypes";
 import { Link } from "react-router-dom";
+import { AiFillLike } from "react-icons/ai";
 interface Props {
   publicationItem: PublicationDataType;
   hidePostDetails?: boolean;
@@ -26,7 +27,7 @@ const PublicationCard = ({
       <div className="md:p-5 p-2">
         <Link to={`/${linkTo}/${publicationItem._id}/`}>
           <h5 className="mb-2 md:text-[15px] text-sm font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">
-            {publicationItem?.title}
+            {publicationItem?.title || publicationItem?.topic}
           </h5>
         </Link>
         {/* <p className="mb-2 text-[10px] line-clamp-1">{formattedDate}</p> */}
@@ -34,19 +35,21 @@ const PublicationCard = ({
         {!hidePostDetails && (
           <div className="flex items-center justify-between">
             <div className="grid grid-cols-2  divide-x-2 ">
-              <aside className="flex items-center gap-2">
-                <img
-                  src={publicationItem.image}
-                  className="w-10 h-10 object-contain rounded-full border"
-                  alt=""
-                />
-                <aside className="grid p-1">
-                  {/* <p className="text-sm font-medium my-1 line-clamp-1" >{publicationItem.paragraphs[0].heading.slice(3, -10)}</p> */}
-                  <small className="text-xs text-white bg-[#D97706] w-fit p-1 rounded-md">
-                    Author
-                  </small>
+              {publicationItem.likes && (
+                <aside className="flex items-center gap-2">
+                  <div className="h-5 w-5 rounded-full bg-gray-100 flex items-center justify-center">
+                    <AiFillLike className="w-4 h-4 text-blue-primary" />
+                  </div>
+                  <aside className="p-1 flex items-center">
+                    <p className="text-sm font-medium my-1 line-clamp-1">
+                      {publicationItem?.likes && publicationItem?.likes?.length}
+                    </p>
+                    <small className="text-xs text-black w-fit p-1 rounded-md">
+                      {publicationItem?.likes?.length > 1 ? "Likes" : "Like"}
+                    </small>
+                  </aside>
                 </aside>
-              </aside>
+              )}
               <div className="border-l flex items-center gap-2 text-sm">
                 <FaRegCommentDots className="w-5 h-5 text-textColor ml-2" />{" "}
                 {publicationItem.comments && (

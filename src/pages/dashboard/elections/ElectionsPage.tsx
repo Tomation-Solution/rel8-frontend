@@ -35,7 +35,7 @@ const ElectionsPage = () => {
         ))
       )}
 
-      {data?.data?.length <= 0 && (
+      {data?.length <= 0 && (
         <h3 className="text-primary-blue font-medium">
           No Elections Position Available
         </h3>

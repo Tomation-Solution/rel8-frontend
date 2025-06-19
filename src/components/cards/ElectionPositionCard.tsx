@@ -26,7 +26,7 @@ const ElectionPositionCard = ({ item }: Props) => {
         </div>
         <div className="col-span-1">
           <Link
-            to={""}
+            to={`/all-votes/${item._id}`}
             className="text-primary-blue whitespace-nowrap text-sm outline-none px-3 py-2    border h-[40px] w-full rounded-md  border-primary-blue"
           >
             See Voting Stats

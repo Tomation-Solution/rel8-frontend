@@ -478,7 +478,7 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/elections-contestant/:id",
+      path: "/elections-contestant/:election_id/:id",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
@@ -489,7 +489,7 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/all-votes",
+      path: "/all-votes/:id",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>

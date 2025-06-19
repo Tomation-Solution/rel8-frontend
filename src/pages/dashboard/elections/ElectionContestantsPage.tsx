@@ -5,48 +5,73 @@
 // import Toast from '../../../components/toast/Toast';
 // import React from 'react'
 
-import avatarImg1 from '../../../assets/images/avatar-1.jpg'
-import avatarImg2 from '../../../assets/images/avatar-2.jpg'
-import avatarImg3 from '../../../assets/images/avatar-3.jpg'
-import ElectionContestantCard from '../../../components/cards/ElectionContestantCard';
+import { useParams } from "react-router-dom";
+import avatarImg1 from "../../../assets/images/avatar-1.jpg";
+import avatarImg2 from "../../../assets/images/avatar-2.jpg";
+import avatarImg3 from "../../../assets/images/avatar-3.jpg";
+import ElectionContestantCard from "../../../components/cards/ElectionContestantCard";
+import CircleLoader from "../../../components/loaders/CircleLoader";
+import Toast from "../../../components/toast/Toast";
+import { useQuery } from "react-query";
+import { fetchElectionContestants } from "../../../api/elections/api-elections";
+import { useEffect } from "react";
+import apiTenant from "../../../api/baseApi";
 
 const ElectionContestantsPage = () => {
+  const { electionPositionId } = useParams();
+  const { notifyUser } = Toast();
 
-    // const {  electionPositionId } = useParams();
-    // const { notifyUser } = Toast();
+  const token = localStorage.getItem("token");
 
-    // const id: string | null = electionPositionId || null;
+  const id: string | null = electionPositionId || null;
 
-    // const { data, isLoading, isError } = useQuery(['electionContestants',electionPositionId ], () => fetchElectionContestants(id),{
-    //     enabled: !!id,
-    //   });
+  const { data, isLoading, isError, refetch } = useQuery(
+    ["electionContestants", electionPositionId],
+    () => fetchElectionContestants(id),
+    {
+      enabled: !!id,
+    }
+  );
 
-    //   if (isError){
-    //     notifyUser("An error occured while fetching event detail","error")
-    //   }
+  const handleRefetch = () => {
+    refetch();
+  };
 
-    // if (isLoading){
-    //     return <CircleLoader />
-    // }
+  if (isError) {
+    notifyUser("An error occured while fetching event detail", "error");
+  }
 
-        
+  if (isLoading) {
+    return <CircleLoader />;
+  }
 
-      // console.log(data)
+  console.log(data);
   return (
     <main>
-        <div className='grid grid-cols-4 gap-4' >
-            <ElectionContestantCard image={avatarImg1} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg2} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg3} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg1} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg2} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg3} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-            <ElectionContestantCard image={avatarImg1} name='Adedeji Moyin' about='Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit esse quis magni ipsum, molestias non fugiat, quos repudiandae ea culpa magnam repellat, iusto molestiae debitis reprehenderit veritatis expedita! Eveniet, quae.' />
-          
-
-        </div>
+      <div className="grid grid-cols-4 gap-4">
+        {data?.length === 0 ? (
+          <div className="col-span-4 text-center">
+            <h3 className="text-lg font-semibold">No Contestants Found</h3>
+            <p className="text-sm text-gray-500">
+              There are currently no contestants for this election position.
+            </p>
+          </div>
+        ) : (
+          data?.map((contestant: any) => (
+            <ElectionContestantCard
+              key={contestant._id}
+              image={contestant.imageUrl}
+              name={contestant.name}
+              about={contestant.bio}
+              id={contestant._id}
+              electionPositionId={electionPositionId}
+              refetch={handleRefetch}
+            />
+          ))
+        )}
+      </div>
     </main>
-  )
-}
+  );
+};
 
-export default ElectionContestantsPage
+export default ElectionContestantsPage;
