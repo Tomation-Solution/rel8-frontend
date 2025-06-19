@@ -68,6 +68,11 @@ const HomePage = () => {
     retryDelay: 3000,
   });
 
+  const { data: allNotifications, isLoading: allNotificationsIsLoading } =
+    useQuery<NotificationDataType[]>("notifications", fetchAllNotifications);
+
+  console.log(allNotifications, "Notifications");
+
   const events = useQuery("events", fetchAllUserEvents, {
     retry: 1,
     retryDelay: 3000,
@@ -154,14 +159,14 @@ const HomePage = () => {
           <div className="flex flex-col">
             <SeeAll title="Notifications" path="/notifications" />
             <div className="grid md:justify-betwee">
-              {/* {isLoading && <CircleLoader />} */}
-              {/* {!isLoading && data?.length === 0 && (
+              {allNotificationsIsLoading && <CircleLoader />}
+              {!allNotificationsIsLoading && allNotifications?.length === 0 && (
                 <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
                   No notifications available, enjoy the silence.
                 </div>
-              )} */}
-              {/* {data &&
-                data
+              )}
+              {allNotifications &&
+                allNotifications
                   .slice(0, 4)
                   .map(
                     (notificationItem: NotificationDataType, index: number) => (
@@ -170,7 +175,7 @@ const HomePage = () => {
                         notificationItem={notificationItem}
                       />
                     )
-                  )} */}
+                  )}
             </div>
           </div>
         </div>

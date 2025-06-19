@@ -42,11 +42,12 @@ const AccountPage = () => {
     (dues: TableDataType) => dues.is_paid === false
   );
 
-  const totalPendingAmount = data
-    ?.filter((dues: TableDataType) => dues.is_paid === false)
-    ?.reduce((total: number, dues: TableDataType) => {
+  const totalPendingAmount = data?.reduce(
+    (total: number, dues: TableDataType) => {
       return total + parseFloat(dues.amount);
-    }, 0);
+    },
+    0
+  );
 
   if (isError) {
     notifyUser("An error occured while fetching account details", "error");
@@ -96,7 +97,7 @@ const AccountPage = () => {
           />
           <div>
             <h3 className="text-3xl font-bold text-primary-blue">
-              {totalPendingAmount}
+              {`NGN${totalPendingAmount.toLocaleString()}.00`}
             </h3>
             {/* <h3 className="text-3xl font-bold text-primaryBlue">{totalPendingAmount}</h3> */}
             <small>Total Outstanding fee</small>
@@ -132,7 +133,8 @@ const AccountPage = () => {
           <Table prop_columns={prop_columns} custom_data={data} />
         )}
         {showCompleted && paidDues && (
-          <CompletedPaymentTable isLoading={isLoading} tableData={paidDues} />
+          // <CompletedPaymentTable isLoading={isLoading} tableData={data} />
+          <Table prop_columns={prop_columns} custom_data={data} />
         )}
       </div>
     </main>

@@ -20,7 +20,12 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const navigate = useNavigate();
 
   // Fetch notifications
-  // const { data: notifications } = useQuery('notifications', fetchAllNotifications);
+  const { data: notifications } = useQuery(
+    "notifications",
+    fetchAllNotifications
+  );
+
+  console.log(user, "User in Navbar");
 
   // Calculate the number of notifications
   // const notificationCount = notifications?.length || 0;
@@ -42,7 +47,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
           </span>
           <h3 className="font-bold text-neutral-1 capitalize md:text-xl text-[16px]">
             <span className="text-textColor !capitalize">Hello</span>{" "}
-            <span className="!capitalize">{user?.member?.name}</span>
+            <span className="!capitalize">{user?.name}</span>
           </h3>
         </div>
         <div className="hidden lg:inline-flex flex-[0.6] items-center justify-center h-[65%]">

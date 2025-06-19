@@ -1,6 +1,29 @@
 // import { EventDataType } from "../../types/myTypes";
 import apiTenant, { apiTenantAxiosForm } from "../baseApi";
 
+export type EventType = {
+  id: string;
+  name: string;
+  image: string;
+  startDate: string;
+  startTime: string;
+  organiserImage?: string;
+  organiser_name?: string;
+  organiser_extra_info?: string;
+  event_docs?: string;
+  amount: string;
+  is_paid_event: boolean;
+  event_access?: {
+    has_paid: boolean;
+  };
+  description?: string;
+};
+
+export const fetchSingleEvent = async (id: string): Promise<EventType> => {
+  const response = await apiTenant.get(`api/events/${id}`);
+  return response.data;
+};
+
 export const fetchAllUserEvents = async () => {
   const response = await apiTenant.get(`api/events`);
   return response.data;

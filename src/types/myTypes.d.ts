@@ -1,5 +1,6 @@
 // ----------------------------------------------- UserData Type --------------
 export interface UserDataType {
+  _id?: string;
   token: string;
   user_type: string;
   chapter: {

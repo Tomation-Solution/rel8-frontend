@@ -5,6 +5,11 @@ export const fetchUserPublications = async () => {
   return response.data;
 };
 
+export const fetchUserSinglePublication = async (id: string) => {
+  const response = await apiTenant.get(`api/content/publication/${id}`);
+  return response.data;
+};
+
 // Fetch comments for a specific publication item
 export const fetchPublicationsComments = async (id: string | null) => {
   if (id) {

@@ -6,7 +6,7 @@ export const fetchAllUserNews = async (): Promise<NewsResponseType> => {
   return response.data;
 };
 
-export const fetchSingleNews = async (id: any): Promise<NewsResponseType> => {
+export const fetchSingleNews = async (id: any) => {
   const response = await apiTenant.get(`api/content/news/${id}`);
   return response.data;
 };
