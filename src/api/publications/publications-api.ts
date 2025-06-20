@@ -5,7 +5,7 @@ export const fetchUserPublications = async () => {
   return response.data;
 };
 
-export const fetchUserSinglePublication = async (id: string) => {
+export const fetchUserSinglePublication = async (id: string | undefined) => {
   const response = await apiTenant.get(`api/content/publication/${id}`);
   return response.data;
 };

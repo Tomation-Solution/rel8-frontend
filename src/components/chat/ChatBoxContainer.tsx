@@ -5,7 +5,7 @@ import { ChatMessageDataType } from "../../types/myTypes";
 import { useAppContext } from "../../context/authContext";
 import CircleLoader from "../loaders/CircleLoader";
 import { useState, useEffect, useRef } from "react";
-import { TENANT, sitename } from "../../utils/constants";
+// import { TENANT, sitename } from "../../utils/constants";
 import moment from "moment";
 import { sendGroupMessage, sendPrivateMessage } from "../../api/chats/chats"; // You'll need to create these API functions
 
@@ -53,12 +53,12 @@ const ChatBoxContainer = ({ currentChatType, data, isLoading }: Props) => {
     setSending(true);
 
     try {
-      const messageData = {
-        message: text,
-        senderId: user._id,
-        name: user.name,
-        timestamp: Date.now(),
-      };
+      // const messageData = {
+      //   message: text,
+      //   senderId: user._id,
+      //   name: user.name,
+      //   timestamp: Date.now(),
+      // };
 
       if (currentChatType.type === "general") {
         // Send group message
@@ -68,17 +68,15 @@ const ChatBoxContainer = ({ currentChatType, data, isLoading }: Props) => {
 
         console.log(response, "Group chat message");
 
-        // Add the new message to local state
-        setMessages((prev) => [
-          ...prev,
-          {
-            _id: response._id || Date.now().toString(),
-            content: text,
-            name: user.name,
-            timestamp: Date.now(),
-            senderId: user._id,
-          },
-        ]);
+        const newMessage: ChatMessageDataType = {
+          _id: response._id ? parseInt(response._id) : Date.now(),
+          content: text,
+          name: user.name,
+          timestamp: Date.now(),
+          senderId: user._id,
+        };
+
+        setMessages((prev) => [...prev, newMessage]);
       } else if (currentChatType.type === "single-chat") {
         // Send private message
         const receiverId = currentChatType.value;

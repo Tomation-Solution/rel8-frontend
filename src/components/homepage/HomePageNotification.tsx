@@ -42,7 +42,6 @@
 import { useEffect } from "react";
 import calendarIcon from "../../assets/icons/calendar.png";
 import clockIcon from "../../assets/icons/clock.png";
-import { Link } from "react-router-dom";
 import {
   NotificationDataType,
   PublicationDataType,
@@ -98,7 +97,7 @@ const HomePageNotification = ({
   }, [notificationItem, newsItem, eventItem]);
 
   return (
-    <Link
+    <div
       // to={getNotificationLink(notificationItem, newsItem, eventItem)}
       className="block"
     >
@@ -128,7 +127,7 @@ const HomePageNotification = ({
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

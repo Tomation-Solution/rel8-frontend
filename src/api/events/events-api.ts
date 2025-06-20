@@ -19,7 +19,7 @@ export type EventType = {
   description?: string;
 };
 
-export const fetchSingleEvent = async (id: string): Promise<EventType> => {
+export const fetchSingleEvent = async (id: string | undefined) => {
   const response = await apiTenant.get(`api/events/${id}`);
   return response.data;
 };

@@ -3,7 +3,7 @@ import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { useQuery } from "react-query";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { fetchSingleNews } from "../../../api/news/news-api";
-import { AiOutlineLike, AiOutlineDislike, AiFillLike } from "react-icons/ai";
+import { AiOutlineLike, AiFillLike } from "react-icons/ai";
 import { toast } from "react-toastify";
 import Avatar from "../../../components/avatar/Avatar";
 import avatarImage from "../../../assets/images/avatar-1.jpg";
@@ -82,9 +82,9 @@ const NewsDetailPage = () => {
     }
   };
 
-  const downloadPublication = () => {
-    toast.info("Download functionality coming soon", { autoClose: 2000 });
-  };
+  // const downloadPublication = () => {
+  //   toast.info("Download functionality coming soon", { autoClose: 2000 });
+  // };
 
   const handleCommentSubmit = async () => {
     if (!commentText) {

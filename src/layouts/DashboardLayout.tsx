@@ -1,8 +1,8 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode } from "react";
 import Sidebar from "../components/navigation/Sidebar";
 import Navbar from "../components/navigation/Navbar";
-import { useNavigate } from "react-router-dom";
-import Toast from "../components/toast/Toast";
+// import { useNavigate } from "react-router-dom";
+// import Toast from "../components/toast/Toast";
 import { useAppContext } from "../context/authContext";
 
 interface DashboardLayoutInterfaceProps {
@@ -11,9 +11,9 @@ interface DashboardLayoutInterfaceProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
   // const { user } = useContext();
-  const { user, userProfileData } = useAppContext();
-  const navigate = useNavigate();
-  const { notifyUser } = Toast();
+  const { user } = useAppContext();
+  // const navigate = useNavigate();
+  // const { notifyUser } = Toast();
 
   console.log(user, "User");
 

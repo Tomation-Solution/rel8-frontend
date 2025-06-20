@@ -1,10 +1,10 @@
 // import BreadCrumb from "../../../components/BreadCrumb";
 import SeeAll from "../../../components/SeeAll";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import profileImage from "../../../assets/images/avatar-1.jpg";
 import ProgressBar from "../../../components/progress-bar/ProgressBar";
 import ElectionContestantCard from "../../../components/cards/ElectionContestantCard";
-import avatarImg1 from "../../../assets/images/avatar-1.jpg";
+// import avatarImg1 from "../../../assets/images/avatar-1.jpg";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import apiTenant from "../../../api/baseApi";
 import { useEffect, useState } from "react";
@@ -13,6 +13,15 @@ import { CiUser } from "react-icons/ci";
 import { fetchElectionContestants } from "../../../api/elections/api-elections";
 import { useQuery } from "react-query";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+
+type Candidate = {
+  _id: string;
+  name: string;
+  bio: string;
+  imageUrl?: string;
+  manifesto?: string;
+  // Add other properties as needed
+};
 
 const ElectionContestantDetailPage = () => {
   const { id, election_id } = useParams();
@@ -27,7 +36,7 @@ const ElectionContestantDetailPage = () => {
 
   console.log(election_id, "ElectionId");
 
-  const [candidate, setCandidate] = useState({});
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchElectionCandidate = async () => {

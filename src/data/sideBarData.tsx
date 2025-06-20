@@ -8,14 +8,14 @@ import eventsIcon from "../assets/icons/events.png";
 import newsIcon from "../assets/icons/news.png";
 import galleryIcon from "../assets/icons/gallery.png";
 import accountIcon from "../assets/icons/my-account.png";
-import serviceRequestsIcon from "../assets/icons/service-request.png";
+// import serviceRequestsIcon from "../assets/icons/service-request.png";
 import electionIcon from "../assets/icons/election.png";
 import logoutIcon from "../assets/icons/logout.png";
 import homeIcon from "../assets/icons/home.png";
 import chatIcon from "../assets/icons/chat.png";
 import notificationsIcon from "../assets/icons/bell.png";
 import supportIcon from "../assets/icons/support.png";
-import fundaProjectIcon from "../assets/icons/fund-a-project.png";
+// import fundaProjectIcon from "../assets/icons/fund-a-project.png";
 import { SideBarLinkType } from "../types/sidebarDataType";
 
 export const sideBarData: SideBarLinkType[] = [

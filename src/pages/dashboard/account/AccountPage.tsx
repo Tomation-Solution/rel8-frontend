@@ -1,5 +1,5 @@
 import accountWallet from "../../../assets/icons/account-wallet.png";
-import CompletedPaymentTable from "../../../components/tables/CompletedPaymentTable";
+// import CompletedPaymentTable from "../../../components/tables/CompletedPaymentTable";
 import { useState } from "react";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 // import { TableDataType } from "../types/myTypes"

@@ -52,12 +52,6 @@ export const fetchPrivateChats = async () => {
 //   }
 
 // Mock endpoints - replace with your actual endpoints
-const ENDPOINTS = {
-  SEND_GROUP_MSG: "/chat/group/send/",
-  SEND_PRIVATE_MSG: "/chat/private/send/",
-  FETCH_GROUP_MSGS: "/chat/group/messages/",
-  FETCH_PRIVATE_MSGS: "/chat/private/messages/",
-};
 
 // Group Chat Functions
 
@@ -73,7 +67,7 @@ export const sendGroupMessage = async (data: { content: string }) => {
 
 export const sendPrivateMessage = async (data: {
   content: string;
-  recipientId: string;
+  recipientId: string | number;
 }) => {
   console.log(data, "Data in private");
 

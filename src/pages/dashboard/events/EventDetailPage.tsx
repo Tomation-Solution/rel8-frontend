@@ -1,17 +1,17 @@
-import SeeAll from "../../../components/SeeAll";
+// import SeeAll from "../../../components/SeeAll";
 import eventsIcon from "../../../assets/icons/calendar.png";
 import clockIcon from "../../../assets/icons/clock.png";
 import dummyOrganizerImage from "../../../assets/images/dummy.jpg";
-import EventGrid from "../../../components/grid/EventGrid";
+// import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { Link, useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery } from "react-query";
+import { useParams } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
 import {
-  fetchAllUserEvents,
+  // fetchAllUserEvents,
   fetchSingleEvent,
-  registerForFreeEvent,
-  registerForPaidEvent,
+  // registerForFreeEvent,
+  // registerForPaidEvent,
 } from "../../../api/events/events-api";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
@@ -20,7 +20,15 @@ import apiTenant from "../../../api/baseApi";
 
 // Define your event type
 type EventType = {
-  id: string;
+  bannerUrl?: string;
+  price: string;
+  isPaid: boolean;
+  details: string;
+  date: string;
+  _id: string;
+  organizerImage: string;
+  time: string;
+  organizer: string;
   name: string;
   image: string;
   startDate: string;
@@ -41,7 +49,7 @@ type EventType = {
 const EventDetailPage = () => {
   const { eventId } = useParams();
   const { notifyUser } = Toast();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -50,13 +58,9 @@ const EventDetailPage = () => {
     data: event,
     isLoading,
     isError,
-  } = useQuery<EventType>(
-    ["event", eventId],
-    () => fetchSingleEvent(eventId || ""),
-    {
-      enabled: !!eventId,
-    }
-  );
+  } = useQuery<EventType>(["event", eventId], () => fetchSingleEvent(eventId), {
+    enabled: !!eventId,
+  });
 
   console.log(event, "Event Single");
 
@@ -80,7 +84,7 @@ const EventDetailPage = () => {
           : `${window.location.origin}${response.data.url}`;
         window.open(paymentUrl, "_blank");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log("Registration error:");
       notifyUser(
         error.response.data.message ||
@@ -198,7 +202,7 @@ const EventDetailPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-3 my-5 border-t border-b py-4">
           <div className="flex items-center gap-2">
             <img
-              src={event.organiserImage || dummyOrganizerImage}
+              src={event.organizerImage || dummyOrganizerImage}
               className="w-10 h-10 rounded-full border"
               alt="Organizer"
             />

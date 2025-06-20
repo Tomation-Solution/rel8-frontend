@@ -1,27 +1,19 @@
-import SeeAll from "../../../components/SeeAll";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { PublicationDataType } from "../../../types/myTypes";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
-import {
-  fetchUserPublications,
-  fetchUserSinglePublication,
-} from "../../../api/publications/publications-api";
+import { fetchUserSinglePublication } from "../../../api/publications/publications-api";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
-import PublicationCard from "../../../components/cards/PublicationCard";
 import { toast } from "react-toastify";
-import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
-import { useState, useEffect } from "react";
-import PublicationComment from "../../../components/cards/PublicationComment";
+// import { useState, useEffect } from "react";
 import apiTenant from "../../../api/baseApi";
 
 const PublicationsDetailPage = () => {
   const { notifyUser } = Toast();
   const { publicationId } = useParams();
-  const [hasLiked, setHasLiked] = useState(false);
-  const [hasDisliked, setHasDisliked] = useState(false);
+  // const [hasLiked, setHasLiked] = useState(false);
+  // const [hasDisliked, setHasDisliked] = useState(false);
 
   // Fetch single publication
   const {
@@ -39,35 +31,19 @@ const PublicationsDetailPage = () => {
   console.log(publicationItem, "Publication Item Data");
 
   // Fetch other publications (optional)
-  const { data: otherPublications } = useQuery<PublicationDataType[]>(
-    "otherPublications",
-    fetchUserPublications
-  );
-
-  const otherPublicationItems = otherPublications?.data?.filter(
-    (item: PublicationDataType) => item.id.toString() !== publicationId
-  );
 
   const formattedDate = publicationItem
     ? new Date(publicationItem.updated_at).toLocaleDateString()
     : "";
 
-  useEffect(() => {
-    if (publicationItem) {
-      setHasLiked(publicationItem.likes > 0);
-      setHasDisliked(
-        publicationItem.dislikes !== null && publicationItem.dislikes > 0
-      );
-    }
-  }, [publicationItem]);
-
-  const handleLike = () => {
-    toast.info("Like functionality coming soon", { autoClose: 2000 });
-  };
-
-  const handleDislike = () => {
-    toast.info("Dislike functionality coming soon", { autoClose: 2000 });
-  };
+  // useEffect(() => {
+  //   if (publicationItem) {
+  //     setHasLiked(publicationItem.likes.length > 0);
+  //     setHasDisliked(
+  //       publicationItem.dislikes !== null && publicationItem.dislikes > 0
+  //     );
+  //   }
+  // }, [publicationItem]);
 
   const downloadPublication = async () => {
     try {
@@ -76,32 +52,35 @@ const PublicationsDetailPage = () => {
         publicationItem?.fileUrl?.split("/").pop() || "publication.pdf";
 
       // Fetch the file with responseType as 'blob'
-      const response = await apiTenant.get(publicationItem.fileUrl, {
-        responseType: "blob",
-        headers: {
-          "Content-Type": "application/octet-stream",
-        },
-      });
+
+      if (publicationItem?.fileUrl) {
+        const response = await apiTenant.get(publicationItem?.fileUrl, {
+          responseType: "blob",
+          headers: {
+            "Content-Type": "application/octet-stream",
+          },
+        });
+        const blob = new Blob([response.data]);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", fileName);
+
+        // Append to DOM, trigger click, then remove
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        link.remove();
+
+        toast.success("Download started successfully", { autoClose: 2000 });
+      }
 
       // Create a blob from the response
-      const blob = new Blob([response.data]);
 
       // Create a temporary anchor element
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", fileName);
-
-      // Append to DOM, trigger click, then remove
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      link.remove();
-
-      toast.success("Download started successfully", { autoClose: 2000 });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Download error:", error);
       toast.error(
         error.response?.data?.message || "Failed to download publication",
@@ -181,7 +160,7 @@ const PublicationsDetailPage = () => {
             <PublicationComment newsId={parseInt(publicationId || "0", 10)} />
           </div> */}
         </div>
-        <div className="md:col-span-1 col-span-3">
+        {/* <div className="md:col-span-1 col-span-3">
           <SeeAll title="Others" />
           <EventGrid numberOfItemsToShow={3} />
           <div className="">
@@ -195,7 +174,7 @@ const PublicationsDetailPage = () => {
               )
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </main>
   );

@@ -2,8 +2,8 @@ import quickPublicationsIcon from "../../assets/icons/publication.png";
 import eventsIcon from "../../assets/icons/events.png";
 import meetingsIcon from "../../assets/icons/members-enviroment.png";
 import galleryIcon from "../../assets/icons/gallery.png";
-import fundAProjectIcon from "../../assets/icons/fund-a-project.png";
-import serviceRequestIcon from "../../assets/icons/service-request.png";
+// import fundAProjectIcon from "../../assets/icons/fund-a-project.png";
+// import serviceRequestIcon from "../../assets/icons/service-request.png";
 import { Link } from "react-router-dom";
 const QuickNav = () => {
   const QuickNavData = [

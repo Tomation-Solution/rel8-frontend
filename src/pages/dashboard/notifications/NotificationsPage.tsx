@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import ZeroNotifications from "../../../assets/images/no-notification-available.png";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { fetchAllNotifications } from "../../../api/notifications/notifications-api";

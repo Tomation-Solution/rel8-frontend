@@ -23,13 +23,13 @@ interface Props {
 const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   const { notifyUser } = Toast();
 
-  const { data, isError, isLoading, error } = useQuery<GalleryResponse>(
+  const { data, isError, isLoading } = useQuery<GalleryResponse>(
     "galleryData",
     fetchAllGalleryData,
     {
       retry: 2,
       retryDelay: 3000,
-      onError: (err: Error) => {
+      onError: (err: any) => {
         notifyUser(
           `An error occurred while fetching gallery data: ${err.message}`,
           "error"

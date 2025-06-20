@@ -25,7 +25,7 @@ const GalleryPage = () => {
   const { notifyUser } = Toast();
   const { data, isError, isLoading } = useQuery(
     ["galleryData", page],
-    () => fetchAllGalleryData(page),
+    () => fetchAllGalleryData(),
     {
       keepPreviousData: true,
     }

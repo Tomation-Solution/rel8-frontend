@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { fetchElections } from "../../../api/elections/api-elections";
 import ElectionPositionCard from "../../../components/cards/ElectionPositionCard";
-import { ElectionPositionDataType } from "../../../types/myTypes";
+// import { ElectionPositionDataType } from "../../../types/myTypes";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 

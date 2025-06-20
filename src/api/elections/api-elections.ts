@@ -4,7 +4,9 @@ export const fetchElections = async () => {
   const response = await apiTenant.get(`api/elections/`);
   return response.data;
 };
-export const fetchElectionContestants = async (id: string | null) => {
+export const fetchElectionContestants = async (
+  id: string | undefined | null
+) => {
   console.log("sdsddsds");
   if (id) {
     const response = await apiTenant.get(`api/elections/${id}/candidates`);

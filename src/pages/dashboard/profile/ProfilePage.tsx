@@ -15,13 +15,9 @@ const ProfilePage = () => {
 
   console.log(userId, "ID");
 
-  const {
-    data: userProfile,
-    isLoading,
-    error,
-  } = useQuery(
+  const { data: userProfile } = useQuery(
     ["userProfile", userId], // Use a unique key for caching
-    () => fetchUserProfile(userId),
+    () => fetchUserProfile(),
     {
       enabled: !!userId, // Only fetch data when userId is available
     }

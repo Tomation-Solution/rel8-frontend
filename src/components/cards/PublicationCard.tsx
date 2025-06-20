@@ -1,5 +1,5 @@
 // import { HiOutlineBookmark } from "react-icons/hi2"
-import { FaRegCommentDots } from "react-icons/fa";
+// import { FaRegCommentDots } from "react-icons/fa";
 import { PublicationDataType } from "../../types/myTypes";
 import { Link } from "react-router-dom";
 import { AiFillLike } from "react-icons/ai";
@@ -13,9 +13,9 @@ const PublicationCard = ({
   hidePostDetails,
   linkTo = "publication",
 }: Props) => {
-  const formattedDate = new Date(
-    publicationItem.updated_at
-  ).toLocaleDateString();
+  // const formattedDate = new Date(
+  //   publicationItem.updated_at
+  // ).toLocaleDateString();
 
   return (
     <div className="max-w- bg-white border border-gray-200 rounded-lg shadow">
@@ -51,10 +51,10 @@ const PublicationCard = ({
                 </aside>
               )}
               <div className="border-l flex items-center gap-2 text-sm">
-                <FaRegCommentDots className="w-5 h-5 text-textColor ml-2" />{" "}
+                {/* <FaRegCommentDots className="w-5 h-5 text-textColor ml-2" />{" "}
                 {publicationItem.comments && (
                   <span>{publicationItem.comments.length} comments</span>
-                )}
+                )} */}
               </div>
             </div>
           </div>

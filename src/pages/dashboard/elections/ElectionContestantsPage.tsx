@@ -6,22 +6,22 @@
 // import React from 'react'
 
 import { useParams } from "react-router-dom";
-import avatarImg1 from "../../../assets/images/avatar-1.jpg";
-import avatarImg2 from "../../../assets/images/avatar-2.jpg";
-import avatarImg3 from "../../../assets/images/avatar-3.jpg";
+// import avatarImg1 from "../../../assets/images/avatar-1.jpg";
+// import avatarImg2 from "../../../assets/images/avatar-2.jpg";
+// import avatarImg3 from "../../../assets/images/avatar-3.jpg";
 import ElectionContestantCard from "../../../components/cards/ElectionContestantCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { useQuery } from "react-query";
 import { fetchElectionContestants } from "../../../api/elections/api-elections";
-import { useEffect } from "react";
-import apiTenant from "../../../api/baseApi";
+// import { useEffect } from "react";
+// import apiTenant from "../../../api/baseApi";
 
 const ElectionContestantsPage = () => {
   const { electionPositionId } = useParams();
   const { notifyUser } = Toast();
 
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const id: string | null = electionPositionId || null;
 

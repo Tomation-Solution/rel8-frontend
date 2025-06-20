@@ -29,7 +29,7 @@ const ChatPage = () => {
   const allChatUsers = useQuery("chatUsers", getAllChatsUsers);
 
   // Fetch messages based on chat type
-  const { data, isLoading, refetch } = useQuery(
+  const { data, isLoading } = useQuery(
     ["chatMessages", currentChatType.type, currentChatType.value],
     () => {
       if (currentChatType.type === "general") {

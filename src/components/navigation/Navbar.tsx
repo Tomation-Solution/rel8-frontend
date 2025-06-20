@@ -6,8 +6,8 @@ import navbarSearch from "../../assets/images/navbar-search.png";
 import { useAppContext } from "../../context/authContext";
 import { FaBars } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
-import { useQuery } from "react-query";
-import { fetchAllNotifications } from "../../api/notifications/notifications-api";
+// import { useQuery } from "react-query";
+// import { fetchAllNotifications } from "../../api/notifications/notifications-api";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -20,10 +20,10 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const navigate = useNavigate();
 
   // Fetch notifications
-  const { data: notifications } = useQuery(
-    "notifications",
-    fetchAllNotifications
-  );
+  // const { data: notifications } = useQuery(
+  //   "notifications",
+  //   fetchAllNotifications
+  // );
 
   console.log(user, "User in Navbar");
 

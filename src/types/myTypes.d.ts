@@ -1,6 +1,7 @@
 // ----------------------------------------------- UserData Type --------------
 export interface UserDataType {
   _id?: string;
+  name: string;
   token: string;
   user_type: string;
   chapter: {
@@ -101,7 +102,10 @@ interface NewsCommentDetails {
 // -------------------------------------------- Events-------------------------------
 
 export interface EventDataType {
-  id: number;
+  date: string;
+  details: string;
+  bannerUrl: string;
+  _id: number;
   image: string;
   name: string;
   is_paid_event: boolean;
@@ -148,7 +152,13 @@ export interface PublicationParagraphType {
 }
 
 export interface PublicationDataType {
-  id: number;
+  _id: string;
+  likes: string[];
+  bannerUrl: string;
+  topic: string;
+  title: string;
+  fileUrl?: string | undefined;
+  _id: number;
   paragraphs: PublicationParagraphType[];
   name: string;
   is_exco: boolean;
@@ -178,7 +188,13 @@ interface ExcoMemberInfoType {
 }
 
 interface ExcoMemberDataType {
-  id: number;
+  _id: number;
+  name: string;
+  exco: {
+    isExco: boolean;
+
+    position: string;
+  };
   member_info: MemberInfoType[];
   exco_info: any[]; // You can specify a type if needed
   is_active: boolean;
@@ -202,7 +218,7 @@ interface ExcoMemberDataType {
 
 // Election Position Datatype
 export interface ElectionPositionDataType {
-  id: number;
+  _id: number;
   name: string;
   role_name: string;
   role_detail: string;
@@ -248,7 +264,7 @@ export interface ChatUserDataType {
 
 export interface ChatMessageDataType {
   content: string;
-  senderId: string;
+  senderId?: string | number;
   name: string;
   _id?: number;
   timestamp: string | number;
@@ -261,6 +277,7 @@ export interface NotificationDataType {
   createdAt: string;
   title: string;
   message: string;
+  latest_update_table_name?: string;
 }
 
 export interface Props {

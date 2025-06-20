@@ -1,7 +1,6 @@
-import { NewsResponseType } from "../../types/myTypes";
 import apiTenant from "../baseApi";
 
-export const fetchAllUserNews = async (): Promise<NewsResponseType> => {
+export const fetchAllUserNews = async () => {
   const response = await apiTenant.get(`api/content/news`);
   return response.data;
 };

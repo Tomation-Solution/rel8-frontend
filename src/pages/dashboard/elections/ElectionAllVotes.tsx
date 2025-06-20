@@ -1,24 +1,53 @@
 import ProgressBar from "../../../components/progress-bar/ProgressBar";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import { fetchElections } from "../../../api/elections/api-elections";
 import apiTenant from "../../../api/baseApi";
 import { useEffect, useState } from "react";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 
+// Define types for your data
+type CandidateResult = {
+  _id: string;
+  name: string;
+  votePercentage: number;
+  voteCount: number;
+};
+
+type PositionResult = {
+  candidates: CandidateResult[];
+  // Add other result properties here if needed
+};
+
+type Election = {
+  _id: string;
+  name: string;
+  positions: Position[];
+  // Add other election properties here
+};
+
+type Position = {
+  _id: string;
+  name: string;
+  // Add other position properties here
+};
+
 const ElectionAllVotes = () => {
-  const { id } = useParams();
   const token = localStorage.getItem("token");
-  const [positionResults, setPositionResults] = useState({});
+  const [positionResults, setPositionResults] = useState<
+    Record<string, PositionResult>
+  >({});
 
   // Fetch all elections data
-  const { data: elections, isLoading } = useQuery("elections", fetchElections);
+  const { data: elections, isLoading } = useQuery<Election[]>(
+    "elections",
+    fetchElections
+  );
 
   // Function to fetch results for a specific position
-  const fetchPositionResults = async (positionId: any) => {
+  const fetchPositionResults = async (positionId: string) => {
     try {
-      const response = await apiTenant.get(
+      const response = await apiTenant.get<PositionResult>(
         `api/elections/results/${positionId}`,
         {
           headers: {
@@ -37,7 +66,7 @@ const ElectionAllVotes = () => {
   useEffect(() => {
     if (elections) {
       const fetchAllPositionResults = async () => {
-        const results = {};
+        const results: Record<string, PositionResult> = {};
         for (const election of elections) {
           for (const position of election.positions) {
             const positionResult = await fetchPositionResults(position._id);
@@ -61,8 +90,8 @@ const ElectionAllVotes = () => {
       <div className="col-span-3">
         <BreadCrumb title="Election Results" />
         <section className="grid">
-          {elections?.map((election: any) =>
-            election.positions.map((position: any) => {
+          {elections?.map((election) =>
+            election.positions.map((position) => {
               const results = positionResults[position._id];
               if (!results) return null;
 
@@ -76,11 +105,9 @@ const ElectionAllVotes = () => {
                       Position: {position.name}
                     </h4>
                     {results.candidates?.length === 0 ? (
-                      <>
-                        <span className="block">No Result yet</span>
-                      </>
+                      <span className="block">No Result yet</span>
                     ) : (
-                      results.candidates?.map((candidate: any) => (
+                      results.candidates?.map((candidate) => (
                         <div key={candidate._id} className="mb-2">
                           <p className="text-sm">{candidate.name}</p>
                           <div className="mt-1">
