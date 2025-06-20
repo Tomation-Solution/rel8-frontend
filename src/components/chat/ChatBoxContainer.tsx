@@ -1,195 +1,173 @@
-import { AiOutlineInfoCircle, AiOutlineSend } from 'react-icons/ai'
-import { BsEmojiSmile, BsTelephone } from 'react-icons/bs'
-import ChatItem from './ChatItem';
-// import FormError from '../form/FormError';
-// import TextInputWithImage from '../form/TextInputWithImage';
-// import { useForm, SubmitHandler } from 'react-hook-form';
-import { ChatMessageDataType } from '../../types/myTypes';
-import { useAppContext } from '../../context/authContext';
-import CircleLoader from '../loaders/CircleLoader';
-import {  useState,useEffect } from 'react';
-import { TENANT, sitename } from '../../utils/constants';
-import {  getUserOrNull } from '../../utils/extra_functions';
+import { AiOutlineInfoCircle, AiOutlineSend } from "react-icons/ai";
+import { BsEmojiSmile, BsTelephone } from "react-icons/bs";
+import ChatItem from "./ChatItem";
+import { ChatMessageDataType } from "../../types/myTypes";
+import { useAppContext } from "../../context/authContext";
+import CircleLoader from "../loaders/CircleLoader";
+import { useState, useEffect, useRef } from "react";
+import { TENANT, sitename } from "../../utils/constants";
+import moment from "moment";
+import { sendGroupMessage, sendPrivateMessage } from "../../api/chats/chats"; // You'll need to create these API functions
 
-interface Props{
-    currentChatType:chatRoomType;
-    data:ChatMessageDataType[];
-    isLoading:boolean,
-    currentTab?:'group-chat'|'single-chat'
+interface Props {
+  currentChatType: chatRoomType;
+  data: ChatMessageDataType[];
+  isLoading: boolean;
+  currentTab?: "group-chat" | "single-chat";
 }
 
 export type ChatBoxFormFields = {
-    message: string;
+  message: string;
+};
+
+export type chatRoomType = {
+  type: "general" | "commitee" | "exco" | "single-chat";
+  display: string;
+  value: number;
+};
+
+const ChatBoxContainer = ({ currentChatType, data, isLoading }: Props) => {
+  const { user } = useAppContext();
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [messages, setMessages] = useState<ChatMessageDataType[]>(data || []);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  console.log(currentChatType, "Cuurent chat type");
+
+  // Update messages when data prop changes
+  useEffect(() => {
+    if (data) {
+      setMessages(data);
+    }
+  }, [data]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!text.trim() || !user) return;
+
+    setSending(true);
+
+    try {
+      const messageData = {
+        message: text,
+        senderId: user._id,
+        name: user.name,
+        timestamp: Date.now(),
+      };
+
+      if (currentChatType.type === "general") {
+        // Send group message
+        const response = await sendGroupMessage({
+          content: text,
+        });
+
+        console.log(response, "Group chat message");
+
+        // Add the new message to local state
+        setMessages((prev) => [
+          ...prev,
+          {
+            _id: response._id || Date.now().toString(),
+            content: text,
+            name: user.name,
+            timestamp: Date.now(),
+            senderId: user._id,
+          },
+        ]);
+      } else if (currentChatType.type === "single-chat") {
+        // Send private message
+        const receiverId = currentChatType.value;
+        const response = await sendPrivateMessage({
+          content: text,
+          recipientId: receiverId,
+        });
+
+        console.log(currentChatType, "Current Chat Type");
+
+        // Add the new message to local state
+        setMessages((prev) => [
+          ...prev,
+          {
+            _id: response._id || Date.now().toString(),
+            content: text,
+            name: user.name,
+            timestamp: Date.now(),
+            senderId: user._id,
+          },
+        ]);
+      }
+
+      setText("");
+    } catch (error) {
+      console.log("Error sending message:", error);
+    } finally {
+      setSending(false);
+    }
   };
 
-  // const onSubmit: SubmitHandler<ChatBoxFormFields> = (data) => console.log(data) 
-
-export  type chatRoomType ={
-    type:'general'|'commitee'|'exco'|'single-chat',
-    display:string,
-    value:number,
-  }
-
-  
-
-const ChatBoxContainer = ({currentChatType,data,isLoading,}:Props) => {
-
-  const { user } = useAppContext();
-  // const [web_socket, setWeb_socket] = useState<WebSocket | null>(null);
-
-  const [text,setText] = useState('')
- 
-  // const [chatroom,setChatRoom] = useState<>(null)
-  const [web_socket,setWeb_socket] = useState<WebSocket | null>(null);
-  const [connecting,setConnecting] = useState(false)
-  const [newchats,setNewchats] = useState<ChatMessageDataType[]>([])
-
-// console.log({data})
-
-
-  useEffect(()=>{
-    if(web_socket){
-        //to avoid duplicate connection
-        web_socket.close()}
-
-    if(currentChatType){
-        let url =''
-        if(currentChatType.type=='general'){
-            // dispatch(get_old_chats(`?room_name=general`))
-            url = `wss://${sitename}/ws/chat/${TENANT}/general/`
-        }
-        if(currentChatType.type==='commitee'){
-            // dispatch(get_old_chats(`?room_name=${chatroom.value}commitee`))
-            url = `wss://${sitename}/ws/commitee_chat/${TENANT}/${currentChatType.value}/`
-        }
-        if(currentChatType.type==='exco'){
-            // dispatch(get_old_chats(`?room_name=${chatroom.value}exco`))
-        }
-        if(currentChatType.type ==='single-chat'){
-          const logged_in_user =  getUserOrNull()
-          // console.log(currentChatType)
-          const reciver_id:any = currentChatType.value
-          if(logged_in_user){
-            const room_name = logged_in_user?.user_id>reciver_id?`${logged_in_user?.user_id}and${reciver_id}`:`${reciver_id}and${logged_in_user?.user_id}`
-            url = `wss://${sitename}/ws/chat/${TENANT}/${room_name}/`
-
-          }
-        }
-        if(url){
-
-          const ws = new WebSocket(url)
-          setWeb_socket(ws)
-          ws.onopen = (e) => {
-              console.log('connected',e)
-              setConnecting(false)
-            }
-            ws.onclose = (e) => {
-              console.log('err',e)
-            }
-        }
-
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      sendMessage();
     }
-},[currentChatType])
+  };
 
-
-if(web_socket){
-  web_socket.onmessage = (e) => {
-      // a message was received
-      const response = JSON.parse(e.data)
-      console.log({response})
-      // dispatch(addChat({
-      //     'user__id':response.send_user_id,
-      //     'message':response.message,
-      //     'full_name':response.full_name
-      // }))
-    };
-}
-
-const sendMessage=()=>{
-  const logged_in_user =  getUserOrNull()
-  console.log({logged_in_user})
-  if(!logged_in_user) return 
-   const data ={
-       'message':text,
-       'send_user_id':logged_in_user.user_id,
-       'is_group':true
-   }
-   
-   try{
-       web_socket?.send(JSON.stringify(data))
-      }
-      catch(e){
-        console.log('catch',e)
-      }
-
-      
-
-}
-
-if(web_socket){
-  web_socket.onmessage = (e) => {
-      // a message was received
-      const response = JSON.parse(e.data)
-      console.log({response})
-      setNewchats([
-        ...newchats,
-        {
-          'user__id':response.send_user_id,
-          'message':response.message,
-          'full_name':response.full_name
-      }
-      ])
-    };
-}
   return (
-    <section className='border-2 border-neutral3 ' >
-    <div className='border-b-2 border-[#ececec] flex items-center w-full  justify-between p-3' >
-       <h3 className='font-semibold text-[17px]' >{currentChatType.display} Chat</h3>
-       <div className='flex items-center justify-between gap-3 text-white' >
-           <span className='bg-primary-blue p-2 rounded-md' >
+    <section className="border-2 border-neutral3">
+      <div className="border-b-2 border-[#ececec] flex items-center w-full justify-between p-3">
+        <h3 className="font-semibold text-[17px]">
+          {currentChatType.display} Chat
+        </h3>
+        <div className="flex items-center justify-between gap-3 text-white">
+          <span className="bg-primary-blue p-2 rounded-md">
+            <BsTelephone className="w-5 h-5" />
+          </span>
+          <span className="bg-primary-blue p-2 rounded-md">
+            <AiOutlineInfoCircle className="w-5 h-5" />
+          </span>
+        </div>
+      </div>
+      <div className="overflow-y-auto max-h-[80vh]">
+        {(isLoading || sending) && <CircleLoader />}
+        {messages.map((chat: ChatMessageDataType, index: number) => (
+          <ChatItem
+            by={chat.name}
+            key={index}
+            time={moment(chat.timestamp).format("h:mm A")}
+            sender={user?._id === chat.senderId}
+            message={chat.content}
+          />
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <div className="flex items-center p-2 gap-2">
+        <BsEmojiSmile className="w-5 h-5" />
+        <div className="flex-1 flex items-center">
+          <div className="flex-1">
+            <input
+              type="text"
+              className="form-control w-full"
+              placeholder="Type a message"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+          </div>
+          <button
+            className="py-2 px-3 grid place-items-center bg-neutral3 rounded-md"
+            onClick={sendMessage}
+            disabled={!text.trim() || sending}
+          >
+            <AiOutlineSend className="w-5 h-5 text-textColor" />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-           <BsTelephone className='w-5 h-5' />
-           </span>
-           <span  className='bg-primary-blue p-2 rounded-md'>
-
-           <AiOutlineInfoCircle className='w-5 h-5' />
-           </span>
-       </div>
-   </div>
-   <div className='overflow-y-auto max-h-[80vh]' >
-    {(isLoading||connecting) && <CircleLoader />}
-{
-  data?
-  [...data,...newchats].map((chat:ChatMessageDataType,index:number)=>(
-
-     <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.user_id === chat.user__id} message={chat?.message} />
-  )):''
-}
-      
-   </div>
-   <div className='flex items-center p-2 gap-2' >
-    <BsEmojiSmile className='w-5 h-5' />
-    <div className='flex-1 flex items-center'  >   
-    {/* up meant to be form */}
-    <div className='flex-1' >
-
-        {/* {errors.message?.type === 'required' && (<FormError message="Message is required" />)}
-        <TextInputWithImage   register={register}  name="message" placeHolder="Type a message"  /> */}
-      
-        <input type="text" className='form-control' placeholder="Type a message" value={text} onChange={(event) => setText(event.target.value)} />
-
-    </div>
-     <button className='py-2 px-3 grid place-items-center bg-neutral3 rounded-md' 
-     onClick={()=>{
-      if(!text) return 
-      sendMessage()
-     }}
-     >
-       <AiOutlineSend className='w-5 h-5 text-textColor'  />
-     </button>
-    </div>
-   </div>
-</section>
-  )
-}
-export default ChatBoxContainer
+export default ChatBoxContainer;

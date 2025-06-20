@@ -247,10 +247,11 @@ export interface ChatUserDataType {
 }
 
 export interface ChatMessageDataType {
-  message: string;
-  user__id: number;
-  full_name: string;
-  id?: number;
+  content: string;
+  senderId: string;
+  name: string;
+  _id?: number;
+  timestamp: string | number;
 }
 
 // ----------------------------------- Notifications

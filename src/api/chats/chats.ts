@@ -14,6 +14,11 @@ export const fetchOldGeneralChats = async () => {
   return response.data;
 };
 
+export const fetchPrivateChats = async () => {
+  const response = await apiTenant.get(`api/chat/private/`);
+  return response.data;
+};
+
 // export const FetchName = (member:MemberType):string=>{
 //     const name:any = member.member_info.find(d=>{
 //       return d.name.toLocaleLowerCase() == 'name' ||  d.name.toLocaleLowerCase() == 'first' ||d.name.toLocaleLowerCase() == 'first name' || d.name.toLocaleLowerCase() == 'surname'
@@ -45,3 +50,38 @@ export const fetchOldGeneralChats = async () => {
 
 //    return `Member (${member.id})`
 //   }
+
+// Mock endpoints - replace with your actual endpoints
+const ENDPOINTS = {
+  SEND_GROUP_MSG: "/chat/group/send/",
+  SEND_PRIVATE_MSG: "/chat/private/send/",
+  FETCH_GROUP_MSGS: "/chat/group/messages/",
+  FETCH_PRIVATE_MSGS: "/chat/private/messages/",
+};
+
+// Group Chat Functions
+
+export const sendGroupMessage = async (data: { content: string }) => {
+  try {
+    const response = await apiTenant.post(`/api/chat/group`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending group message:", error);
+    throw error;
+  }
+};
+
+export const sendPrivateMessage = async (data: {
+  content: string;
+  recipientId: string;
+}) => {
+  console.log(data, "Data in private");
+
+  try {
+    const response = await apiTenant.post(`api/chat/private`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending private message:", error);
+    throw error;
+  }
+};
