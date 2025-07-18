@@ -11,7 +11,7 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchUserMeetingById, registerForMeeting } from "../../../api/meetings/api-meetings";
 import Button from "../../../components/button/Button";
 import styled from "styled-components";
@@ -44,6 +44,7 @@ const AttendItem = styled.button<AttendButtonProps>`
 const MeetingDetailsPage = () => {
   const { meetingId } = useParams();
   const { notifyUser } = Toast();
+  const queryClient = useQueryClient();
 
   // Fetch meeting details
   const { data, isLoading, isError } = useQuery(["meetingDetails", meetingId], () =>
@@ -61,6 +62,7 @@ const MeetingDetailsPage = () => {
   const { mutate, isLoading: isSubmitting } = useMutation(registerForMeeting, {
     onSuccess: () => {
       notifyUser("Registration successful!", "success");
+      queryClient.invalidateQueries(["meetingDetails", meetingId]);
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message?.error || "An error occurred.";
