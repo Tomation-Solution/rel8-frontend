@@ -27,6 +27,33 @@ interface AttendButtonProps {
   primary: boolean
 }
 
+const AttendLink = styled.a<{ primary?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  color: ${props => props.primary ? "#1890ff" : "#333"};
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${props => props.primary ? "#40a9ff" : "#1890ff"};
+    text-decoration: underline;
+  }
+
+  &::after {
+    content: "→";
+    transition: transform 0.2s ease;
+  }
+
+  &:hover::after {
+    transform: translateX(4px);
+  }
+`;
+
 const AttendItem = styled.button<AttendButtonProps>`
   padding: 8px 16px;
   border-radius: 4px;
@@ -160,7 +187,7 @@ const MeetingDetailsPage = () => {
             <AttendItem primary={false} className="text-base font-medium">You have successfully registered for the event.</AttendItem>
             {meetingItem.url && (
               <a target="_blank" rel="noopener noreferrer" href={meetingItem.url}>
-                <AttendItem primary={true}>Click to join meeting</AttendItem>
+                <AttendLink primary={true}>Click to join meeting</AttendLink>
               </a>
             )}
           </AttendDiv>
