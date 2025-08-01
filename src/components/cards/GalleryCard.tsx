@@ -6,10 +6,14 @@ interface Props {
 }
 
 const GalleryCard = ({ galleryItem, height }: Props) => {
+  if (!galleryItem) {
+    return null;
+  }
+
   return (
     <div className={`relative w-full border rounded-md  ${height ? height : 'h-[250px]'}  my-2`}>
       <img
-        src={galleryItem.images[0].image}
+        src={galleryItem.images[0]?.image}
         className=" z-[-1] absolute rounded-xl top-0 left-0 bottom-0 right-0 w-full max-w-full h-full object-cover max-h-[inherit]"
         alt="news-image"
       />
