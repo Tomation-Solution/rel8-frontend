@@ -12,19 +12,19 @@ const useDynamicPaymentApi =  ()=>{
     
     const {notifyUser} = Toast()
     
-    const pay = async ({payment_id,forWhat,query_param=''}:PayProp) =>{
+    const pay = async ({payment_id,forWhat,query_param=''}:PayProp) => {
         notifyUser('Loading Gateway ','success')
         try{
             if(setIsloading){
-                setIsloading(true)
-         
+                setIsloading(true) 
             }
              const resp = await apiTenant.post(`/dues/process_payment/${forWhat}/${payment_id}/${query_param}`)
             
              window.location.href=resp.data.data.data.authorization_url
-         
+
              return resp.data.data
         }
+        
         catch(e:any){
             if(setIsloading){
                 setIsloading(false)

@@ -9,13 +9,21 @@ export const verifyUserMembership =async (data:VerifyMembershipForm): Promise<Ve
     const response = await apiPublic.post(`/auth/ManageMemberValidation/`,data);
     return response.data
 }
+
+export const resetPassword =async (data: any) =>{
+    const response = await apiPublic.post(`/members/set-password/`,data);
+    return response.data
+}
+
+
+
 export const createMember = async (data: any) =>{
     const response = await apiPublic.post(`/auth/ManageMemberValidation/create_member/`, data);
     return response.data
 }
 
-export const memberLogin = async (data: {email: string, password: string}) =>{
-    const response = await apiPublic.post(`/auth/login/`, data);
+export const memberLogin = async (data: {email: string, userType: string, password: string}) =>{
+    const response = await apiPublic.post(`/members/login`, data);
     return response.data
 }
 

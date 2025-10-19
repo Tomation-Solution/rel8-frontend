@@ -3,7 +3,8 @@ import axios from 'axios';
 import {ENDPOINT_URL, TENANT} from "../utils/constants";
 
 export const apiPublic = axios.create({
-    baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
+    // baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
+    baseURL: `${ENDPOINT_URL}/api/`,
     headers: {
         'Content-Type': "application/json",
     },
@@ -13,7 +14,8 @@ export const apiPublic = axios.create({
 
 
 const apiTenant = axios.create({
-  baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
+  // baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
+  baseURL: `${ENDPOINT_URL}/`,
   // headers: {
   //   'Content-Type': 'application/json',
   // },

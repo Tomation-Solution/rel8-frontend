@@ -7,9 +7,9 @@ import bukaalogo from '../assets/cover-images/bukaalogo.png'
 import { getSubdomain } from './extra_functions';
 
 
-export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
-// export const ENDPOINT_URL = "http://127.0.0.1:8000";
-export const TENANT = getSubdomain()||'aani';
+// export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
+export const ENDPOINT_URL = "http://127.0.0.1:3000";
+export const TENANT = getSubdomain() || 'aani';
 export const WSS = `ws://rel8.watchdoglogisticsng.com/ws/chat/${TENANT}/`;
 export const sitename='rel8.watchdoglogisticsng.com'
 

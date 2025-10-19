@@ -36,7 +36,7 @@ const LoginPage = () => {
 
   const { mutate, isLoading } = useMutation(memberLogin, {
     onSuccess: (data) => {
-      setRel8LoginUserData(data)
+      setRel8LoginUserData(data.member)
       notifyUser("Login Successful","success");
       // console.log(data)
       navigate('/')
@@ -44,14 +44,15 @@ const LoginPage = () => {
     },
     onError: (error:any) => {
       const data:any = error.response.data
-     
-      notifyUser(data.data.error[0]||"An error occured while logging you in","error");
-    }
+      console.log(data)
+      notifyUser(data.message ||"An error occured while logging you in","error");
+    },
+
     
   });
 
   const onSubmit = (data: LoginFormFields) =>{
-    mutate(data)
+    mutate({ userType: 'member', ... data })
   } 
 
 

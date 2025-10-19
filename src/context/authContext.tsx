@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserDataType } from '../types/myTypes';
+import { MemberInfoType } from '../types/myTypes';
 import { useQuery } from 'react-query';
 import { fetchUserProfile } from '../api/profile/profile-api';
 
 interface AppContextType {
-  user: UserDataType | null;
-  setRel8LoginUserData: (data: UserDataType) => void;
+  user: MemberInfoType | null;
+  setRel8LoginUserData: (data: MemberInfoType) => void;
   userFullName: string;
   userProfileData: any[];
 }
@@ -25,7 +25,7 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserDataType | null>(null);
+  const [user, setUser] = useState<MemberInfoType | null>(null);
   const [userFullName, setUserFullName] = useState<string>('');
   const [userProfileData, setUserProfileData] = useState<any[]>([]);
 
@@ -58,7 +58,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [userProfile.data]);
 
-  const setRel8LoginUserData = (data: UserDataType) => {
+  const setRel8LoginUserData = (data: MemberInfoType) => {
     try {
       setUser(data);
       localStorage.setItem('rel8User', JSON.stringify(data));

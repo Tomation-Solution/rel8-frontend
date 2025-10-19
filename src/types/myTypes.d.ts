@@ -26,6 +26,26 @@ export interface UserDataType {
     profile_image: string;
 }
 
+
+export interface MemberInfoType {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    orgId: string;
+    exco: {
+        isExco: boolean;
+        position: string | null;
+    };
+    committee: {
+        isMember: boolean;
+        committeeName: string | null;
+        position: string | null;
+    };
+    token: string;
+}
+
+
 //  ---------------------------------------- Types of data-----------------------
 type NewsParagraphItem = {
     id: number;
