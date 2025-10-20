@@ -1,4 +1,4 @@
-import { EventDataType, EventsResponseType } from "../../types/myTypes";
+import {  EventsResponseType } from "../../types/myTypes";
 import apiTenant, { apiTenantAxiosForm } from "../baseApi";
 
 export const fetchAllUserEvents = async (): Promise<EventsResponseType> => {

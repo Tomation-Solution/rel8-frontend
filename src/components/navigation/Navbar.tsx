@@ -43,7 +43,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
           </span>
           <h3 className="font-bold text-neutral-1 capitalize md:text-xl text-[16px]">
             <span className="text-textColor !capitalize">Hello</span>{" "}
-            <span className="!capitalize">{user?.userName}</span>
+            <span className="!capitalize">{user?.name}</span>
           </h3>
         </div>
         <div className="hidden lg:inline-flex flex-[0.6] items-center justify-center h-[65%]">

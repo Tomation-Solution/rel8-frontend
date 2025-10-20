@@ -15,7 +15,7 @@ const ExcosMemberCard = ({ item }: Props) => {
       />
       <div className="my-3">
         <h6 className="font-semibold">{item?.full_name}</h6>
-        <p className="text-sm text-textColor">
+        {/* <p className="text-sm text-textColor">
           {item?.member_info && item.member_info[3]?.position_held
             ? item.member_info[3].position_held
             : "Position Not Available"}
@@ -24,7 +24,7 @@ const ExcosMemberCard = ({ item }: Props) => {
           {item?.member_info && item.member_info[4]?.value
             ? item.member_info[4].value
             : "Grade Not Available"}
-        </small>
+        </small> */}
         <p className="text-sm line-clamp-2 text-textColor">{item.bio}</p>
       </div>
     </div>

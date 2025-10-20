@@ -162,7 +162,7 @@ if(web_socket){
   data?
   [...data,...newchats].map((chat:ChatMessageDataType,index:number)=>(
 
-     <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.user_id === chat.user__id} message={chat?.message} />
+     <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.id === chat.user__id} message={chat?.message} />
   )):''
 }
       

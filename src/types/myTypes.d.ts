@@ -33,6 +33,7 @@ export interface MemberInfoType {
     email: string;
     phone: string;
     orgId: string;
+    profile_image?: string;
     exco: {
         isExco: boolean;
         position: string | null;

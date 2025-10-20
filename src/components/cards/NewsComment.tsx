@@ -22,7 +22,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
         },
     });
 
-    const deleteMutation = useMutation((commentId: number) => deleteNewsComment(commentId), {
+    const deleteMutation = useMutation((commentId: number) => deleteNewsComment(commentId, 1), {
         onSuccess: () => {
             queryClient.invalidateQueries(['news', newsId]);
         },
@@ -76,7 +76,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                 {comments.length > 0 ? (
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-2 mb-4 items-center">
-                            <div className="rounded-md">
+                            {/* <div className="rounded-md">
                                 <Avatar imageUrl={comment.member.photo_url || avatarImage} />
                             </div>
                             <div className="flex flex-col gap-1">
@@ -90,7 +90,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                                         Delete
                                     </button>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     ))
                 ) : (
