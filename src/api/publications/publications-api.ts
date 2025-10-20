@@ -1,7 +1,7 @@
 import apiTenant from "../baseApi";
 
 export const fetchUserPublications = async () =>{
-    const response = await apiTenant.get(`/publication/getyourpublication/`);
+    const response = await apiTenant.get(`/api/content/publication/getyourpublication/`);
     return response.data
 }
 

@@ -10,11 +10,15 @@ export const verifyUserMembership =async (data:VerifyMembershipForm): Promise<Ve
     return response.data
 }
 
-export const resetPassword =async (data: any) =>{
-    const response = await apiPublic.post(`/members/set-password/`,data);
+export const resetPassword =async (data: {newPassword: string, token: string}) =>{
+    const response = await apiPublic.post(`/members/reset-password/${data.token}`, {newPassword: data.newPassword});
     return response.data
 }
 
+export const setPassword =async (data: {password: string, token: string}) =>{
+    const response = await apiPublic.post(`/members/set-password`,data);
+    return response.data
+}
 
 
 export const createMember = async (data: any) =>{
@@ -28,7 +32,7 @@ export const memberLogin = async (data: {email: string, userType: string, passwo
 }
 
 export const requestPassword = async(data:{email:string})=>{
-    const response = await apiPublic.post('/user/forgot-password/request_password_change/',data)
+    const response = await apiPublic.post('/members/forgot-password',data)
     return response.data
 }
 

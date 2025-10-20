@@ -8,7 +8,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import Button from "../../../components/button/Button";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "react-query";
-import { resetPassword } from "../../../api/auth/auth-api";
+import { resetPassword, setPassword } from "../../../api/auth/auth-api";
 import Toast from "../../../components/toast/Toast";
 
 export type SetupNewPasswordInput = {
@@ -30,7 +30,7 @@ const SetupNewPasswordPage = () => {
   const navigate = useNavigate();
   const { notifyUser } = Toast();
 
-  const { mutate, isLoading } = useMutation(resetPassword, {
+  const { mutate, isLoading } = useMutation(setPassword, {
     onSuccess: (data) => {
       // setRel8LoginUserData(data)
       notifyUser("Reset Successful","success");
@@ -53,7 +53,7 @@ const SetupNewPasswordPage = () => {
       return;
     }
 
-    mutate({ password: data.password1, userType: 'member', token: token})
+    mutate({ password: data.password1, token: token || '' })
   }
     
 

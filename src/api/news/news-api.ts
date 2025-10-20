@@ -2,13 +2,13 @@ import { NewsResponseType } from "../../types/myTypes";
 import apiTenant from "../baseApi";
 
 export const fetchAllUserNews = async ():Promise<NewsResponseType> =>{
-    const response = await apiTenant.get(`/news/newsview/get_news/`);
+    const response = await apiTenant.get(`/api/content/news`);
     return response.data
 }
 // Fetch comments for a specific news item
 export const fetchNewsComments = async (id:string|null) =>{
-    if (id){    
-        const response = await apiTenant.get(`/news/newsview__comment/?news_id=${id}`);
+    if (id){
+        const response = await apiTenant.get(`/api/content/news/${id}/comments`);
         return response.data
     }
 }
@@ -16,28 +16,21 @@ export const fetchNewsComments = async (id:string|null) =>{
 // Post a comment for a specific news item
 export const postNewsComment = async (comment: string, newsId: number) => {
     const requestBody = {
-        comment: comment,
-        news: newsId
+        content: comment
     };
 
-    const response = await apiTenant.post(`/news/newsview__comment/`, requestBody);
+    const response = await apiTenant.post(`/api/content/news/${newsId}/comments`, requestBody);
     return response.data;
 };
 
 // Delete a comment by its ID
-export const deleteNewsComment = async (commentId: number) => {
-    const response = await apiTenant.delete(`/news/newsview__comment/${commentId}/`);
+export const deleteNewsComment = async (newsId: number, commentId: number) => {
+    const response = await apiTenant.delete(`/api/content/news/${newsId}/comments/${commentId}`);
     return response.data;
 };
 
 // Like or dislike a news item
-export const likeDislikeNews = async (id: number, like: boolean, dislike: boolean) => {
-    const requestBody = {
-        id: id,
-        like: like,
-        dislike: dislike
-    };
-
-    const response = await apiTenant.patch(`/news/getyournews/`, requestBody);
+export const likeDislikeNews = async (id: number) => {
+    const response = await apiTenant.post(`/api/content/news/${id}/like`);
     return response.data;
 };

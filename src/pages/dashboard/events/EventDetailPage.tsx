@@ -22,6 +22,24 @@ const EventDetailPage = () => {
         refetchOnMount: false,
         enabled:!!eventId,
         retry:2,
+        select: (data) => ({
+            ...data,
+            data: data?.data?.map((event: any) => ({
+                ...event,
+                id: event._id || event.id,
+                name: event.details || event.name,
+                image: event.bannerUrl || event.image,
+                startDate: event.date || event.startDate,
+                startTime: event.time || event.startTime,
+                is_paid_event: event.isPaid || event.is_paid_event,
+                amount: event.price?.toString() || event.amount,
+                organiser_name: event.organizer || event.organiser_name,
+                organiserImage: event.organizerImage || event.organiserImage,
+                event_docs: event.event_docs || '',
+                organiser_extra_info: event.organiser_extra_info || '',
+                event_access: event.event_access || { has_paid: false, link: '' }
+            }))
+        })
     });
 
     const handleFreeEventMutation = useMutation(registerForFreeEvent, {
@@ -35,7 +53,7 @@ const EventDetailPage = () => {
       }
     });
 
-    const registerForPaidEventMutation = useMutation(() => registerForPaidEvent(eventId, event.amount), {
+    const registerForPaidEventMutation = useMutation(() => registerForPaidEvent(eventId, parseFloat(event.amount || '0')), {
       onSuccess: (data) => {
         const hasPaid = event?.event_access?.has_paid ?? false; // Fallback for undefined
         console.log('Mutation onSuccess data:', data);
@@ -64,15 +82,16 @@ const EventDetailPage = () => {
       if (eventId){
         
         const formData = new FormData()
-        formData.append("event_id",eventId)
+        formData.append("event_id", eventId || event?._id || event?.id)
         handleFreeEventMutation.mutate(formData)
       }
     }
        
     const handleRegisterUserForPaidEvents = () => {
       const hasPaid = event?.event_access?.has_paid ?? false;
-    
-      if (eventId && event?.is_paid_event && !hasPaid) {
+      const eventIdToUse = eventId || event?._id || event?.id;
+
+      if (eventIdToUse && (event?.is_paid_event || event?.isPaid) && !hasPaid) {
         registerForPaidEventMutation.mutate();
       } else if (hasPaid) {
         notifyUser('You have already paid for this event', "success");
@@ -81,7 +100,7 @@ const EventDetailPage = () => {
       }
     };
     
-    const event = singleEvent.data?.data.find((item:any) => item.id.toString() === eventId);
+    const event = singleEvent.data?.data.find((item:any) => (item._id || item.id).toString() === eventId);
     if (singleEvent.isError){
         notifyUser("An error occured while fetching event detail","error")
       }
@@ -107,7 +126,7 @@ const EventDetailPage = () => {
                 <div className="relative flex items-center  h-[40vh]">
 
               <img
-                src={event?.image}
+                src={event?.image || event?.bannerUrl}
                 className="w-full  max-h-[40vh] border object-contain rounded-md"
                 // className="w-full absolute top-0 right-0 left-0 bottom-0 object-cover h-full max-h-[inheit] "
                 alt=""
@@ -116,22 +135,22 @@ const EventDetailPage = () => {
               <div className="grid md:grid-cols-5 grid-cols-3 my-5 gap-1">
                 <div className=" col-span-3 flex items-center font-semibold">
                
-                  <span className="block" >Name of event: 
+                  <span className="block" >Name of event:
                   <span className="font-light text-justify" >
 
-                   {" "}{event.name} 
-                  
+                   {" "}{event.name || event.details}
+
                   </span>
                    </span>
                 </div>
                 <div className=" col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 h-fit">
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={eventsIcon} className="w-6 h-6" alt="" />{" "}
-                    <span className="overflow-y-auto">{event.startDate}</span>
+                    <span className="overflow-y-auto">{event.startDate || event.date}</span>
                   </span>
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={clockIcon} className="w-6 h-6" alt="" />{" "}
-                    <span>{event.startTime}</span>
+                    <span>{event.startTime || event.time}</span>
                   </span>
                 </div>
               </div>
@@ -146,11 +165,11 @@ const EventDetailPage = () => {
                 />
                 <div>
                   <h3 className="text-base ">
-                   { event?.organiser_name? event?.organiser_name:"Not Available"} <span className="text-xs">~ Organizer</span>{" "}
-                  </h3>
-                  <p className="text-sm text-neutral1">
-                    {event?.organiser_extra_info ? event.organiser_extra_info : "Organiser Info not available"}
-                  </p>
+                       { event?.organiser_name || event?.organizer ? (event?.organiser_name || event?.organizer) : "Not Available"} <span className="text-xs">~ Organizer</span>{" "}
+                      </h3>
+                      <p className="text-sm text-neutral1">
+                        {event?.organiser_extra_info || event?.organizer ? (event?.organiser_extra_info || "Organiser Info not available") : "Organiser Info not available"}
+                      </p>
                 </div>
               </div>
 
@@ -159,15 +178,15 @@ const EventDetailPage = () => {
             
             <div className="" >
               <h3 className="text-sm">Event Fee: <span className="font-bold text-sm">
-                  {event?.amount && parseFloat(event.amount) > 0 ? `₦${parseFloat(event.amount).toFixed(2)}` : "Free"}
+                  {(event?.amount && parseFloat(event.amount) > 0) || (event?.price && event.price > 0) ? `₦${parseFloat(event.amount || event.price.toString()).toFixed(2)}` : "Free"}
                   </span>
               </h3>
               <div className="grid grid-cols-2 gap-2 my-3 text-sm">
                 <button className="bg-primary-blue text-white  border border-white h-[40px] rounded-md  ">
                   Add Participants
                 </button>              
-                <button onClick={event?.is_paid_event ? handleRegisterUserForPaidEvents : handleRegisterUserForFreeEvents} className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
-                  {event?.is_paid_event ? "Pay for event" : "Register for free"}
+                <button onClick={(event?.is_paid_event || event?.isPaid) ? handleRegisterUserForPaidEvents : handleRegisterUserForFreeEvents} className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
+                  {(event?.is_paid_event || event?.isPaid) ? "Pay for event" : "Register for free"}
                 </button>
               </div>
             </div>

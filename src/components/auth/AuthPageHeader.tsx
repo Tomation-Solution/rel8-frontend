@@ -7,6 +7,7 @@ interface Props {
 }
 
 const AuthPageHeader = ({ authPageHeader, authPageText, className }: Props) => {
+
   const { logo } = getTenantInfo();
   return (
     <div className={`grid w-full my-10 text-center ${className}`}>

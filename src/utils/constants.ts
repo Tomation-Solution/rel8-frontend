@@ -5,25 +5,36 @@ import nimnLogo from '../assets/cover-images/nimnlogoo.svg'
 import bukaalogo from '../assets/cover-images/bukaalogo.png'
 
 import { getSubdomain } from './extra_functions';
+import { apiPublic } from '../api/baseApi';
 
 
 // export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
 export const ENDPOINT_URL = "http://127.0.0.1:3000";
 export const TENANT = getSubdomain() || 'aani';
 export const WSS = `ws://rel8.watchdoglogisticsng.com/ws/chat/${TENANT}/`;
-export const sitename='rel8.watchdoglogisticsng.com'
+export const sitename = 'rel8.watchdoglogisticsng.com'
 
 
-export const  getTenantInfo = ()=>{
-    const currentTenant = TENANT
-    const currentLogo:any = {
-        'bpmi':BpmiLogo,
-        'aani':anniLogo,
-        'nimn':nimnLogo,
-        'bukaa':bukaalogo,
-    }
+export const getTenantInfo = () => {
+    const data = JSON.parse(localStorage.getItem('tenant-info') || "null");
 
     return {
-        logo:currentLogo[currentTenant]
+        organization: data?.organization || null,
+        logo: data?.organization?.logo || null
     }
 }
+
+
+// export const  getTenantInfo = ()=>{
+//     const currentTenant = TENANT
+//     const currentLogo:any = {
+//         'bpmi':BpmiLogo,
+//         'aani':anniLogo,
+//         'nimn':nimnLogo,
+//         'bukaa':bukaalogo,
+//     }
+
+//     return {
+//         logo:currentLogo[currentTenant]
+//     }
+// }

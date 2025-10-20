@@ -69,7 +69,6 @@ function App() {
   const AdminSupportPage = lazy(() => import("./pages/dashboard/support/AdminSupportPage"));
 
   const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
-  
   const router = createBrowserRouter([
     {
       path: "/verify-membership",

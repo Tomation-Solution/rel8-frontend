@@ -29,12 +29,12 @@ const NewsDetailPage = () => {
 
   useEffect(() => {
     if (newsItem) {
-      setHasLiked(newsItem.likes > 0);
-      setHasDisliked(newsItem.dislikes !== null && newsItem.dislikes > 0);
+      setHasLiked(newsItem.likes.length > 0);
+      setHasDisliked(false); // Backend doesn't have dislikes, only likes
     }
   }, [newsItem]);
 
-  const formattedDate = newsItem ? new Date(newsItem.updated_at).toLocaleDateString() : '';
+  const formattedDate = newsItem ? new Date(newsItem.updatedAt || newsItem.createdAt || '').toLocaleDateString() : '';
   
 // function is underconstruction please
   // const likeDislikeMutation = useMutation<{ data: NewsCommentDetails[] }, Error, { id: number; like: boolean; dislike: boolean }>(
@@ -82,7 +82,7 @@ const NewsDetailPage = () => {
   }
 
   if (isError) {
-    return notifyUser("An error occurred while fetching publication details", "error");
+    return notifyUser("An error occurred while fetching news details", "error");
   }
 
   if (data) {
@@ -93,17 +93,17 @@ const NewsDetailPage = () => {
             <BreadCrumb title="News" />
             <div className="relative">
               <img
-                src={newsItem?.image}
+                src={newsItem?.bannerUrl || newsItem?.image}
                 className="w-full object-cover max-h-[40vh] top-0 bottom-0 left-0 right-0 rounded-md border"
                 alt=""
               />
             </div>
             <div className="col-span-1 mt-6">
               <div className="mb-3">
-                <h3 className="font-semibold my-2">{newsItem?.name}</h3>
+                <h3 className="font-semibold my-2">{newsItem?.topic || newsItem?.name}</h3>
                 <p className="text-sm font-light">Date published: {formattedDate}</p>
               </div>
-              <div dangerouslySetInnerHTML={{ __html: `${newsItem?.body}` }}></div>
+              <div dangerouslySetInnerHTML={{ __html: `${newsItem?.content || newsItem?.body}` }}></div>
             </div>
             <div className="flex gap-2 mt-4">
               <button

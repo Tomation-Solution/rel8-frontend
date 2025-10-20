@@ -24,13 +24,20 @@ const apiTenant = axios.create({
 apiTenant.interceptors.request.use(
   (config) => {
     // Retrieve the token from local storage
-    const user = localStorage.getItem('rel8User');
-    
+    const user = JSON.parse(localStorage.getItem('rel8User') || "null");
+    console.log(user)
     // If a token is available, set the 'Authorization' header
     if (user) {
-      config.headers['Authorization'] = `Token ${JSON.parse(user)['token']}`;
+      config.headers['Authorization'] = `Bearer ${user['token']}`;
+      const orgId = user['orgId']
+      if (orgId && !config.params) {
+        config.params = { orgId };
+      } else if (orgId && config.params) {
+        config.params.orgId = orgId;
+      }
     }
-    
+
+
     return config;
   },
   (error) => {

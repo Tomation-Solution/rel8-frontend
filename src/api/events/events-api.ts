@@ -1,45 +1,45 @@
-// import { EventDataType } from "../../types/myTypes";
+import { EventDataType, EventsResponseType } from "../../types/myTypes";
 import apiTenant, { apiTenantAxiosForm } from "../baseApi";
 
-export const fetchAllUserEvents = async () =>{
-    const response = await apiTenant.get(`/event/eventview/get_events/`);
+export const fetchAllUserEvents = async (): Promise<EventsResponseType> => {
+    const response = await apiTenant.get(`/api/events/eventview/get_events/`);
     return response.data
 }
 
-export const registerForFreeEvent = async (data:any)=>{
+export const registerForFreeEvent = async (data: any) => {
     // console.log(data,'----->testing')
-    const response = await apiTenantAxiosForm.post("/event/eventview/register_for_free_event/", data);
+    const response = await apiTenantAxiosForm.post("/api/events/eventview/register_for_free_event/", data);
     return response.data;
 }
 
-export async function getEventRegisteredMembers(eventId: string) {
+export async function getEventRegisteredMembers(eventId: string): Promise<any> {
     // const token = await retrieveAppData("token");
-    const response = await apiTenant.post("/event/eventview/list_of_register_members/", {
+    const response = await apiTenant.post("/api/events/eventview/list_of_register_members/", {
         eventId: eventId
     });
     return response.data;
 }
 
-export async function getEventAttendees(eventId: string) {
-    const response = await apiTenant.post("/event/eventview/view_attendies/", {
+export async function getEventAttendees(eventId: string): Promise<any> {
+    const response = await apiTenant.post("/api/events/eventview/view_attendies/", {
         eventId: eventId
     });
     return response.data;
 }
 
-export async function registerForPaidEvent(eventId: any, amount: number) {
+export async function registerForPaidEvent(eventId: any, amount: number): Promise<any> {
     const data = {
-      amount: amount, 
-      project_id: eventId, 
+      amount: amount,
+      project_id: eventId,
       callback_url: `${window.location.origin}/event/success/${eventId}?project_id=${eventId}&amount=${amount}`, // Your callback URL
     };
-    const response = await apiTenant.post(`/event/payment/`, data);
+    const response = await apiTenant.post(`/api/events/payment/`, data);
     return response.data;
   }
 
-  export const postEventPaymentSuccess = async (data: any) => {
+export const postEventPaymentSuccess = async (data: any): Promise<any> => {
     try {
-        const response = await apiTenant.post(`/event/save/payment/`, data);
+        const response = await apiTenant.post(`/api/events/save/payment/`, data);
         console.log(response.data)
         return response.data;
     } catch (error) {
@@ -47,8 +47,8 @@ export async function registerForPaidEvent(eventId: any, amount: number) {
     }
 };
 
-export async function requestReschedule(data: any) {
-    const response = await apiTenant.post("/event/eventview/request-reschedule/", { ...data.data }, {
+export async function requestReschedule(data: any): Promise<any> {
+    const response = await apiTenant.post("/api/events/eventview/request-reschedule/", { ...data.data }, {
         params: {
             ...data.params
         }
@@ -56,8 +56,8 @@ export async function requestReschedule(data: any) {
     return response.data;
 }
 
-export async function getReschedule(eventId: string) {
-    const response = await apiTenant.get("/event/eventview/request-reschedule/", {
+export async function getReschedule(eventId: string): Promise<any> {
+    const response = await apiTenant.get("/api/events/eventview/request-reschedule/", {
         params: {
             event_id: eventId
         }

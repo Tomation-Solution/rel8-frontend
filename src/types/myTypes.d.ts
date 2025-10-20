@@ -76,45 +76,50 @@ type NewsParagraphItem = {
 export  type NewsResponseType = {
     message: string;
     status_code: number;
-    data: DataItem[];
+    data: NewsCommentDetails[];
     success: boolean;
-  };
+};
+
+export type EventsResponseType = {
+    message: string;
+    status_code: number;
+    data: EventDataType[];
+    success: boolean;
+};
 
 // -------------------------------------------- NewsComments-------------------------------
 export type NewsCommentProps = {
-  newsId: number; 
+  newsId: number;
 }
 
 // Define types for comments
 export type Comment = {
-  id: number; 
-  comment: string;
-  member: {
-      full_name: string;
-      photo_url?: string;
-      id: number;
-  };
+  id: number;
+  content: string;
+  memberId: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-interface NewsCommentDetails {
-  id: number;
-  paragraphs: any;
-  name: string;
-  is_exco: boolean;
-  is_committe: boolean;
-  is_member: boolean;
-  created_at: string;
-  updated_at: string;
-  likes: number;
-  dislikes: number | null;
-  body: string;
-  image: string;
-  danload: string | null;
-  exco: string | null;
-  commitee_name: string | null;
-  chapters: string | null;
-  membership_grade: string | null;
-  newsId: number;
+export interface NewsCommentDetails {
+  _id: string;
+  id: string;
+  topic: string;
+  bannerUrl: string;
+  content: string;
+  audience: string;
+  orgId: string;
+  comments: Comment[];
+  likes: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  // For compatibility with existing UI
+  name?: string;
+  body?: string;
+  image?: string;
+  updated_at?: string;
+  likes_count?: number;
+  dislikes?: number;
 }
   
 
@@ -122,7 +127,22 @@ interface NewsCommentDetails {
 // -------------------------------------------- Events-------------------------------
 
   export interface EventDataType {
-    id: number;
+    _id: string;
+    bannerUrl: string;
+    details: string;
+    address: string;
+    meetingLink: string;
+    audience: string;
+    date: string;
+    time: string;
+    organizer: string;
+    isPaid: boolean;
+    price: number;
+    orgId: string;
+    createdAt: string;
+    updatedAt: string;
+    // Legacy fields for backward compatibility
+    id: string;
     image: string;
     name: string;
     is_paid_event: boolean;
@@ -130,12 +150,12 @@ interface NewsCommentDetails {
     is_virtual: boolean;
     commitee_id: number | null;
     exco_id: number | null;
-    amount: string; // Consider using a more specific numeric type if possible
+    amount: string;
     is_active: boolean;
-    startDate: string; // Consider using Date type
-    startTime: string; // Consider using Time type
-    scheduletype: string; // Replace with an enum or specific type if available
-    schedule: string[]; // Consider using a more specific type
+    startDate: string;
+    startTime: string;
+    scheduletype: string;
+    schedule: string[];
     event_access: {
       has_paid: boolean;
       link: string;

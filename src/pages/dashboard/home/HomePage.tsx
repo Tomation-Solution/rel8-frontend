@@ -128,10 +128,10 @@ const HomePage = () => {
                   autoPlaySpeed={3000}
                   keyBoardControl={true}
                   className="container"
-                >
-                  {events?.data?.data.map((eventItem:any, index:number) => (
+                ><></>
+                  {/* {events?.data?.data.map((eventItem:any, index:number) => (
                     <EventsCard key={index} eventItem={eventItem} />
-                  ))}
+                  ))} */}
                 </Carousel>
               )}
             </div>

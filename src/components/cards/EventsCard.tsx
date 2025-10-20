@@ -11,25 +11,25 @@ interface Props{
 const EventsCard = ({eventItem,hideButton,height}:Props) => {
   return (
     <div className={`relative w-full border rounded-md  ${height ? height : 'h-[250px]'}  my-2`} >
-     
-        <img src={eventItem.image} className=' z-[-1] absolute rounded-xl top-0 left-0 bottom-0 right-0 w-full max-w-full h-full object-cover max-h-[inherit]' alt="news-image" />
-      
+
+        <img src={eventItem.bannerUrl || eventItem.image} className=' z-[-1] absolute rounded-xl top-0 left-0 bottom-0 right-0 w-full max-w-full h-full object-cover max-h-[inherit]' alt="event-image" />
+
 
       <div className={`w-full absolute bottom-0 flex items-center justify-between rounded-b-xl gap-3 z-[3]  text-sm text-white bg-primary-dark2 ${height ? 'px-2 py-[6px]' : 'px-5 py-4'}`} >
-     <div className="" >
-        <p className={`line-clamp-1 text-white font-medium my-1 break-all  ${height ? 'text-[13px]' : 'text-[15px]'}`} >{eventItem.name}</p>
-        
-        <span className="flex items-center gap-2 " >
-            <span className={`text-neutral-2  line-clamp-1 ${height ? 'text-xs' : 'text-sm'}`} >{eventItem.startDate}</span>
-            <span className={`text-neutral-2  line-clamp-1 ${height ? 'text-xs' : 'text-sm'}`}>{eventItem.startTime}</span>
-        </span>
-     </div>
-     {!hideButton && (
+      <div className="" >
+         <p className={`line-clamp-1 text-white font-medium my-1 break-all  ${height ? 'text-[13px]' : 'text-[15px]'}`} >{eventItem.details || eventItem.name}</p>
 
-      <CardButton text="View" path={`/event/${eventItem.id}`} />
-     )}
+         <span className="flex items-center gap-2 " >
+             <span className={`text-neutral-2  line-clamp-1 ${height ? 'text-xs' : 'text-sm'}`} >{eventItem.date || eventItem.startDate}</span>
+             <span className={`text-neutral-2  line-clamp-1 ${height ? 'text-xs' : 'text-sm'}`}>{eventItem.time || eventItem.startTime}</span>
+         </span>
       </div>
-       
+      {!hideButton && (
+
+       <CardButton text="View" path={`/event/${eventItem._id || eventItem.id}`} />
+      )}
+       </div>
+
     </div>
   )
 }

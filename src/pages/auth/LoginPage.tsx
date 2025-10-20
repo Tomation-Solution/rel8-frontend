@@ -36,11 +36,11 @@ const LoginPage = () => {
 
   const { mutate, isLoading } = useMutation(memberLogin, {
     onSuccess: (data) => {
-      setRel8LoginUserData(data.member)
+      setRel8LoginUserData({ ...data.member, token: data.token })
       notifyUser("Login Successful","success");
       // console.log(data)
       navigate('/')
-     
+
     },
     onError: (error:any) => {
       const data:any = error.response.data
