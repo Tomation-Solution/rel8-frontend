@@ -11,7 +11,7 @@ const RememberUser = ({showLink}:Prop) => {
     </aside>
     {showLink && (
 
-    <Link to="/forgot-password" className="text-primaryBlue">
+    <Link to="/forgot-password" className="text-org-primaryBlue">
       Forgot Password?
     </Link>
     )}

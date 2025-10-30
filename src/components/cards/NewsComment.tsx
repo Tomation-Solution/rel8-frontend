@@ -66,7 +66,7 @@ export default function NewsComment({ comments, newsId }: NewsCommentProps) {
                             onChange={handleCommentChange}
                         ></textarea>
                     <button
-                        className={`${commentText ? "bg-primary-blue" : "bg-primary-blue/50"} text-white w-[full] px-4 h-[50px] rounded-md`}
+                        className={`${commentText ? "bg-org-primary" : "bg-org-primary/50"} text-white w-[full] px-4 h-[50px] rounded-md`}
                         onClick={handleCommentSubmit}
                         disabled={!commentText}
                     >

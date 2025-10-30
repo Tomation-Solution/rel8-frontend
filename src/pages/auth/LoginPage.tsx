@@ -38,7 +38,6 @@ const LoginPage = () => {
     onSuccess: (data) => {
       setRel8LoginUserData({ ...data.member, token: data.token })
       notifyUser("Login Successful","success");
-      // console.log(data)
       navigate('/')
 
     },
@@ -47,6 +46,7 @@ const LoginPage = () => {
       console.log(data)
       notifyUser(data.message ||"An error occured while logging you in","error");
     },
+
 
     
   });

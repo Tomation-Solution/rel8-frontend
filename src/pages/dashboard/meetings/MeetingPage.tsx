@@ -21,7 +21,7 @@ const MeetingPage = () => {
               <MeetingCard key={index} meeting={meeting} linkTo="meeting" />
             ))}
           {[].length <= 0 && (
-            <h3 className="text-primary-blue font-light">No Meetings Available</h3>
+            <h3 className="text-org-primary-blue font-light">No Meetings Available</h3>
           )}
         </section>
         <section className="col-span-1">

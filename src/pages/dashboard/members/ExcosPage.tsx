@@ -37,7 +37,7 @@ const ExcosPage = () => {
       </div>
 
       {currentItems?.length <= 0 && (
-        <h3 className="text-primary-blue text-xl">No Excos Available</h3>
+        <h3 className="text-org-primary-blue text-xl">No Excos Available</h3>
       )}
 
       {pageNumbers.length > 0 && (
@@ -47,7 +47,7 @@ const ExcosPage = () => {
               <button
                 className={`${
                   currentPage === number
-                    ? "bg-primary-blue text-white"
+                    ? "bg-org-primary text-white"
                     : "bg-neutral-3"
                 } px-3 py-2 rounded-sm focus:outline-none`}
                 onClick={() => setCurrentPage(number)}

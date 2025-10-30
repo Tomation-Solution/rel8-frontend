@@ -146,11 +146,11 @@ if(web_socket){
     <div className='border-b-2 border-[#ececec] flex items-center w-full  justify-between p-3' >
        <h3 className='font-semibold text-[17px]' >{currentChatType.display} Chat</h3>
        <div className='flex items-center justify-between gap-3 text-white' >
-           <span className='bg-primary-blue p-2 rounded-md' >
+           <span className='bg-org-primary p-2 rounded-md' >
 
            <BsTelephone className='w-5 h-5' />
            </span>
-           <span  className='bg-primary-blue p-2 rounded-md'>
+           <span  className='bg-org-primary p-2 rounded-md'>
 
            <AiOutlineInfoCircle className='w-5 h-5' />
            </span>

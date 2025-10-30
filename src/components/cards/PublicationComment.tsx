@@ -15,7 +15,7 @@ export default function PublicationComment({ newsId }: NewsCommentProps) {
     const { data, isLoading, isError } = useQuery(['publication', newsId], () => fetchPublicationsComments(newsId?.toString() || null));
     const comments: Comment[] = data?.data || [];
 
-    const postMutation = useMutation((newComment: { comment: string; newsId: number }) => postPublicationComment(newComment.comment, newComment.newsId), {
+    const postMutation = useMutation((newComment: { comment: string; newsId: string }) => postPublicationComment(newComment.comment, newComment.newsId), {
         onSuccess: () => {
             queryClient.invalidateQueries(['publication', newsId]);
         },
@@ -63,7 +63,7 @@ export default function PublicationComment({ newsId }: NewsCommentProps) {
                         ></textarea>
                     </div>
                     <button
-                        className="bg-primary-blue text-white w-[full] px-4 h-[50px] rounded-md"
+                        className="bg-org-primary text-white w-[full] px-4 h-[50px] rounded-md"
                         onClick={handleCommentSubmit}
                     >
                         <AiOutlineSend />

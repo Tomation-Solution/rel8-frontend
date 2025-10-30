@@ -55,8 +55,8 @@ const FundAProjectDetailPage = () => {
           </div>
           <div className="grid grid-cols-1 my-2 w-full lg:w-1/2">
             <div className="flex items-center divide-x-2 divide-primaryBlue">
-              <p className="text-primaryBlue pr-2 font-semibold">Target</p>
-              <p className="text-primary-blue flex items-center pl-2 gap-2 line-clamp-1">
+              <p className="text-org-primaryBlue pr-2 font-semibold">Target</p>
+              <p className="text-org-primary-blue flex items-center pl-2 gap-2 line-clamp-1">
                 {projectItem.what_project_needs.map((item: string, index: number) => (
                   <span key={index}>{item}</span>
                 ))}
@@ -71,14 +71,14 @@ const FundAProjectDetailPage = () => {
                   <Link
                     to={`/support-in-cash/${projectId}`}
                     onClick={togglePopOver}
-                    className="w-full rounded-md text-left px-4 py-2 text-primary-blue"
+                    className="w-full rounded-md text-left px-4 py-2 text-org-primary-blue"
                   >
                     Support in Cash
                   </Link>
                   <Link
                     to={`/support-in-kind/${projectId}`}
                     onClick={togglePopOver}
-                    className="w-full rounded-md text-left px-4 py-2 text-primary-blue"
+                    className="w-full rounded-md text-left px-4 py-2 text-org-primary-blue"
                   >
                     Support in Kind
                   </Link>
@@ -94,7 +94,7 @@ const FundAProjectDetailPage = () => {
               <FundAProjectCard key={index} projectItem={projectItem} />
             ))}
             {otherProjects?.length <= 0 && (
-              <h3 className="text-primary-blue text-xl font-medium">No other Project Available</h3>
+              <h3 className="text-org-primary-blue text-xl font-medium">No other Project Available</h3>
             )}
           </div>
         </div>

@@ -41,7 +41,7 @@ const ProfilePage = () => {
             {/* <p className="text-sm font-medium my-1">Chapter : <span className="font-light">{user?.chapter.name}</span></p> */}
           </div>
           {/* <div className="w-full " >
-            <h3 className="text-primary-blue font-semibold text-sm">
+            <h3 className="text-org-primary-blue font-semibold text-sm">
               Pictures
             </h3>
             <div className="flex items-center gap-3">

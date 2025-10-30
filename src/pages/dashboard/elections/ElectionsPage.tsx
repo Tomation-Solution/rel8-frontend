@@ -32,7 +32,7 @@ const ElectionsPage = () => {
         <ElectionPositionCard key={index} item={item} />
       ))}
 
-      {data?.data?.length<=0 && <h3 className='text-primary-blue font-medium' >No Elections Position Available</h3>}
+      {data?.data?.length<=0 && <h3 className='text-org-primary-blue font-medium' >No Elections Position Available</h3>}
     
     
     </main>

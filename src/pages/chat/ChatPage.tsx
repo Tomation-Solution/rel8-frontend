@@ -105,7 +105,7 @@ const ChatPage = () => {
               }}
                 className={`relative hover:cursor-pointer p-2 flex items-center rounded-md
                 `} 
-                  //  ${selected ? "bg-primary-blue" : "bg-neutral-3"} gap-2 h-[50px]
+                  //  ${selected ? "bg-org-primary" : "bg-neutral-3"} gap-2 h-[50px]
                 >
     <img src={ dummyImage} className="rounded-md w-fit h-10" alt="" />
     <div className="flex-1" >
@@ -138,7 +138,7 @@ const ChatPage = () => {
                 <li key={index} className="my-1" >
                 <button
                   className={`${
-                    currentPage === number ? 'bg-primary-blue text-white' : 'bg-neutral-3'
+                    currentPage === number ? 'bg-org-primary text-white' : 'bg-neutral-3'
                   } px-3 py-2 rounded-sm focus:outline-none`}
                   onClick={() => setCurrentPage(number)}
                 >

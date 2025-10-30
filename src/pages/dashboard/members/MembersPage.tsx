@@ -41,7 +41,7 @@ const MembersPage = () => {
         ))}
       </div>
 
-      {currentItems?.length <=0 && <h3 className='text-primary-blue text-xl' >No Members Available</h3> }
+      {currentItems?.length <=0 && <h3 className='text-org-primary-blue text-xl' >No Members Available</h3> }
 
   
       {pageNumbers.length > 0 && (
@@ -51,7 +51,7 @@ const MembersPage = () => {
           <li key={index}>
           <button
             className={`${
-              currentPage === number ? 'bg-primary-blue text-white' : 'bg-neutral-3'
+              currentPage === number ? 'bg-org-primary text-white' : 'bg-neutral-3'
             } px-3 py-2 rounded-sm focus:outline-none`}
             onClick={() => setCurrentPage(number)}
           >

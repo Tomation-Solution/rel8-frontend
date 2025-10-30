@@ -17,12 +17,12 @@ const ElectionPositionCard = ({item}:Props) => {
 
     <div className="col-span-1">
         
-      <Link to={`/election/${item.id}`} className="bg-primary-blue whitespace-nowrap text-sm outline-none px-3 py-2 text-white  border h-[40px] w-full rounded-md  border-none">
+      <Link to={`/election/${item.id}`} className="bg-org-primary whitespace-nowrap text-sm outline-none px-3 py-2 text-white  border h-[40px] w-full rounded-md  border-none">
         See Contestants
       </Link>
     </div>
     <div className="col-span-1">
-      <Link to={""} className="text-primary-blue whitespace-nowrap text-sm outline-none px-3 py-2    border h-[40px] w-full rounded-md  border-primary-blue">
+      <Link to={""} className="text-org-primary-blue whitespace-nowrap text-sm outline-none px-3 py-2    border h-[40px] w-full rounded-md  border-primary-blue">
       See Voting Stats
       </Link>
      

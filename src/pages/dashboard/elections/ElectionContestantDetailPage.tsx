@@ -51,7 +51,7 @@ const ElectionContestantDetailPage = () => {
           consectetur adipisicing elit. Sint, incidunt sed ipsa magni et nobis
           accusamus libero, labore voluptatem inventore, sapiente rem vitae
           accusantium deleniti ab enim repellendus adipisci consequuntur! <br />
-          <Link to='' className="font-semibold text-primaryBlue my-2" >Download Full manifesto</Link>
+          <Link to='' className="font-semibold text-org-primaryBlue my-2" >Download Full manifesto</Link>
         </div>
       </div>
       <div className="col-span-2">

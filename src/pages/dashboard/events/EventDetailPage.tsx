@@ -22,30 +22,30 @@ const EventDetailPage = () => {
         refetchOnMount: false,
         enabled:!!eventId,
         retry:2,
-        select: (data) => ({
-            ...data,
-            data: data?.data?.map((event: any) => ({
-                ...event,
-                id: event._id || event.id,
-                name: event.details || event.name,
-                image: event.bannerUrl || event.image,
-                startDate: event.date || event.startDate,
-                startTime: event.time || event.startTime,
-                is_paid_event: event.isPaid || event.is_paid_event,
-                amount: event.price?.toString() || event.amount,
-                organiser_name: event.organizer || event.organiser_name,
-                organiserImage: event.organizerImage || event.organiserImage,
-                event_docs: event.event_docs || '',
-                organiser_extra_info: event.organiser_extra_info || '',
-                event_access: event.event_access || { has_paid: false, link: '' }
-            }))
-        })
+        // select: (data) => ({
+        //     ...data,
+        //     data: data?.data?.map((event: any) => ({
+        //         ...event,
+        //         id: event._id || event.id,
+        //         name: event.details || event.name,
+        //         image: event.bannerUrl || event.image,
+        //         startDate: event.date || event.startDate,
+        //         startTime: event.time || event.startTime,
+        //         is_paid_event: event.isPaid || event.is_paid_event,
+        //         amount: event.price?.toString() || event.amount,
+        //         organiser_name: event.organizer || event.organiser_name,
+        //         organiserImage: event.organizerImage || event.organiserImage,
+        //         event_docs: event.event_docs || '',
+        //         organiser_extra_info: event.organiser_extra_info || '',
+        //         event_access: event.event_access || { has_paid: false, link: '' }
+        //     }))
+        // })
     });
 
     const handleFreeEventMutation = useMutation(registerForFreeEvent, {
       onSuccess: (data) => {
         notifyUser(data.message,"success");
-        // console.log('hahaha-->event',data)
+        console.log('hahaha-->event',data)
       },
       onError: (error:any) => {
         const data:any = error.response.data
@@ -100,7 +100,7 @@ const EventDetailPage = () => {
       }
     };
     
-    const event = singleEvent.data?.data.find((item:any) => (item._id || item.id).toString() === eventId);
+    const event = singleEvent.data?.find((item:any) => (item._id || item.id).toString() === eventId);
     if (singleEvent.isError){
         notifyUser("An error occured while fetching event detail","error")
       }
@@ -110,10 +110,10 @@ const EventDetailPage = () => {
     }
 
     if (event){
-        const fileUrl = event.event_docs || "";
+        const fileUrl = event.bannerUrl || "";
         const fileNameArr: string[] = fileUrl.split('/') || [];
         const fileName = fileNameArr[fileNameArr.length - 1];
-
+      console.log(event)
         return (
           <main className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5 text-textColor ">
             {
@@ -146,7 +146,7 @@ const EventDetailPage = () => {
                 <div className=" col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 h-fit">
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={eventsIcon} className="w-6 h-6" alt="" />{" "}
-                    <span className="overflow-y-auto">{event.startDate || event.date}</span>
+                    <span className="overflow-y-auto">{event.startDate || (new Date(event.date)).toLocaleDateString()}</span>
                   </span>
                   <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
                     <img src={clockIcon} className="w-6 h-6" alt="" />{" "}
@@ -176,16 +176,16 @@ const EventDetailPage = () => {
               < DownloadFileButton fileName={fileName} fileUrl={fileUrl} buttonText="Event Attachment" />
             </div>
             
-            <div className="" >
+            <div className="hidden" >
               <h3 className="text-sm">Event Fee: <span className="font-bold text-sm">
                   {(event?.amount && parseFloat(event.amount) > 0) || (event?.price && event.price > 0) ? `₦${parseFloat(event.amount || event.price.toString()).toFixed(2)}` : "Free"}
                   </span>
               </h3>
               <div className="grid grid-cols-2 gap-2 my-3 text-sm">
-                <button className="bg-primary-blue text-white  border border-white h-[40px] rounded-md  ">
+                <button className="bg-org-primary text-white  border border-white h-[40px] rounded-md  ">
                   Add Participants
                 </button>              
-                <button onClick={(event?.is_paid_event || event?.isPaid) ? handleRegisterUserForPaidEvents : handleRegisterUserForFreeEvents} className="bg-white text-primaryBlue border border-primary-blue h-[40px] rounded-md">
+                <button onClick={(event?.is_paid_event || event?.isPaid) ? handleRegisterUserForPaidEvents : handleRegisterUserForFreeEvents} className="bg-white text-org-primaryBlue border border-primary-blue h-[40px] rounded-md">
                   {(event?.is_paid_event || event?.isPaid) ? "Pay for event" : "Register for free"}
                 </button>
               </div>

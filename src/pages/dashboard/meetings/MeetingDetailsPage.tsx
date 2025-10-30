@@ -165,7 +165,7 @@ const MeetingDetailsPage = () => {
               href={meetingItem.meeting_docs}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primaryBlue mb-2"
+              className="flex items-center gap-2 text-org-primaryBlue mb-2"
             >
               <img src={AttachmentIcon} alt="Attachment" className="w-5 h-5" />
               <span>Download Attachment</span>

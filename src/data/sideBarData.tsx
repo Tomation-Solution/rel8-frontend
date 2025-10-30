@@ -98,11 +98,11 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Meetings",
     path: "/meeting",
   },
-  {
-    mainIcon: accountIcon,
-    name: "My Account",
-    path: "/account",
-  },
+  // {
+  //   mainIcon: accountIcon,
+  //   name: "My Account",
+  //   path: "/account",
+  // },
   // {
   //   mainIcon: fundaProjectIcon,
   //   name: "Fund a Project",
@@ -113,11 +113,11 @@ export const sideBarData: SideBarLinkType[] = [
   //   name: "Service Requests",
   //   path: "/service-requests",
   // },
-  {
-    mainIcon: electionIcon,
-    name: "Election",
-    path: "/election",
-  },
+  // {
+  //   mainIcon: electionIcon,
+  //   name: "Election",
+  //   path: "/election",
+  // },
   // {
   //   mainIcon: subscribeIcon,
   //   name: "Subscribe",

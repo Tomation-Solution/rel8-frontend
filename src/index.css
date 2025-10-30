@@ -25,13 +25,13 @@
         @apply  w-full 
     }
     .btnPrimary{
-        @apply bg-primary-blue
+        @apply bg-pri/mary-blue
     }
     .btnSecondary{
         @apply bg-secondary-btn
     }
     .btn-Outlined{
-        @apply bg-white border border-primary-blue !text-primary-blue !capitalize
+        @apply bg-white border border-primary-blue !text-org-primary-blue !capitalize
     }
     .btn{
         @apply w-full mt-2  capitalize text-center  rounded-[12px]   font-[500] text-[14px]

@@ -15,13 +15,13 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-      <TenantGate>
-        <AppProvider>
+      <ThemeProvider>
+        <TenantGate>
+          <AppProvider>
             <App />
-        </AppProvider>
-      </TenantGate>
-          </ThemeProvider>
+          </AppProvider>
+        </TenantGate>
+      </ThemeProvider>
       {/* <ReactQueryDevtools /> */}
     </QueryClientProvider>
     <ToastContainer />

@@ -18,7 +18,7 @@ const GalleryCard = ({ galleryItem, height }: Props) => {
         alt="news-image"
       />
 
-      <div className="w-full absolute bottom-0 flex items-center justify-between rounded-b-xl gap-3 z-[3] px-5 py-2 text-sm text-white bg-primary-blue">
+      <div className="w-full absolute bottom-0 flex items-center justify-between rounded-b-xl gap-3 z-[3] px-5 py-2 text-sm text-white bg-org-primary">
         <div className="">
           <Link to={`/gallery/${galleryItem._id}/`}>
           <p className="line-clamp-2 text-white font-medium text-sm">

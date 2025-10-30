@@ -16,7 +16,7 @@ const Button = ({text,size,className,type='primary',onClick,isLoading,textColor=
     <button onClick={onClick} className={`btn ${size ? size : "btn-block"} ${type === 'outlined' && "btn-Outlined"}  ${type === 'secondary' && "btnSecondary"} ${type === 'primary' && "btnPrimary" } ${textColor} ${padding} ${borderRadius} ${className}` }>
        {isLoading ? (
         <div className="flex items-center justify-center">
-          <div className="animate-spin outline-none h-5 w-5 border-t-2 border-blue-500 rounded-full mr-3"></div>
+          <div className="animate-spin outline-none h-5 w-5 border-t-2 border-org-secondary rounded-full mr-3"></div>
           Loading
         </div>
       ) : (

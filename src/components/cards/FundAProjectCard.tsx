@@ -25,8 +25,8 @@ const FundAProjectCard = ({ projectItem, height }: Props) => {
           </Link>
           <div className="grid my-2">
             <div className="flex items-center divide-x-2 divide-primaryBlue">
-              <p className="text-primary-blue pr-2">Target</p>
-              <p className="text-primary-blue flex items-center pl-2 gap-2 line-clamp-1">
+              <p className="text-org-primary-blue pr-2">Target</p>
+              <p className="text-org-primary-blue flex items-center pl-2 gap-2 line-clamp-1">
                 <BsGift className='w-5 h-5' />
                 {projectItem.what_project_needs.map((item, index) => (
                   <span className="" key={index}>{item}</span>

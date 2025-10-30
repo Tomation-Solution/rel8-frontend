@@ -24,12 +24,12 @@ const PublicationsDetailPage = () => {
     // enabled: false,
   });
 
-  const publicationItem = data?.data?.find((item:PublicationDataType) => item.id.toString() === publicationId);
-  console.log('--->',data?.data)
-  const otherPublicationItems = data?.data?.filter((item:PublicationDataType) => item.id.toString() !== publicationId);
+  const publicationItem = data?.find((item: any) => item._id === publicationId);
+  console.log('--->',data)
+  const otherPublicationItems = data?.filter((item: any) => item._id!== publicationId);
 
-  const formattedDate = publicationItem ? new Date(publicationItem.updated_at).toLocaleDateString() : '';
-
+  const formattedDate = publicationItem ? new Date(publicationItem.updatedAt).toLocaleDateString() : '';
+  console.log(publicationItem)
   useEffect(() => {
     if (publicationItem) {
       setHasLiked(publicationItem.likes > 0);
@@ -54,7 +54,7 @@ const PublicationsDetailPage = () => {
   }
 
   if (data){
-    const fileUrl = publicationItem.danload || "";
+    const fileUrl = publicationItem.fileUrl || "";
     const fileNameArr: string[] = fileUrl.split('/') || [];
     const fileName = fileNameArr[fileNameArr.length - 1];
 
@@ -65,7 +65,7 @@ const PublicationsDetailPage = () => {
                 <BreadCrumb title="Publications" />
                 <div className="relative" >
                   <img
-                    src={publicationItem?.image}
+                    src={publicationItem?.fileUrl}
                     className="w-full object-cover max-h-[40vh] top-0 bottom-0 left-0 right-0  rounded-md border "
                     alt=""
                   />
@@ -102,7 +102,7 @@ const PublicationsDetailPage = () => {
                 </div>
                 < DownloadFileButton fileUrl={fileUrl} fileName={fileName} buttonText="Attachment" />
                 <div>
-              <PublicationComment newsId={parseInt(publicationId || '0', 10)} />
+              {/* <PublicationComment newsId={publicationId} /> */}
             </div>
             </div>
             <div className="md:col-span-1 col-span-3">

@@ -51,7 +51,7 @@ const QuickNav = () => {
             <Link
               to={data.path}
               onClick={scrollToTop}
-              className=" w-fit h-fit p-3 rounded-full bg-primary-blue"
+              className=" w-fit h-fit p-3 rounded-full bg-org-primary"
               key={index}
             >
               <img

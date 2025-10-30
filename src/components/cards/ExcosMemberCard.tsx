@@ -19,7 +19,7 @@ const ExcosMemberCard = ({ item }: Props) => {
           {item.exco.isExco ? item.exco.position 
             : "Position Not Available"}
         </p>
-        <small className="text-xs text-primaryBlue">
+        <small className="text-xs text-org-primaryBlue">
           {item?.member_info && item.member_info[4]?.value
             ? item.member_info[4].value
             : "Grade Not Available"}

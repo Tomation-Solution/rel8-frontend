@@ -1,7 +1,7 @@
 const ErrorPage = () => {
   return (
     <div className='grid place-items-center h-screen w-full' >
-      <h3 className='font-semibold text-primary-blue' >Opps! Something went wrong. We are working on a fix.</h3>
+      <h3 className='font-semibold text-org-primary-blue' >Opps! Something went wrong. We are working on a fix.</h3>
     </div>
   )
 }

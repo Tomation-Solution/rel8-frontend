@@ -56,7 +56,7 @@ const DownloadFileButton = ({ fileUrl, fileName, buttonText }: Props) => {
 
     return (
         <div>
-            <button className="px-3 w-[240px] my-4 py-2 bg-primary-blue text-white  border border-white h-[40px] rounded-md hover:bg-white hover:text-primary-blue  hover:border-primary-blue"
+            <button className="px-3 w-[240px] my-4 py-2 bg-org-primary text-white  border border-white h-[40px] rounded-md hover:bg-org-secondary hover:text-org-primary  hover:border-org-primary"
                 onClick={downloadFile}
                 disabled={isLoading || isDownloading}
             >

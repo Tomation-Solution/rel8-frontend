@@ -14,7 +14,7 @@ export const fetchPublicationsComments = async (id:string|null) =>{
 }
 
 // Post a comment for a specific news item
-export const postPublicationComment = async (comment: string, newsId: number) => {
+export const postPublicationComment = async (comment: string, newsId: string) => {
     const requestBody = {
         comment: comment,
         news: newsId

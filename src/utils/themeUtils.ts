@@ -1,5 +1,3 @@
-// src/utils/themeUtils.ts
-
 export const hexToRgb = (hex: string): string => {
   // Remove # if present
   const cleanHex = hex.replace('#', '');

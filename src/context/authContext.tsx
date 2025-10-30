@@ -12,7 +12,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const useAppContext = () => {
+export const useAppContext = () => {  
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error('useAppContext must be used within an AppProvider');
@@ -62,7 +62,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   return (
     // @ts-ignore
-    <AppContext.Provider value={{ user, userFullName, userProfileData }}>
+    <AppContext.Provider value={{ user, setRel8LoginUserData, userFullName, userProfileData }}>
       {children}
     </AppContext.Provider>
   );

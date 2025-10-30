@@ -64,7 +64,7 @@ const PayUpForASingleDue = ({due__Name,amount,dueId}:Props) => {
 
       {/* Add more form fields based on the structure of dataObject */}
 
-      <button className="ml-2 bg-primary-blue text-white p-2 rounded-md "  type="submit">Pay</button>
+      <button className="ml-2 bg-org-primary text-white p-2 rounded-md "  type="submit">Pay</button>
     </form>
   )
 }

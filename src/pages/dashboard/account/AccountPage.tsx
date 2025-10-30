@@ -65,7 +65,7 @@ const AccountPage = () => {
           Header:'Update Subbmission',
           accessor:'a',
           Cell:(tableProps:any)=>(
-            <button className="text-white bg-primary-blue px-3 py-1 rounded-md my-2 min-w-[70px]" 
+            <button className="text-white bg-org-primary px-3 py-1 rounded-md my-2 min-w-[70px]" 
             onClick={()=>{
               pay({'forWhat':'dues','payment_id':tableProps.row.original.id,})
             }}
@@ -89,16 +89,16 @@ const AccountPage = () => {
           alt=""
         />
         <div>
-          <h3 className="text-3xl font-bold text-primary-blue">{totalPendingAmount}</h3>
-          {/* <h3 className="text-3xl font-bold text-primaryBlue">{totalPendingAmount}</h3> */}
+          <h3 className="text-3xl font-bold text-org-primary-blue">{totalPendingAmount}</h3>
+          {/* <h3 className="text-3xl font-bold text-org-primaryBlue">{totalPendingAmount}</h3> */}
           <small>Total Outstanding fee</small>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button onClick={showCompletedTable} className={`${showCompleted ? "bg-primary-blue text-white p-2  border border-white  " : "bg-[#ccddea] text-black border p-2 border-primaryBlue h-[40px] rounded-md" } h-[40px] rounded-md`}>
+        <button onClick={showCompletedTable} className={`${showCompleted ? "bg-org-primary text-white p-2  border border-white  " : "bg-[#ccddea] text-black border p-2 border-primaryBlue h-[40px] rounded-md" } h-[40px] rounded-md`}>
           Completed Payment
         </button>
-        <button onClick={showPendingTable} className={`${!showCompleted ? "bg-primary-blue text-white p-2  border border-white  " : "bg-[#ccddea] text-black border p-2 border-primaryBlue h-[40px] rounded-md" } h-[40px] rounded-md`}>
+        <button onClick={showPendingTable} className={`${!showCompleted ? "bg-org-primary text-white p-2  border border-white  " : "bg-[#ccddea] text-black border p-2 border-primaryBlue h-[40px] rounded-md" } h-[40px] rounded-md`}>
           Pending Payment
         </button>
       </div>

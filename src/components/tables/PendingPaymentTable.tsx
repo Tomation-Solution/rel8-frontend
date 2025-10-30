@@ -87,7 +87,7 @@ const PendingPaymentTable = ({tableData,isLoading}:Props) => {
                   ))}
                    <td className='hover:cursor' >
                     
-                    <button className="text-white bg-primary-blue px-3 py-1 rounded-md my-2 min-w-[70px]"  >Pay</button>     
+                    <button className="text-white bg-org-primary px-3 py-1 rounded-md my-2 min-w-[70px]"  >Pay</button>     
                    </td>
                 </tr>
               ))}

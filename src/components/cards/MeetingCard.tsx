@@ -27,7 +27,7 @@ const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
           <img src={image || meetingImage} alt={name} className="w-28 h-24" />
           <div>
             <Link to={`/${linkTo}/${meeting.id}/`} >
-              <h6 className="font-medium text-primary-blue hover:underline">{name}</h6>
+              <h6 className="font-medium text-org-primary-blue hover:underline">{name}</h6>
             </Link>
             <p className="font-light">{formattedDate}</p>
             <p className="text-sm text-gray-500">{organiserName}</p>
@@ -43,7 +43,7 @@ const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
         )}
         <Link
           to={`/${linkTo}/${meeting.id}/`}
-          className="w-full py-2 px-3 border border-primary-blue text-sm bg-[inherit] text-primaryDark rounded-md text-center"
+          className="w-full py-2 px-3 border border-primary-blue text-sm bg-[inherit] text-org-primaryDark rounded-md text-center"
         >
           View Details
         </Link>

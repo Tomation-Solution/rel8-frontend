@@ -1,5 +1,3 @@
-// src/contexts/ThemeContext.tsx
-
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { setOrganizationTheme } from '../utils/themeUtils';
 
