@@ -1,7 +1,7 @@
 import {  EventsResponseType } from "../../types/myTypes";
 import apiTenant, { apiTenantAxiosForm } from "../baseApi";
 
-export const fetchAllUserEvents = async (): Promise<EventsResponseType> => {
+export const fetchAllUserEvents = async (): Promise<any> => {
     const response = await apiTenant.get(`/api/events/eventview/get_events/`);
     return response.data
 }

@@ -1,7 +1,7 @@
 import apiTenant from "../baseApi";
 
 export const fetchUserMeetings = async () =>{
-    const response = await apiTenant.get(`/meeting/meeting_member/`);
+    const response = await apiTenant.get(`/api/meetings/`);
     return response.data
 }
 

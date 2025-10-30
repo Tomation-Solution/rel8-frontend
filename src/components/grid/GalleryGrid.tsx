@@ -74,10 +74,9 @@ const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   if (isLoading) {
     return <CircleLoader />;
   }
-
   return (
     <div className=" xl/lg:px-0 md:px-10 px-5">
-      {data?.data?.data
+      {data
         ?.slice(0, numberOfItemsToShow)
         .map((galleryItem: any, index: number) => (
           <GalleryCard height={heightOfCard} key={index} galleryItem={galleryItem} />

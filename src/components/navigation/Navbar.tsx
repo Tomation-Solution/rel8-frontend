@@ -24,9 +24,8 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
   // Calculate the number of notifications
   const notificationCount = notifications?.length || 0;
-  console.log(notificationCount); // Or integrate it into your JSX
 
-
+  console.log(user)
   return (
     <header className="h-[70px] z-[999] w-full px-2 border fixed top-0 bg-white max-w-[inherit]">
       <div className="w-[95%] mx-auto flex items-center h-full justify-between">
@@ -75,7 +74,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
               </span>
             )} */}
           </div>
-          <Avatar imageUrl={user?.profile_image ? user.profile_image : avatarImage} />
+          <Avatar imageUrl={user?.imageUrl || avatarImage} />
         </div>
       </div>
     </header>

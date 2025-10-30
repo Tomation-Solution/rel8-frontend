@@ -90,7 +90,8 @@ export type EventsResponseType = {
 
 // -------------------------------------------- NewsComments-------------------------------
 export type NewsCommentProps = {
-  newsId: number;
+  newsId: string;
+  comments: any
 }
 
 // Define types for comments
@@ -304,10 +305,9 @@ export interface ChatMessageDataType {
 
 export interface NotificationDataType {
   id: string;
-  created_on: string;
+  createdAt: string;
   title: string;
   body:string;
-  created_on?: string;
   latest_update_table_name: string;
   latest_update_table_id: number;
 }

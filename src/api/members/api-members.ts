@@ -53,7 +53,7 @@ export type MemberType =       {
 }
 
 export const fetchAllMembers = async () =>{
-    const response = await apiTenant.get(`/user/memberlist-info/get_all_members/`);
+    const response = await apiTenant.get(`/api/members/`);
     return response.data
 }
 export const fetchAllExcos = async () =>{

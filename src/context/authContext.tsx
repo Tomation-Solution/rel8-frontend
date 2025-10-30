@@ -4,7 +4,7 @@ import { useQuery } from 'react-query';
 import { fetchUserProfile } from '../api/profile/profile-api';
 
 interface AppContextType {
-  user: MemberInfoType | null;
+  user: any | null;
   setRel8LoginUserData: (data: MemberInfoType) => void;
   userFullName: string;
   userProfileData: any[];
@@ -43,18 +43,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (userProfile.data) {
-      const profileData = userProfile.data.data || [];
-      setUserProfileData(profileData);
+      const profileData: any = userProfile.data;
+            setUserProfileData(profileData);
+      setUser(userProfile.data)
 
-      if (profileData.length > 0) {
-        const moreInfo = profileData[0]?.more_info || [];
-        const fullNameValue = moreInfo[5]?.value || '';
-        const parts = fullNameValue.split(' ');
-
-        if (parts.length > 0) {
-          setUserFullName(parts[0]);
-        }
-      }
+      setUserFullName(userProfile.data.name as string);
     }
   }, [userProfile.data]);
 
@@ -68,7 +61,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, setRel8LoginUserData, userFullName, userProfileData }}>
+    // @ts-ignore
+    <AppContext.Provider value={{ user, userFullName, userProfileData }}>
       {children}
     </AppContext.Provider>
   );

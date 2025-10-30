@@ -35,7 +35,7 @@ const GalleryDetailPage = () => {
   return (
     <main  className='grid grid-cols-4 space-x-[60px]'>
     <div className='col-span-4 xl:col-span-3 flex flex-col'  >
-    <BreadCrumb title={data?.data.name||''} />
+    <BreadCrumb title={data?.caption||''} />
     {/* <h3 className="font-medium mb-2 text-xl" >{data?.data.name}</h3> */}
     {/* <p className="font-light text-sm" >Lorem ipsum dolor sit amet consectetur adipisicing elit. Cum, repellat illum! Maxime dolor officia similique in rem ipsa temporibus ipsam. 
       Quasi voluptatibus minus veritatis quis dolores et reiciendis debitis alias.</p> */}
@@ -43,13 +43,13 @@ const GalleryDetailPage = () => {
 
     <div className=" grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
         {isLoading && <CircleLoader />}
-    {data?.data?.images.map((eventItem:any,index:number)=>(
+    {data?.imageUrl.map((image:any,index:number)=>(
     //  <EventsCard key={index}   eventItem={eventItem} />
-    <img src={eventItem.image} key={index}  className="object-cover"/>
+    <img src={image} key={index}  className="object-cover"/>
    ))}
     </div>
     </div>
-    <div className="col-span-1 hidden xl:inline">
+    <div className="col-span-1 xl:inline">
         <SeeAll title='Highlights' path='/gallery' />
         <div className='relative ' >
          <GalleryGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />

@@ -24,11 +24,11 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Home",
     path: "/",
   },
-  {
-    mainIcon: chatIcon,
-    name: "Chat",
-    path: "/chat",
-  },
+  // {
+  //   mainIcon: chatIcon,
+  //   name: "Chat",
+  //   path: "/chat",
+  // },
   {
     mainIcon: notificationsIcon,
     name: "Notifications",
@@ -103,16 +103,16 @@ export const sideBarData: SideBarLinkType[] = [
     name: "My Account",
     path: "/account",
   },
-  {
-    mainIcon: fundaProjectIcon,
-    name: "Fund a Project",
-    path: "/fund-a-project",
-  },
-  {
-    mainIcon: serviceRequestsIcon,
-    name: "Service Requests",
-    path: "/service-requests",
-  },
+  // {
+  //   mainIcon: fundaProjectIcon,
+  //   name: "Fund a Project",
+  //   path: "/fund-a-project",
+  // },
+  // {
+  //   mainIcon: serviceRequestsIcon,
+  //   name: "Service Requests",
+  //   path: "/service-requests",
+  // },
   {
     mainIcon: electionIcon,
     name: "Election",

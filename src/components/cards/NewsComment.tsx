@@ -8,21 +8,24 @@ import { useAppContext } from "../../context/authContext";
 import { AiOutlineSend } from "react-icons/ai";
 
 // Define the component with props type
-export default function NewsComment({ newsId }: NewsCommentProps) {
+export default function NewsComment({ comments, newsId }: NewsCommentProps) {
     const [commentText, setCommentText] = useState('');
     const queryClient = useQueryClient();
-    const { user } = useAppContext();
+    const context = useAppContext();
     
-    const { data, isLoading, isError } = useQuery(['news', newsId], () => fetchNewsComments(newsId?.toString() || null));
-    const comments: Comment[] = data?.data || [];
+    const user = context.user;
 
-    const postMutation = useMutation((newComment: { comment: string; newsId: number }) => postNewsComment(newComment.comment, newComment.newsId), {
+    console.log(context,'context data')
+    // const { data, isLoading, isError} = useQuery(['news', newsId], () => fetchNewsComments(newsId?.toString() || null));
+
+    // const comments: Comment[] = data?.data || [];
+    const postMutation = useMutation(async (newComment: { comment: string; newsId: string }) => postNewsComment(newComment.comment, newsId), {
         onSuccess: () => {
-            queryClient.invalidateQueries(['news', newsId]);
+            queryClient.invalidateQueries(['news']);
         },
     });
 
-    const deleteMutation = useMutation((commentId: number) => deleteNewsComment(commentId, 1), {
+    const deleteMutation = useMutation((commentId: string) => deleteNewsComment(newsId,commentId), {
         onSuccess: () => {
             queryClient.invalidateQueries(['news', newsId]);
         },
@@ -33,16 +36,17 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
     };
 
     const handleCommentSubmit = () => {
+        if(commentText === '') return;
         postMutation.mutate({ comment: commentText, newsId });
         setCommentText('');
     };
 
-    const handleCommentDelete = (commentId: number) => {
+    const handleCommentDelete = (commentId: string) => {
         deleteMutation.mutate(commentId);
     };
 
-    if (isLoading) return <div>Loading comments...</div>;
-    if (isError) return <div>Error loading comments</div>;
+    // if (isLoading) return <div>Loading comments...</div>;
+    // if (isError) return <div>Error loading comments</div>;
 
     return (
         <div className="flex flex-col h-full justify-between gap-10">
@@ -51,38 +55,38 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                     <h3 className="font-semibold text-xl">Comments</h3>
                 </div>
                 {/* This is the write a comment section */}
-                <div className="h-[100px] flex items-center gap-2">
+                <div className="h-[100px] flex items-center gap-x-2">
                     <div className="rounded-full">
                         <Avatar imageUrl={user?.profile_image ? user.profile_image : avatarImage} />
                     </div>
-                    <div className="flex-1">
                         <textarea
                             className="w-full h-[50px] border-2 border-gray-300 rounded-md p-2"
                             placeholder="Write a comment"
                             value={commentText}
                             onChange={handleCommentChange}
                         ></textarea>
-                    </div>
                     <button
-                        className="bg-primary-blue text-white w-[full] px-4 h-[50px] rounded-md"
+                        className={`${commentText ? "bg-primary-blue" : "bg-primary-blue/50"} text-white w-[full] px-4 h-[50px] rounded-md`}
                         onClick={handleCommentSubmit}
+                        disabled={!commentText}
                     >
-                        <AiOutlineSend />
+                        { postMutation.isLoading ? "..." : <AiOutlineSend /> }
                     </button>
                 </div>
             </div>
             {/* This is the get comments section */}
             <div className="comments-container overflow-y-auto max-h-[300px]">
                 {comments.length > 0 ? (
-                    comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-2 mb-4 items-center">
-                            {/* <div className="rounded-md">
-                                <Avatar imageUrl={comment.member.photo_url || avatarImage} />
+                    comments.toReversed().map((comment) => (
+                        <div key={comment._id} className="flex gap-2 mb-4">
+                            <div className="rounded-md">
+                                <Avatar imageUrl={comment?.member?.photo_url || avatarImage} />
+                                {/* <Avatar imageUrl={comment?.member?.photo_url || avatarImage} /> */}
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <h3 className="font-semibold text-sm">{comment.member.full_name}</h3>
-                                <p className="text-textColor font-light text-md">{comment.comment}</p>
-                                {user?.member_id === comment.member.id && (
+                            <div className="flex flex-col gap-1 border p-4 rounded-lg w-full md:w-2/3">
+                                <h3 className="font-semibold text-sm">{comment.userId?.name}</h3>
+                                <p className="text-textColor font-light text-md">{comment.content}</p>
+                                {user?.id == comment.userId?._id && (
                                     <button
                                         className="text-red-500 text-sm text-end"
                                         onClick={() => handleCommentDelete(comment.id)}
@@ -90,7 +94,7 @@ export default function NewsComment({ newsId }: NewsCommentProps) {
                                         Delete
                                     </button>
                                 )}
-                            </div> */}
+                            </div>
                         </div>
                     ))
                 ) : (

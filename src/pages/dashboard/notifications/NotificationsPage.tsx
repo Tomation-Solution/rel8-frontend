@@ -126,7 +126,7 @@ const NotificationsPage = () => {
   };
 
   const groupedNotifications = notifications.reduce<Record<string, NotificationDataType[]>>((acc, notification) => {
-    const dateKey = getRelativeDate(notification.created_on);
+    const dateKey = getRelativeDate(notification.createdAt);
     if (!acc[dateKey]) {
       acc[dateKey] = [];
     }
@@ -158,7 +158,7 @@ const NotificationsPage = () => {
                     <h3 className='text-sm font-semibold'>{notification.title}</h3>
                     <small className='text-xs text-neutral-1'>{notification.body}</small>
                   </div>
-                  <small className='text-xs'>{new Date(notification.created_on).toLocaleTimeString()}</small>
+                  <small className='text-xs'>{new Date(notification.createdAt).toLocaleTimeString()}</small>
                 </div>
               </Link>
             ))}

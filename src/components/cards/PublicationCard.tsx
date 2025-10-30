@@ -3,20 +3,20 @@ import { FaRegCommentDots } from "react-icons/fa"
 import { PublicationDataType, NewsCommentDetails } from "../../types/myTypes"
 import { Link } from "react-router-dom";
 interface Props{
-    publicationItem:PublicationDataType | NewsCommentDetails;
+    publicationItem:PublicationDataType;
     hidePostDetails?:boolean;
     linkTo?:string
 }
-const PublicationCard = ({publicationItem, hidePostDetails, linkTo='publication'}:Props) => {
+const PublicationCard = ({publicationItem, hidePostDetails = true, linkTo='publication'}:Props) => {
 
     const formattedDate = new Date((publicationItem as any).updated_at || (publicationItem as any).updatedAt || (publicationItem as any).createdAt || '').toLocaleDateString();
 
   return (
     <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-        <img className="rounded-t-lg w-full md:h-[180px] h-[170px] object-contain" src={(publicationItem as any).image || (publicationItem as any).bannerUrl} alt="" />
+        <img className="rounded-t-lg w-full md:h-[180px] h-[170px] object-contain" src={(publicationItem as any).fileUrl || (publicationItem as any).bannerUrl} alt="" />
     <div className="md:p-5 p-2">
         <Link to={`/${linkTo}/${(publicationItem as any).id || (publicationItem as any)._id}/`} >
-            <h5 className="mb-2 md:text-[15px] text-sm font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{(publicationItem as any).name || (publicationItem as any).topic}</h5>
+            <h5 className="mb-2 md:text-[15px] text-sm font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{(publicationItem as any).title || (publicationItem as any).topic}</h5>
         </Link>
         <p className="mb-2 text-[10px] line-clamp-1">{formattedDate}</p>
         <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{(publicationItem as any).body || (publicationItem as any).content}</p>
@@ -31,7 +31,8 @@ const PublicationCard = ({publicationItem, hidePostDetails, linkTo='publication'
                     </aside>
                 </aside>
                 <div className="border-l flex items-center gap-2 text-sm" >
-                    <FaRegCommentDots className='w-5 h-5 text-textColor ml-2' /> <span>0 comments</span>
+                    {/* @ts-ignore */}
+                    <FaRegCommentDots className='w-5 h-5 text-textColor ml-2' /> <span>{publicationItem?.comments?.length} comments</span>
                 </div>
             </div>
 

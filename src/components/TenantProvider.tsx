@@ -3,6 +3,7 @@ import { useQuery } from "react-query";
 import { getTenantInfo, TENANT } from "../utils/constants";
 import Loader from "./Loader";
 import { apiPublic } from "../api/baseApi";
+import { useTheme } from "../context/themeContext";
 
 interface TenantResponse {
   message: string;
@@ -74,6 +75,15 @@ export default function TenantGate({ children }: { children: ReactNode }) {
           window.location.reload();
         }
       }
+    }
+  }, [data]);
+
+
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    if (data?.organization.colorTheme) {
+      setTheme(data.organization.colorTheme.primary, data.organization.colorTheme.secondary);
     }
   }, [data]);
 

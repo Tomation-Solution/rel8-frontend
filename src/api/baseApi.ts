@@ -21,6 +21,22 @@ const apiTenant = axios.create({
   // },
 });
 
+
+apiTenant.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401 && !window.location.href.includes('login')) {
+      localStorage.removeItem('rel8User');
+      window.location.href = '/login';
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+
 apiTenant.interceptors.request.use(
   (config) => {
     // Retrieve the token from local storage
@@ -45,7 +61,9 @@ apiTenant.interceptors.request.use(
   }
 );
 
-export default apiTenant;
+
+
+
 
 
 
@@ -82,3 +100,5 @@ export const fetchFileForDownload = async (fileUrl: string) => {
     return response.data;
 }
 
+
+export default apiTenant;

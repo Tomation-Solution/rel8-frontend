@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100;0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;0,9..40,1000;1,9..40,700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100;0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;0,9..40,1000;1,9..40,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -60,4 +60,76 @@
     }
 }
 
+ */
 
+
+
+ @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100;0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;0,9..40,1000;1,9..40,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Default organization colors - will be overridden dynamically */
+        --color-org-primary: 1 85 149; /* RGB for #015595 */
+        --color-org-primary-hover: 0 57 100; /* Darker variant */
+        --color-org-secondary: 1 170 255; /* RGB for #01AAFF */
+        --color-org-secondary-hover: 0 136 232; /* Darker variant */
+    }
+
+    body{
+        @apply text-[16px] 
+    }
+    p{
+        @apply text-[16px] 
+    }
+    h1{
+        @apply text-[40px]
+    }
+    h2{
+        @apply text-[32px]
+    }
+    h3{
+        @apply text-[24px]
+    }
+   
+    .btn-block{
+        @apply w-full 
+    }
+    .btnPrimary{
+        @apply bg-org-primary text-white hover:bg-org-primary-hover
+    }
+    .btnSecondary{
+        @apply bg-org-secondary text-white hover:bg-org-secondary-hover
+    }
+    .btn-Outlined{
+        @apply bg-white border border-org-primary !text-org-primary !capitalize hover:bg-org-primary/10
+    }
+    .btn{
+        @apply w-full mt-2 capitalize text-center rounded-[12px] font-[500] text-[14px]
+    }
+    .form-control{
+        @apply bg-neutral-3 text-textColor py-2 px-3 w-[100%] rounded-md outline-none placeholder:text-neutral-1 focus:ring-2 focus:ring-org-primary
+    }
+    .form-control-icon{
+        @apply w-10 h-10 object-contain bg-neutral-3 p-[10px] rounded-md
+    }
+    .form-group{
+        @apply flex items-center gap-2 
+    }
+    .auth-form-container{
+        @apply flex flex-col justify-center items-center w-[90%] sm:w-[70%] md:w-[80%] md:max-w-[80%] 2xl:w-[60%] xl:w-[70%] mx-auto h-full z-[2]
+    }
+    .registration-table{
+        @apply !table-auto py-0 mt-6 bg-white border-gray-200 shadow-md rounded-md w-full overflow-x-auto
+    }
+
+    .table{
+        @apply w-full border-collapse overflow-x-auto text-black
+    }
+    a {
+        @apply text-org-primary underline hover:text-org-primary-hover;
+    }
+}

@@ -12,7 +12,7 @@ export const fetchAllGalleryData = async (page: number) => {
 // Fetch gallery data by id
 export const fetchGalleryItem = async (id: string | null) => {
   if (id) {
-    const response = await apiTenant.get(`/api/content/gallery_version2/${id}/`);
+    const response = await apiTenant.get(`/api/content/gallery/${id}/`);
     return response.data;
   }
 };

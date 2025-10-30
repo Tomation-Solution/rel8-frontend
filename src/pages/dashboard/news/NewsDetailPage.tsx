@@ -23,9 +23,10 @@ const NewsDetailPage = () => {
   // const queryClient = useQueryClient();
   const [hasLiked, setHasLiked] = useState(false);
   const [hasDisliked, setHasDisliked] = useState(false);
-  const { data, isLoading, isError } = useQuery<{ data: NewsCommentDetails[] }, Error>('news', fetchAllUserNews);
-  const newsItem = data?.data?.find((item: NewsCommentDetails) => item.id.toString() === newsId);
-  const otherNewsItems = data?.data?.filter((item: NewsCommentDetails) => item.id.toString() !== newsId);
+  const { data, isLoading, isError } = useQuery<NewsCommentDetails[] , Error>('news', fetchAllUserNews,{
+  });
+  const newsItem = data?.find((item: NewsCommentDetails) => item._id === newsId);
+  const otherNewsItems = data?.filter((item: NewsCommentDetails) => item._id !== newsId);
 
   useEffect(() => {
     if (newsItem) {
@@ -33,6 +34,8 @@ const NewsDetailPage = () => {
       setHasDisliked(false); // Backend doesn't have dislikes, only likes
     }
   }, [newsItem]);
+
+  console.log(newsItem)
 
   const formattedDate = newsItem ? new Date(newsItem.updatedAt || newsItem.createdAt || '').toLocaleDateString() : '';
   
@@ -125,7 +128,7 @@ const NewsDetailPage = () => {
               </button>
             </div>
             <div>
-              <NewsComment newsId={parseInt(newsId || '0', 10)} />
+              <NewsComment comments={newsItem.comments} newsId={newsId} />
             </div>
           </div>
           <div className="md:col-span-1 col-span-3">

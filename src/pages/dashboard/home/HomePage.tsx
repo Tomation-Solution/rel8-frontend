@@ -84,6 +84,7 @@ const HomePage = () => {
     notifyUser('Sorry, an error occured when fetching events', 'error');
   }
 
+
   return (
     <main className='grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:gap-8 gap-10 md:px-0 px-5'>
       <div className="col-span-1 xl:col-span-3 relative flex flex-col gap-8 ">
@@ -92,7 +93,7 @@ const HomePage = () => {
         {/* Latest Updates */}
         <div className={`relative py-6 ${news.isLoading ? "flex items-center justify-center" : ""}`}>
           {news.isLoading && <CircleLoader />}
-          {news?.data?.data && news?.data?.data.length > 0 &&
+          {news?.data && news?.data.length > 0 &&
             <Carousel
               removeArrowOnDeviceType={["tablet", "mobile"]}
               dotListClass="flex items-center !bg-white absolute top-0 h-fit w-fit bg-red-400 main-class"
@@ -100,7 +101,7 @@ const HomePage = () => {
               showDots
               arrows={false}
               className="" responsive={newResponsiveCarousel}>
-              {news?.data?.data.map((newsItem, index) => (
+              {news?.data.map((newsItem, index) => (
                 <HomePageNewsCard key={index} newsItem={newsItem} index={index} />
               ))}
             </Carousel>
@@ -114,7 +115,7 @@ const HomePage = () => {
             <SeeAll title="Events" path="/events" />
             <div className={`grid place items-center`}>
               {events.isLoading && <CircleLoader />}
-              {!events.isLoading && events?.data?.data?.length === 0 && (
+              {!events.isLoading && events?.data?.length === 0 && (
                   <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">
                       No events available, enjoy the silence.
                   </div>
@@ -128,10 +129,10 @@ const HomePage = () => {
                   autoPlaySpeed={3000}
                   keyBoardControl={true}
                   className="container"
-                ><></>
-                  {/* {events?.data?.data.map((eventItem:any, index:number) => (
+                >
+                  {events?.data.map((eventItem:any, index:number) => (
                     <EventsCard key={index} eventItem={eventItem} />
-                  ))} */}
+                  ))}
                 </Carousel>
               )}
             </div>
@@ -155,8 +156,8 @@ const HomePage = () => {
         <div>
           <SeeAll title='Publications' path="/publications" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
-            {publication?.data?.data?.map((publicationItem: PublicationDataType, index: number) => (
-              <PublicationCard key={index} publicationItem={publicationItem} />
+            {publication?.data?.map((publicationItem: PublicationDataType, index: number) => (
+              <PublicationCard key={index} publicationItem={publicationItem} /> 
             ))}
           </div>
         </div>

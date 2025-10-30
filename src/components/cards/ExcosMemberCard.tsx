@@ -2,29 +2,28 @@ import { ExcoMemberDataType } from "../../types/myTypes";
 import profileImage from '../../assets/images/dummy.jpg';
 
 interface Props {
-  item: ExcoMemberDataType;
+  item: any;
 }
 
 const ExcosMemberCard = ({ item }: Props) => {
   return (
-    <div className="grid bg-white my-2 border border-[#ececec] p-2 rounded-md">
+    <div className="bg-white my-2 border border-[#ececec] p-2 flex flex-col justify-between rounded-md">
       <img
-        src={item?.photo ? item.photo : profileImage}
-        className="w-full max-w-full object-contain rounded-md"
+        src={item?.imageUrl ? item.imageUrl : profileImage}
+        className="w-full object-center object-cover rounded-md"
         alt=""
       />
       <div className="my-3">
-        <h6 className="font-semibold">{item?.full_name}</h6>
-        {/* <p className="text-sm text-textColor">
-          {item?.member_info && item.member_info[3]?.position_held
-            ? item.member_info[3].position_held
+        <h6 className="font-semibold">{item?.name}</h6>
+        <p className="text-sm text-textColor">
+          {item.exco.isExco ? item.exco.position 
             : "Position Not Available"}
         </p>
         <small className="text-xs text-primaryBlue">
           {item?.member_info && item.member_info[4]?.value
             ? item.member_info[4].value
             : "Grade Not Available"}
-        </small> */}
+        </small>
         <p className="text-sm line-clamp-2 text-textColor">{item.bio}</p>
       </div>
     </div>

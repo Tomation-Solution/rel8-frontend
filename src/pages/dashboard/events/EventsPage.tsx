@@ -16,6 +16,8 @@ const EventsPage = () => {
         notifyUser("An error occurred while fetching events", "error");
     }
 
+    console.log(data);
+
     return (
         <main className='grid grid-cols-1 md:grid-cols-4 gap-7'>
             <div className='col-span-1 md:col-span-3 md:px-0 px-5'>
@@ -23,12 +25,12 @@ const EventsPage = () => {
 
                 <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
                     {isLoading && <CircleLoader />}
-                    {!isLoading && data?.data?.length === 0 && (
+                    {!isLoading && data?.length === 0 && (
                         <div className="py-10 text-center col-span-full md:text-[25px]">
                             No events available, enjoy the silence.
                         </div>
                     )}
-                    {!isLoading && data?.data?.map((eventItem: any, index: number) => (
+                    {!isLoading && data?.map((eventItem: any, index: number) => (
                         <EventsCard key={index} eventItem={eventItem} />
                     ))}
                 </div>

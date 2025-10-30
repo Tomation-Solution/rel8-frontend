@@ -9,7 +9,7 @@ interface Props{
 
 const CardButton = ({text,path}:Props) => {
   return (
-    <Link to={path} className="bg-primary-blue w-fit whitespace-nowrap py-2 px-2 rounded-md"  >{text}</Link>
+    <Link to={path} className="bg-primary-blue w-fit whitespace-nowrap py-2 px-2 rounded-md text-white"  >{text}</Link>
   )
 }
 

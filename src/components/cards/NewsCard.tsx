@@ -4,7 +4,7 @@ import { PublicationDataType, NewsCommentDetails } from "../../types/myTypes"
 import { Link } from "react-router-dom";
 
 interface Props{
-    newsItem:PublicationDataType | NewsCommentDetails;
+    newsItem: NewsCommentDetails;
     hidePostDetails?:boolean;
     linkTo?:string
 }
@@ -33,7 +33,7 @@ const NewsCard = ({newsItem,hidePostDetails,linkTo='news'}:Props) => {
                     </aside>
                 </aside>
                 <div className="border-l flex items-center gap-2 text-sm" >
-                    <FaRegCommentDots className='w-5 h-5 text-textColor ml-2' /> <span>0 comments</span>
+                    <FaRegCommentDots className='w-5 h-5 text-textColor ml-2' /> <span>{newsItem.comments?.length} comments</span>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { fetchAllUserNews } from "../../../api/news/news-api";
 import { useEffect } from "react";
+import NewsCard from "../../../components/cards/NewsCard";
 
 const NewsPage = () => {
   const { notifyUser } = Toast();
@@ -23,14 +24,15 @@ const NewsPage = () => {
     return <CircleLoader/>
   }
   
+  console.log(data)
   return (
     <main>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
       <div className="col-span-1 md:col-span-3 md:px-0 px-10">
           <BreadCrumb title={"News"} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {data?.data?.map((newsItem:NewsCommentDetails, index:number) => (
-              <PublicationCard key={index} publicationItem={newsItem}  linkTo="news"/>
+            {data?.map((newsItem:NewsCommentDetails, index:number) => (
+              <NewsCard key={index} newsItem={newsItem}  linkTo="news"/>
             ))}
           </div>
         </div>

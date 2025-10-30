@@ -16,11 +16,11 @@ const MeetingPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <section className="col-span-3">
           <BreadCrumb title="Meeting" />
-          {data?.data?.length > 0 &&
-            data.data.map((meeting: any, index: number) => (
+          {[].length > 0 &&
+            [].map((meeting: any, index: number) => (
               <MeetingCard key={index} meeting={meeting} linkTo="meeting" />
             ))}
-          {data?.data?.length <= 0 && (
+          {[].length <= 0 && (
             <h3 className="text-primary-blue font-light">No Meetings Available</h3>
           )}
         </section>

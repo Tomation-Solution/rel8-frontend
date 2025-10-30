@@ -1,10 +1,16 @@
 import { NewsResponseType } from "../../types/myTypes";
 import apiTenant from "../baseApi";
 
-export const fetchAllUserNews = async ():Promise<NewsResponseType> =>{
+export const fetchAllUserNews = async ():Promise<any> =>{
     const response = await apiTenant.get(`/api/content/news`);
     return response.data
 }
+
+export const fetchNewsById = async (id: string):Promise<any> =>{
+    const response = await apiTenant.get(`/api/content/news/${id}`);
+    return response.data
+}
+
 // Fetch comments for a specific news item
 export const fetchNewsComments = async (id:string|null) =>{
     if (id){
@@ -14,7 +20,7 @@ export const fetchNewsComments = async (id:string|null) =>{
 }
 
 // Post a comment for a specific news item
-export const postNewsComment = async (comment: string, newsId: number) => {
+export const postNewsComment = async (comment: string, newsId: string) => {
     const requestBody = {
         content: comment
     };
@@ -24,7 +30,7 @@ export const postNewsComment = async (comment: string, newsId: number) => {
 };
 
 // Delete a comment by its ID
-export const deleteNewsComment = async (newsId: number, commentId: number) => {
+export const deleteNewsComment = async (newsId: string, commentId: string) => {
     const response = await apiTenant.delete(`/api/content/news/${newsId}/comments/${commentId}`);
     return response.data;
 };

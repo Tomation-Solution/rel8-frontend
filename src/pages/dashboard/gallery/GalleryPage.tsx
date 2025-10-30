@@ -49,6 +49,7 @@ const GalleryPage = () => {
         }
     };
 
+    console.log(data)
     return (
         <main>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
@@ -58,7 +59,7 @@ const GalleryPage = () => {
                     <div className={`${isLoading && `place-items-center`} grid grid-cols-2 md:grid-cols-4 gap-2`}>
                         {isLoading && <CircleLoader />}
 
-                        {data?.data?.data?.map((galleryItem: GalleryItem, index: number) => (
+                        {data?.map((galleryItem: GalleryItem, index: number) => (
                             <GalleryCard key={index} galleryItem={galleryItem} />
                         ))}
                     </div>
