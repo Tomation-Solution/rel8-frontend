@@ -83,7 +83,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
                     }`}
                 >
                     <nav 
-                        className="lg:hidden fixed top-[60px] w-[80%] sm:w-[40%] md:w-[36%] overflow-y-auto min-h-screen h-full bg-org-primary px-3 py-6"
+                        className="lg:hidden fixed top-[60px] w-[80%] sm:w-[40%] md:w-[36%] overflow-y-auto min-h-screen h-full bg-white px-3 py-6"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {sideBarData.map((item, index) => (

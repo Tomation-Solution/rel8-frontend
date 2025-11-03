@@ -40,8 +40,8 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
     return (
         <>
             <NavLink to={item.path ? item.path : ""} onClick={handleClick} className="">
-                <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem]  p-3 mx-4 rounded-lg group ${
-                    location.pathname === item.path ? "bg-org-secondary text-org-primary" : "hover:bg-org-secondary hover:text-org-primary text-org-secondary/50"
+                <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem]  p-3 mx-4 rounded-lg group text-gray-500 ${
+                    location.pathname === item.path ? "bg-org-secondary text-org-primary" : "hover:bg-org-secondary hover:text-org-primary "
                 }`}>
                     <div className='flex items-center gap-2'>
                         <div className='bg-org-primary rounded-full p-2'>
