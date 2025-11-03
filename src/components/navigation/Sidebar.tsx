@@ -62,7 +62,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
     return (
         <>
             {/* Desktop Navbar */}
-            <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 bg-org-primary fixed h-full shadow-md py-5">
+            <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 bg-white fixed h-full shadow-md py-5">
                 {sideBarData.map((item, index) => (
                     <NavItem
                         key={index}
