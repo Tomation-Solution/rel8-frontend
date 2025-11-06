@@ -173,13 +173,13 @@ export interface NewsCommentDetails {
   
 //----------------------------- Table Type
   export interface TableDataType {
-    id: number;
+    _id: string;
     user__email: string;
     is_overdue: boolean;
     amount: string;
     is_paid: boolean;
-    due__startDate: string;
-    due__Name: string;
+    startDate: string;
+    purpose: string;
     customAccessorProperty: string;
   }
   
@@ -296,8 +296,9 @@ export interface ChatUserDataType{
 
 export interface ChatMessageDataType {
   message: string;
-  user__id: number;
+  user__id: number | string;
   full_name: string;
+  time?: string;
   id?: number;
 }
 

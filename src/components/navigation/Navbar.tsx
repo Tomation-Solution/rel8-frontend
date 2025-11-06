@@ -29,6 +29,8 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const notificationCount = notifications?.length || 0;
 
   console.log(user);
+
+  console.log(user);
   return (
     <header className="h-[70px] z-[999] w-full px-2 border fixed top-0 bg-white max-w-[inherit]">
       <div className="w-[95%] mx-auto flex items-center h-full justify-between">
@@ -82,7 +84,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
               </span>
             )}
           </div>
-          <Avatar imageUrl={user?.imageUrl || avatarImage} />
+          <Avatar name={user?.name} imageUrl={user?.imageUrl} />
         </div>
       </div>
     </header>

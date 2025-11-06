@@ -12,7 +12,7 @@ interface Props{
 const columnHelper = createColumnHelper<TableDataType>()
 
 const columns = [
-  columnHelper.accessor('due__Name', {
+  columnHelper.accessor('purpose', {
     header: 'Particluars',
     cell: (info) => info.getValue(),
   }),
@@ -20,7 +20,7 @@ const columns = [
     header: 'Amount',
     cell: (info) => info.renderValue(),
   }),
-  columnHelper.accessor('due__startDate', {
+  columnHelper.accessor('startDate', {
     header: 'Date',
     cell: (info) => info.getValue(),
   }),

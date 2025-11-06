@@ -10,6 +10,9 @@ import CircleLoader from '../loaders/CircleLoader';
 import {  useState,useEffect } from 'react';
 import { TENANT, sitename } from '../../utils/constants';
 import {  getUserOrNull } from '../../utils/extra_functions';
+import { sendGroupMessage } from '../../api/chats/chats';
+import { useMutation, useQueryClient } from 'react-query';
+// import io from 'socket.io-client';
 
 interface Props{
     currentChatType:chatRoomType;
@@ -35,14 +38,21 @@ export  type chatRoomType ={
 const ChatBoxContainer = ({currentChatType,data,isLoading,}:Props) => {
 
   const { user } = useAppContext();
-  // const [web_socket, setWeb_socket] = useState<WebSocket | null>(null);
+  const queryClient = useQueryClient();
 
   const [text,setText] = useState('')
- 
+
   // const [chatroom,setChatRoom] = useState<>(null)
   const [web_socket,setWeb_socket] = useState<WebSocket | null>(null);
   const [connecting,setConnecting] = useState(false)
   const [newchats,setNewchats] = useState<ChatMessageDataType[]>([])
+
+  const sendMessageMutation = useMutation(sendGroupMessage, {
+    onSuccess: () => {
+      setText('');
+      queryClient.invalidateQueries('fetchOldGeneralChats');
+    },
+  });
 
 // console.log({data})
 
@@ -106,24 +116,8 @@ if(web_socket){
 }
 
 const sendMessage=()=>{
-  const logged_in_user =  getUserOrNull()
-  console.log({logged_in_user})
-  if(!logged_in_user) return 
-   const data ={
-       'message':text,
-       'send_user_id':logged_in_user.user_id,
-       'is_group':true
-   }
-   
-   try{
-       web_socket?.send(JSON.stringify(data))
-      }
-      catch(e){
-        console.log('catch',e)
-      }
-
-      
-
+  if(!text.trim()) return;
+  sendMessageMutation.mutate(text);
 }
 
 if(web_socket){
@@ -136,7 +130,8 @@ if(web_socket){
         {
           'user__id':response.send_user_id,
           'message':response.message,
-          'full_name':response.full_name
+          'full_name':response.full_name,
+          'time': new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
       }
       ])
     };
@@ -161,10 +156,10 @@ if(web_socket){
 {
   data?
   [...data,...newchats].map((chat:ChatMessageDataType,index:number)=>(
-
-     <ChatItem by={chat.full_name} key={index}  time='6:00pm' sender={user?.id === chat.user__id} message={chat?.message} />
-  )):''
-}
+ 
+      <ChatItem by={chat.full_name} key={index}  time={chat.time || '6:00pm'} sender={user?.id === chat.user__id} message={chat?.message} />
+   )):''
+ }
       
    </div>
    <div className='flex items-center p-2 gap-2' >
@@ -179,11 +174,8 @@ if(web_socket){
         <input type="text" className='form-control' placeholder="Type a message" value={text} onChange={(event) => setText(event.target.value)} />
 
     </div>
-     <button className='py-2 px-3 grid place-items-center bg-neutral3 rounded-md' 
-     onClick={()=>{
-      if(!text) return 
-      sendMessage()
-     }}
+     <button className='py-2 px-3 grid place-items-center bg-neutral3 rounded-md'
+     onClick={sendMessage}
      >
        <AiOutlineSend className='w-5 h-5 text-textColor'  />
      </button>

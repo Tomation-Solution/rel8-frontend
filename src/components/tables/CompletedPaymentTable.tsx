@@ -12,17 +12,17 @@ interface Props{
 const columnHelper = createColumnHelper<TableDataType>()
 
 const columns = [
-  columnHelper.accessor('due__Name', {
-    header: 'Particluars',
+  columnHelper.accessor('purpose', {
+    header: 'Name',
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor('amount', {
     header: 'Amount',
     cell: (info) => info.renderValue(),
   }),
-  columnHelper.accessor('due__startDate', {
+  columnHelper.accessor('startDate', {
     header: 'Date',
-    cell: (info) => info.getValue(),
+    cell: (info) => (new Date(info.getValue()).toDateString()),
   }),
   
 ];
@@ -58,7 +58,7 @@ const CompletedPaymentTable = ({tableData,isLoading}:Props) => {
                   
                 >
                   {headerGroup.headers.map((header,index) => (
-                    <th key={header.id} className={`${index % 2 === 0 ? "bg-primary-dark2" : "bg-primary-light2"} ${index === 0 && "rounded-tl-md rounded-bl-md"}  text-center  text-white relative min-w-[60px] text-sm font-semibold border-b capitalize pt-3 pl-[6px] pr-1 pb-4  max-w-[150px] sm:max-w-[200px] break-words  gap-2`}>
+                    <th key={header.id} className={`bg-org-primary ${index === 0 && "rounded-tl-md rounded-bl-md"}  text-center  text-white relative min-w-[60px] text-sm font-semibold border-b capitalize pt-3 pl-[6px] pr-1 pb-4  max-w-[150px] sm:max-w-[200px] break-words  gap-2`}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -67,7 +67,7 @@ const CompletedPaymentTable = ({tableData,isLoading}:Props) => {
                           )}
                     </th>
                   ))}
-                   <th key={headerGroup.id} className={` ${headerGroup.headers.length+1 % 2 === 0 ? "bg-primary-dark2" : "bg-primary-light2"} rounded-tr-md rounded-br-md text-center text-white relative text-sm font-semibold border-b capitalize pt-3 pl-1 pr-1 pb-4  max-w-[150px] sm:max-w-[200px] break-words  gap-2`}>
+                   <th key={headerGroup.id} className={` ${headerGroup.headers.length+1 % 2 === 0 ? "bg-org-primary" : "bg-org-secondary"} rounded-tr-md rounded-br-md text-center text-white relative text-sm font-semibold border-b capitalize pt-3 pl-1 pr-1 pb-4  max-w-[150px] sm:max-w-[200px] break-words  gap-2`}>
                       Download
                    </th>
                 </tr>

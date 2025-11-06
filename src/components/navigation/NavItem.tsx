@@ -39,7 +39,7 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
 
     return (
         <>
-            <NavLink to={item.path ? item.path : ""} onClick={handleClick} className="">
+            <NavLink to={item.path ? item.path : ""} style={{ textDecoration: 'none' }} onClick={handleClick} className="">
                 <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem]  p-3 mx-4 rounded-lg group text-gray-500 ${
                     location.pathname === item.path ? "bg-org-secondary text-org-primary" : "hover:bg-org-secondary hover:text-org-primary "
                 }`}>
@@ -47,7 +47,7 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
                         <div className='bg-org-primary rounded-full p-2'>
                             <img src={item.mainIcon} className='object-fit' alt="" />
                         </div>
-                        <span className="text-sm md:text-lg">
+                        <span className="text-sm md:text-[17px]">
                             {item.name}
                         </span>
                     </div>

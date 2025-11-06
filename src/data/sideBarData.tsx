@@ -98,11 +98,11 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Meetings",
     path: "/meeting",
   },
-  // {
-  //   mainIcon: accountIcon,
-  //   name: "My Account",
-  //   path: "/account",
-  // },
+  {
+    mainIcon: accountIcon,
+    name: "My Account",
+    path: "/account",
+  },
   // {
   //   mainIcon: fundaProjectIcon,
   //   name: "Fund a Project",

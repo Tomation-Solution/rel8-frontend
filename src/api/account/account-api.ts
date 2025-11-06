@@ -3,7 +3,7 @@
 import apiTenant from "../baseApi";
 
 export const fetchUserDues= async ()=>{
-    const response = await apiTenant.get(`/dues/memberdue/`);
+    const response = await apiTenant.get(`/api/dues/memberdues/`);
     return response.data
 }
 

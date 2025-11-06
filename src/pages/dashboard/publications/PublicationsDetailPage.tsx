@@ -79,10 +79,10 @@ const PublicationsDetailPage = () => {
               </div>
                     <br />
                     {
-                publicationItem?.body?
+                publicationItem?.content?
                 <div
                dangerouslySetInnerHTML={{
-                 __html: `${publicationItem.body}`,
+                 __html: `${publicationItem.content}`,
                }}
              />:''
                 }
