@@ -92,11 +92,11 @@ const LoginPage = () => {
                <Button isLoading={isLoading} text='Login' />
             </div>
             </form>
-            <AuthPageInformation
+            {/* <AuthPageInformation
               authPageInformationText="Don’t have an account?"
               authPageInformationAction="Register"
               authPageInformationLink="/register"
-            />
+            /> */}
           </div>
         </section>
       </div>

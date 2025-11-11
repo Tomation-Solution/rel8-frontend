@@ -41,6 +41,7 @@ export interface MemberInfoType {
     committee: {
         isMember: boolean;
         committeeName: string | null;
+        committeeId: string | null;
         position: string | null;
     };
     token: string;
