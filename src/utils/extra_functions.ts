@@ -131,7 +131,7 @@ export type UserType = {
           "id": number
       }[]
   ,
-  "user_id": number,
+  "id": number,
   "member_id": string,
   "profile_image":string | null
 }
@@ -189,7 +189,7 @@ export const FetchName = (user: any) => {
   if (memberInfoFullName) {
     return memberInfoFullName;
   }
-  return user.full_name || "Unknown User"; // Return user's full_name or default value
+  return user.name || "Unknown User"; // Return user's full_name or default value
 };
 
 export const FetchNameByMemberInfo = (member_info:MemberType['member_info']):string=>{

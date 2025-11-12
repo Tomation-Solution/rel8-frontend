@@ -10,7 +10,7 @@ interface Props{
     borderRadius?:string;
 }
 
-const Button = ({text,size,className,type='primary',onClick,isLoading,textColor='text-white',padding='p-3',borderRadius='rounded-[12px]'}:Props) => {
+const Button = ({text,size,className,type='primary',onClick,isLoading,textColor='text-white',padding='p-3',borderRadius='rounded-[4px]'}:Props) => {
   return (
     
     <button onClick={onClick} className={`btn ${size ? size : "btn-block"} ${type === 'outlined' && "btn-Outlined"}  ${type === 'secondary' && "btnSecondary"} ${type === 'primary' && "btnPrimary" } ${textColor} ${padding} ${borderRadius} ${className}` }>

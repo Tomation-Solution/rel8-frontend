@@ -24,23 +24,23 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Home",
     path: "/",
   },
-  // {
-  //   mainIcon: chatIcon,
-  //   name: "Chat",
-  //   path: "/chat",
-  // },
+  {
+    mainIcon: chatIcon,
+    name: "Chat",
+    path: "/chat",
+  },
   {
     mainIcon: notificationsIcon,
     name: "Notifications",
     path: "/notifications",
   },
-  {
-    mainIcon:membersEnviroment,
-    name: "Directory",
-    path: "/registry",
-    activeLinkIcon: '',
-    notActiveLinkIcon:'',
-  },
+  // {
+  //   mainIcon:membersEnviroment,
+  //   name: "Directory",
+  //   path: "/registry",
+  //   activeLinkIcon: '',
+  //   notActiveLinkIcon:'',
+  // },
   {
     mainIcon:membersEnviroment,
     name: "Members Enviroment",
@@ -55,13 +55,13 @@ export const sideBarData: SideBarLinkType[] = [
     activeLinkIcon: activeLinkIcon,
     notActiveLinkIcon:nonActiveLinkIcon,
   },
-  {
-    mainIcon: comiteeEnviromentIcon,
-    name: "Committee Environment",
-    activeLinkIcon: togglerIcon,
-    notActiveLinkIcon: togglerIcon,
-    subMenu: [] // This will be filled with committee data fetched from the backend
-  },
+  // {
+  //   mainIcon: comiteeEnviromentIcon,
+  //   name: "Committee Environment",
+  //   activeLinkIcon: togglerIcon,
+  //   notActiveLinkIcon: togglerIcon,
+  //   subMenu: [] // This will be filled with committee data fetched from the backend
+  // },
 
   {
     mainIcon: eventsIcon,

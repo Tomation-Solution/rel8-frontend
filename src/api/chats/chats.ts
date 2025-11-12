@@ -10,16 +10,26 @@ export const getGroupMessages = async () => {
         full_name: msg.senderId.name,
         time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
     }));
+
+    console.log(transformedData, 'transformed data')
     return transformedData;
 }
 
 export const getPrivateMessages = async () => {
     const response = await apiTenant.get('/api/chat/private');
-    return response.data;
+    // Transform data to match frontend expectations
+    const transformedData = response.data.map((msg: any) => ({
+        user__id: msg.senderId._id,
+        message: msg.content,
+        full_name: msg.senderId.name,
+        time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    }));
+    return transformedData;
 }
 
-export const sendGroupMessage = async (content: string) => {
-    const response = await apiTenant.post('/api/chat/group', { content });
+export const sendGroupMessage = async (content: string, groupId?: string) => {
+    const payload = groupId ? { content, groupId } : { content };
+    const response = await apiTenant.post('/api/chat/group', payload);
     return response.data;
 }
 
@@ -29,14 +39,32 @@ export const sendPrivateMessage = async (content: string, recipientId: string) =
 }
 
 export const getChatOverview = async () => {
-    const response = await apiTenant.get('/api/chat/overview');
-    return response.data;
+  const response = await apiTenant.get('/api/chat/overview');
+  return response.data;
+}
+
+export const getGroupChats = async () => {
+  const response = await apiTenant.get('/api/chat/groups');
+  return response.data;
+}
+
+export const getGroupMessagesById = async (groupId: string) => {
+  const response = await apiTenant.get(`/api/chat/group/${groupId}`);
+  // Transform data to match frontend expectations
+  const transformedData = response.data.map((msg: any) => ({
+      user__id: msg.senderId._id,
+      message: msg.content,
+      full_name: msg.senderId.name,
+      time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+  }));
+
+  return transformedData;
 }
 
 // Legacy functions for backward compatibility
 export const getChats = async (roomName: string) => {
-    // For now, return group messages
-    return getGroupMessages();
+    // For private chats, return private messages
+    return getPrivateMessages();
 }
 
 export const getAllChatsUsers = async () => {
