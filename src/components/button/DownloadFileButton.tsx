@@ -6,61 +6,67 @@ import Toast from "../toast/Toast";
 const { notifyUser } = Toast();
 
 interface Props {
-    fileUrl: string;
-    fileName: string;
+    fileUrl?: string;
+    fileUrls?: string[];
+    fileName?: string;
+    fileNames?: string[];
     buttonText: string;
 }
 
-const DownloadFileButton = ({ fileUrl, fileName, buttonText }: Props) => {
+const DownloadFileButton = ({ fileUrl, fileUrls, fileName, fileNames, buttonText }: Props) => {
     const [isDownloading, setIsDownloading] = useState(false);
 
-    const { refetch, isLoading } = useQuery(
-        'downloadFile',
-        () => fetchFileForDownload(fileUrl),
-        {
-            enabled: false,
-            onSuccess: (blob) => {
-                const url = window.URL.createObjectURL(blob);
+    const downloadSingleFile = async (url: string, name: string) => {
+        try {
+            const blob = await fetchFileForDownload(url);
+            const downloadUrl = window.URL.createObjectURL(blob);
 
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.setAttribute('download', name);
 
-                document.body.appendChild(link);
-
-                // Start download
-                link.click();
-
-                // Clean up
-                link.parentNode?.removeChild(link);
-                window.URL.revokeObjectURL(url);
-                setIsDownloading(false);
-            },
-            onError: (err) => {
-                console.error('Download error: ', err);
-                notifyUser(`Failed to download`, 'error');
-
-                setIsDownloading(false);
-            }
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (err) {
+            console.error('Download error: ', err);
+            notifyUser(`Failed to download ${name}`, 'error');
         }
-    );
+    };
 
-    const downloadFile = () => {
-        if (isLoading || isDownloading) {
+    const downloadFile = async () => {
+        if (isDownloading) {
             return;
         }
 
         setIsDownloading(true);
-        refetch();
+
+        try {
+            if (fileUrls && fileUrls.length > 0) {
+                // Download multiple files
+                for (let i = 0; i < fileUrls.length; i++) {
+                    const name = fileNames ? fileNames[i] : `attachment_${i + 1}`;
+                    await downloadSingleFile(fileUrls[i], name);
+                }
+            } else if (fileUrl && fileName) {
+                // Download single file
+                await downloadSingleFile(fileUrl, fileName);
+            }
+        } catch (err) {
+            console.error('Download error: ', err);
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
     return (
         <div>
             <button className="px-3 w-[240px] my-4 py-2 bg-org-primary text-white  border border-white h-[40px] rounded-md hover:bg-org-secondary hover:text-org-primary  hover:border-org-primary"
                 onClick={downloadFile}
-                disabled={isLoading || isDownloading}
+                disabled={isDownloading}
             >
-                {isLoading || isDownloading ? 'Downloading...' : `Download ${buttonText}`}
+                {isDownloading ? 'Downloading...' : `Download ${buttonText}`}
             </button>
         </div>
     )

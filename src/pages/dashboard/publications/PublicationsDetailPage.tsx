@@ -54,22 +54,23 @@ const PublicationsDetailPage = () => {
   }
 
   if (data){
-    const fileUrl = publicationItem.fileUrl || "";
-    const fileNameArr: string[] = fileUrl.split('/') || [];
-    const fileName = fileNameArr[fileNameArr.length - 1];
+    const bannerUrl = publicationItem.bannerUrl || "";
+    const attachmentUrls = publicationItem.attachmentUrls || [];
 
     return (
       <main>
           <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5">
             <div className="col-span-3">
                 <BreadCrumb title="Publications" />
-                <div className="relative" >
-                  <img
-                    src={publicationItem?.fileUrl}
-                    className="w-full object-cover max-h-[40vh] top-0 bottom-0 left-0 right-0  rounded-md border "
-                    alt=""
-                  />
-                </div>
+                {bannerUrl && (
+                  <div className="relative" >
+                    <img
+                      src={bannerUrl}
+                      className="w-full object-cover object-center min-h-[40vh] top-0 bottom-0 left-0 right-0  rounded-md border "
+                      alt=""
+                    />
+                  </div>
+                )}
                 <div className="col-span-1 mt-6">
                 <div className="mb-3">
                 <h3 className="font-semibold my-2">{publicationItem?.name}</h3>
@@ -100,8 +101,19 @@ const PublicationsDetailPage = () => {
                     <AiOutlineDislike />
                   </button>
                 </div>
-                < DownloadFileButton fileUrl={fileUrl} fileName={fileName} buttonText="Attachment" />
-                <div>
+                {attachmentUrls.length > 0 && (
+                  <div className="mt-4">
+                    <DownloadFileButton
+                      fileUrls={attachmentUrls}
+                      fileNames={attachmentUrls.map(url => {
+                        const fileNameArr: string[] = url.split('/') || [];
+                        return fileNameArr[fileNameArr.length - 1];
+                      })}
+                      buttonText="Attachments"
+                    />
+                  </div>
+                )}
+                 <div>
               {/* <PublicationComment newsId={publicationId} /> */}
             </div>
             </div>

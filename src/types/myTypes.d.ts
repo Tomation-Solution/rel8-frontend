@@ -204,12 +204,13 @@ export interface PublicationDataType {
   likes: number;
   dislikes: number | null;
   body: string;
-  image: string;
-  danload: string | null;
+  bannerUrl?: string;
+  attachmentUrls?: string[];
   exco: string | null;
   commitee_name: string | null;
   chapters: string | null;
   membership_grade: string | null;
+  comments: any;
   newsId: number;
 }
 

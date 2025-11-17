@@ -1,0 +1,1 @@
+export const unformatText = (text: string) => text.replace(/<[^>]*>/g, '').trim();
