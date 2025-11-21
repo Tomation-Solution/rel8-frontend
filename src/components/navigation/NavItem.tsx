@@ -1,3 +1,4 @@
+import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { SideBarLinkType } from '../../types/sidebarDataType';
 import { useState } from 'react';
@@ -41,13 +42,12 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
         <>
             <NavLink to={item.path ? item.path : ""} style={{ textDecoration: 'none' }} onClick={handleClick} className="">
                 <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem]  p-3 mx-4 rounded-lg group text-gray-500 ${
-                    location.pathname === item.path ? "bg-org-secondary text-org-primary" : "hover:bg-org-secondary hover:text-org-primary "
+                    location.pathname === item.path ? "bg-org-secondary/30 text-[#000000] font-bold" : "hover:bg-org-secondary hover:text-org-primary "
+                    // location.pathname === item.path ? "bg-org-secondary/50 text-org-primary" : "hover:bg-org-secondary hover:text-org-primary "
                 }`}>
                     <div className='flex items-center gap-2'>
-                        <div className='bg-org-primary rounded-full p-2'>
-                            <img src={item.mainIcon} className='object-fit' alt="" />
-                        </div>
-                        <span className="text-sm md:text-[17px]">
+                            {item.mainIcon && React.createElement(item.mainIcon, { className: 'w-5 h-5' })}
+                        <span className="text-sm md:text-[15px]">
                             {item.name}
                         </span>
                     </div>

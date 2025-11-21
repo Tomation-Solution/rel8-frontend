@@ -32,7 +32,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
   console.log(user);
   return (
-    <header className="h-[70px] z-[999] w-full px-2 border fixed top-0 bg-white max-w-[inherit]">
+    <header className="h-[70px] z-[999] w-full sticky px-2 border-b bg-gray-50 ">
       <div className="w-[95%] mx-auto flex items-center h-full justify-between">
         <div className="flex items-center gap-5">
           <span

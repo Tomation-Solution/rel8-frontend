@@ -1,36 +1,31 @@
-import membersEnviroment from '../assets/icons/members-enviroment.png'
-import activeLinkIcon from '../assets/icons/active-link-icon.png'
-import nonActiveLinkIcon from '../assets/icons/non-active-link-icon.png'
-import excosEnviromentIcon from '../assets/icons/excos-enviroment.png'
-import comiteeEnviromentIcon from '../assets/icons/comittee-enviroment.png'
-import togglerIcon from '../assets/icons/toggler.png'
-import eventsIcon from '../assets/icons/events.png'
-import newsIcon from '../assets/icons/news.png'
-import galleryIcon from '../assets/icons/gallery.png'
-import accountIcon from '../assets/icons/my-account.png'
-import serviceRequestsIcon from '../assets/icons/service-request.png'
-import electionIcon from '../assets/icons/election.png'
-import logoutIcon from '../assets/icons/logout.png'
-import homeIcon from '../assets/icons/home.png'
-import chatIcon from '../assets/icons/chat.png'
-import notificationsIcon from '../assets/icons/bell.png'
-import supportIcon from '../assets/icons/support.png'
-import fundaProjectIcon from '../assets/icons/fund-a-project.png'
+import {
+  FiGrid,
+  FiImage,
+  FiCalendar,
+  FiUser,
+  FiBell,
+  FiHelpCircle,
+  FiLogOut,
+} from "react-icons/fi";
+import { HiOutlineUserGroup } from "react-icons/hi2";
+import { PiChatTeardropText } from "react-icons/pi";
+import { CgWebsite } from "react-icons/cg";
+import { MdBallot, MdOutlineAdminPanelSettings } from "react-icons/md";
 import { SideBarLinkType } from '../types/sidebarDataType'
 
 export const sideBarData: SideBarLinkType[] = [
   {
-    mainIcon: homeIcon,
+    mainIcon: FiGrid,
     name: "Home",
     path: "/",
   },
   {
-    mainIcon: chatIcon,
+    mainIcon: PiChatTeardropText,
     name: "Chat",
     path: "/chat",
   },
   {
-    mainIcon: notificationsIcon,
+    mainIcon: FiBell,
     name: "Notifications",
     path: "/notifications",
   },
@@ -42,18 +37,14 @@ export const sideBarData: SideBarLinkType[] = [
   //   notActiveLinkIcon:'',
   // },
   {
-    mainIcon:membersEnviroment,
+    mainIcon: HiOutlineUserGroup,
     name: "Members Enviroment",
     path: "/members",
-    activeLinkIcon: activeLinkIcon,
-    notActiveLinkIcon:nonActiveLinkIcon,
   },
   {
-    mainIcon: excosEnviromentIcon,
+    mainIcon: MdOutlineAdminPanelSettings,
     name: "Excos Enviroment",
     path: "/excos",
-    activeLinkIcon: activeLinkIcon,
-    notActiveLinkIcon:nonActiveLinkIcon,
   },
   // {
   //   mainIcon: comiteeEnviromentIcon,
@@ -64,22 +55,22 @@ export const sideBarData: SideBarLinkType[] = [
   // },
 
   {
-    mainIcon: eventsIcon,
+    mainIcon: FiCalendar,
     name: "Events",
     path: "/events",
   },
   // {
-  //   mainIcon: eventsIcon,
+  //   mainIcon: FiCalendar,
   //   name: "Special Events",
   //   path: "/special-events",
   // },
   {
-    mainIcon:newsIcon,
+    mainIcon: CgWebsite,
     name: "Publication",
     path: "/publications",
   },
   {
-    mainIcon:newsIcon,
+    mainIcon: CgWebsite,
     name: "News",
     path: "/news",
   },
@@ -89,17 +80,17 @@ export const sideBarData: SideBarLinkType[] = [
   //   path: "/resources",
   // },
   {
-    mainIcon: galleryIcon,
+    mainIcon: FiImage,
     name: "Gallery",
     path: "/gallery",
   },
   {
-    mainIcon: eventsIcon,
+    mainIcon: FiCalendar,
     name: "Meetings",
     path: "/meeting",
   },
   {
-    mainIcon: accountIcon,
+    mainIcon: FiUser,
     name: "My Account",
     path: "/account",
   },
@@ -113,23 +104,24 @@ export const sideBarData: SideBarLinkType[] = [
   //   name: "Service Requests",
   //   path: "/service-requests",
   // },
-  // {
-  //   mainIcon: electionIcon,
-  //   name: "Election",
-  //   path: "/election",
-  // },
+  {
+    mainIcon: MdBallot,
+    // mainIcon: electionIcon,
+    name: "Election",
+    path: "/election",
+  },
   // {
   //   mainIcon: subscribeIcon,
   //   name: "Subscribe",
   //   path: "/subscribe",
   // },
   {
-    mainIcon: supportIcon,
+    mainIcon: FiHelpCircle,
     name: "Support",
     path: "/support",
   },
   {
-    mainIcon: logoutIcon,
+    mainIcon: FiLogOut,
     name: "Logout",
     path: "/logout",
   },

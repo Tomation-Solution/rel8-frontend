@@ -13,6 +13,7 @@ import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import PublicationComment from "../../../components/cards/PublicationComment";
 import DownloadFileButton from "../../../components/button/DownloadFileButton";
+import { togglePublicationLike } from "../../../api/publications/publications-api";
 
 const PublicationsDetailPage = () => {
 
@@ -32,13 +33,25 @@ const PublicationsDetailPage = () => {
   console.log(publicationItem)
   useEffect(() => {
     if (publicationItem) {
-      setHasLiked(publicationItem.likes > 0);
+      // Check if current user has liked this publication
+      const currentUserId = localStorage.getItem('userId'); // Adjust based on how you store user ID
+      setHasLiked(publicationItem.likes?.some((like: any) => like._id === currentUserId) || false);
       setHasDisliked(publicationItem.dislikes !== null && publicationItem.dislikes > 0);
     }
   }, [publicationItem]);
 
-  const handleLike = () => {
-    toast.info("Like functionality coming soon", { autoClose: 2000 });
+  const handleLike = async () => {
+    if (!publicationId) return;
+
+    try {
+      const response = await togglePublicationLike(publicationId);
+      setHasLiked(response.liked);
+      // Update the publication data to reflect the new like count
+      // You might need to refetch or update the local state
+      toast.success(response.liked ? "Liked!" : "Unliked!", { autoClose: 2000 });
+    } catch (error) {
+      toast.error("Failed to toggle like", { autoClose: 2000 });
+    }
   };
 
   const handleDislike = () => {

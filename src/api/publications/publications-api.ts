@@ -29,3 +29,9 @@ export const deletePublicationComment = async (commentId: number) => {
     const response = await apiTenant.delete(`/publication/publicationview__comment/${commentId}/`);
     return response.data;
 };
+
+// Toggle like for a publication
+export const togglePublicationLike = async (publicationId: string) => {
+    const response = await apiTenant.post(`/api/content/publication/${publicationId}/like`);
+    return response.data;
+};

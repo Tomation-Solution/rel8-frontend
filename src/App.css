@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap');
+
+*{
+  font-family: 'Manrope';
+}
+
+.font-inter{
+  font-family: 'Inter' !important;
+}
+
+button{
+  cursor: pointer !important;
+}
+
 .react-multi-carousel-dot-list{
     background-color: white !important;
 }

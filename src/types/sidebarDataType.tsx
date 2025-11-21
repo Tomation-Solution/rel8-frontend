@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface SubMenuItem {
   name: string;
   path: string;
@@ -13,7 +15,7 @@ export interface DropdownLinkType {
 export interface SideBarLinkType {
   name: string;
   path?: string;
-  mainIcon?: string;
+  mainIcon?: React.ElementType;
   activeLinkIcon?: string;
   notActiveLinkIcon?: string;
   subMenu?: SubMenuItem[]; // Updated to use SubMenuItem interface

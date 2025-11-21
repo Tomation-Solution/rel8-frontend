@@ -4,7 +4,27 @@ import apiTenant from "../baseApi";
 
 
 export const fetchElections = async () =>{
-    const response = await apiTenant.get(`/election/adminmanageballotbox/list_of_elections/`);
+    const response = await apiTenant.get(`/api/elections/`);
+    return response.data
+}
+
+export const fetchPositions = async () =>{
+    const response = await apiTenant.get(`/api/positions/`);
+    return response.data
+}
+
+export const fetchElectionStatsForMembers = async () =>{
+    const response = await apiTenant.get(`/api/elections/member-stats`);
+    return response.data
+}
+
+export const fetchElectionDetails = async (id: string) =>{
+    const response = await apiTenant.get(`/api/elections/${id}/details`);
+    return response.data
+}
+
+export const castVote = async (candidateId: string) =>{
+    const response = await apiTenant.post(`/api/elections/vote`, { candidateId });
     return response.data
 }
 export const fetchElectionContestants = async (id:string|null) =>{

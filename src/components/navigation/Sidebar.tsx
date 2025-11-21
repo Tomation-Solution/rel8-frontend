@@ -62,7 +62,8 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
     return (
         <>
             {/* Desktop Navbar */}
-            <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 bg-white fixed h-full shadow-md py-5">
+            {/* <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 !bg-[#FAFAFB] fixed h-full shadow-md py-5"> */}
+            <nav className="hidden lg:block lg:w-80 z-10 !bg-[#FAFAFB] h-screen shadow-md py-5 sticky top-0 overflow-y-auto">
                 {sideBarData.map((item, index) => (
                     <NavItem
                         key={index}
@@ -75,7 +76,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
             </nav>
 
             {/* Mobile Navbar */}
-            {isMobileSidebarOpen && (
+            {/* {isMobileSidebarOpen && (
                 <div
                     onClick={() => setIsMobileSidebarOpen(false)}
                     className={`lg:hidden fixed top-0 w-full min-h-screen h-full bg-black/70 transition-transform z-10 ${
@@ -97,7 +98,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
                         ))}
                     </nav>
                 </div>
-            )}
+            )} */}
         </>
     );
 };

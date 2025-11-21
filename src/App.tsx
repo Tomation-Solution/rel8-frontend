@@ -47,6 +47,7 @@ function App() {
   const ElectionAllVotesPage = lazy(() => import("./pages/dashboard/elections/ElectionAllVotes"));
   const ElectionStepPage = lazy(() => import("./pages/dashboard/elections/ElectionStepsPage"));
   const ElectionCreateAspirantPage = lazy(() => import("./pages/dashboard/elections/ElectionCreateAspirantPage"));
+  const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
   const FundAProjectPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectPage"));
   const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
   const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
@@ -382,17 +383,6 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/election/:electionPositionId",
-      element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
-            <ElectionsContestantsPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
       path: "/elections-contestant/:id",
       element: (
         <Suspense fallback={<Loader />} >
@@ -429,6 +419,16 @@ function App() {
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
             <ElectionCreateAspirantPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+    },
+    {
+      path: "/election/:id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <ElectionDetailsPage />
           </DashboardLayout>
         </Suspense>
       ),

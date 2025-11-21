@@ -43,11 +43,13 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
     }, [userProfileData,navigate,notifyUser]);
 
   return (
-    <div className="font-sans h-screen relative ">
+    <div className="font-sans h-screen overflow-hidden relative flex justify-between">
         <Sidebar  isMobileSidebarOpen={isMobileSidebarOpen}  setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
-        <section className="lg:max-w-[calc(100%_-_330px)] ml-auto py-10">
+        <section className="lg:w-[calc(100%)] overflow-y-scroll h-screen  pb-10 relative">
+          <div className="fixed w-full">
             <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
-            <div className="scrollbar-thin scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto text-black z-1 w-[95%] mx-auto py-4 pt-[70px]" >  
+          </div>
+            <div className="scrollbar-thin mt-12 scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto text-black z-1 w-[95%] mx-auto py-4 pt-[70px]" >  
                 {children}
             </div>
 
