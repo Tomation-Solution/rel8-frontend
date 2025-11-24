@@ -125,11 +125,14 @@ const MeetingDetailsPage = () => {
         <BreadCrumb title={meetingItem.name} />
 
         {/* Image Section */}
+        <div className="w-full h-[200px] bg-gray-800 md:h-[400px]">
+
         <img
           src={meetingItem.image || meetingImage}
-          className="w-full h-[200px] md:h-[300px] object-cover rounded-lg"
+          className="h-full object-cover mx-auto rounded-lg"
           alt={meetingItem.name}
-        />
+          />
+          </div>
 
         {/* Event Date and Organizer Section */}
         <div className="my-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
