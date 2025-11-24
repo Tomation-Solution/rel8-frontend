@@ -27,6 +27,11 @@ export const castVote = async (candidateId: string) =>{
     const response = await apiTenant.post(`/api/elections/vote`, { candidateId });
     return response.data
 }
+
+export const fetchElectionResults = async (electionId: string) => {
+    const response = await apiTenant.get(`/api/elections/results/${electionId}`);
+    return response.data
+}
 export const fetchElectionContestants = async (id:string|null) =>{
     console.log('sdsddsds')
     if (id){

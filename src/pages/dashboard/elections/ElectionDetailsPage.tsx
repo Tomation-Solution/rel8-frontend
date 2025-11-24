@@ -23,6 +23,7 @@ interface Candidate {
   manifestoType?: string;
   fileUrl?: string;
   hasUserVoted?: boolean;
+  voters?: any[];
 }
 
 interface PositionItemProps {
@@ -232,8 +233,27 @@ const ElectionDetailsPage = () => {
   const [votingStates, setVotingStates] = useState<{ [candidateId: string]: 'idle' | 'voting' | 'voted' | 'error' }>({});
   const [votedCandidates, setVotedCandidates] = useState<Set<string>>(new Set());
   const [hasOutstandingDues, setHasOutstandingDues] = useState(false);
+  const [activeTab, setActiveTab] = useState("positions");
+  const [expandedCandidates, setExpandedCandidates] = useState<Set<string>>(new Set());
+  const [resultsData, setResultsData] = useState<any>(null);
 
   const { notifyUser } = Toast();
+
+  const tabsData = [
+    { value: "positions", label: "Positions" },
+    { value: "results", label: "Results" },
+  ];
+
+  const isElectionOngoing = () => {
+    if (!electionData) return true;
+    const now = new Date();
+    const endDateTime = new Date(electionData.endDate);
+    if (electionData.endTime) {
+      const [hours, minutes] = electionData.endTime.split(':');
+      endDateTime.setHours(parseInt(hours), parseInt(minutes));
+    }
+    return now < endDateTime;
+  };
 
   const handleViewManifesto = (candidate: Candidate) => {
     setSelectedCandidate(candidate);
@@ -376,6 +396,23 @@ const ElectionDetailsPage = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="bg-white inline-flex border-b border-gray-200 gap-1 w-full mb-6">
+          {tabsData.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={`px-12 py-4 rounded-t-md font-medium text-sm bg-transparent border-gray-200 transition-colors ${
+                activeTab === tab.value
+                  ? "bg-org-secondary/40 text-gray-700 border-b-2 border-org-secondary font-semibold"
+                  : "text-gray-600"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <StatCard
@@ -392,68 +429,197 @@ const ElectionDetailsPage = () => {
           />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Positions List */}
-          <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
-            <div className="p-5 border-b border-gray-200">
-              <h4 className="font-semibold text-gray-700">Positions</h4>
-            </div>
-            <div className="p-4 space-y-3">
-              {electionData.positions.length > 0 ? (
-                electionData.positions.map((position: any, index: number) => (
-                  <PositionItem
-                    key={position.id}
-                    position={position}
-                    isSelected={selectedPosition === index}
-                    onClick={() => setSelectedPosition(index)}
-                  />
-                ))
-              ) : (
-                <div className="p-4 text-center text-gray-500">
-                  <p>No positions available for this election.</p>
+        {/* Tab Content */}
+        {activeTab === "positions" && (
+          <>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Positions List */}
+              <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
+                <div className="p-5 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-700">Positions</h4>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column - Position Results */}
-          <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
-            <div className="p-5 border-b border-gray-200">
-              <h4 className="font-semibold text-gray-700">
-                {currentPosition?.name} Results
-              </h4>
-            </div>
-
-            {/* Position Stats */}
-            <div className="grid grid-cols-2 gap-4 p-4">
-              <StatCard title="Total Votes Cast" value={positionTotalVotes} />
-              <StatCard title="Voter Turnout" value={`${positionTurnout}%`} />
-            </div>
-
-            {/* Candidates Results */}
-            <div className="p-4">
-              {currentPosition?.candidates &&
-              currentPosition.candidates.length > 0 ? (
-                currentPosition.candidates.map((candidate: any) => (
-                  <CandidateChoiceCard
-                    key={candidate.id}
-                    candidate={candidate}
-                    onViewManifesto={handleViewManifesto}
-                    onVote={handleVote}
-                    votingState={votingStates[candidate.id] || 'idle'}
-                    hasVotedInPosition={hasVotedInCurrentPosition}
-                    hasUserVotedForCandidate={candidate.hasUserVoted || false}
-                  />
-                ))
-              ) : (
-                <div className="text-center text-gray-500 py-8">
-                  <p>No candidates or votes recorded for this position yet.</p>
+                <div className="p-4 space-y-3">
+                  {electionData.positions.length > 0 ? (
+                    electionData.positions.map((position: any, index: number) => (
+                      <PositionItem
+                        key={position.id}
+                        position={position}
+                        isSelected={selectedPosition === index}
+                        onClick={() => setSelectedPosition(index)}
+                      />
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      <p>No positions available for this election.</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Right Column - Position Results */}
+              <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
+                <div className="p-5 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-700">
+                    {currentPosition?.name} Results
+                  </h4>
+                </div>
+
+                {/* Position Stats */}
+                <div className="grid grid-cols-2 gap-4 p-4">
+                  <StatCard title="Total Votes Cast" value={positionTotalVotes} />
+                  <StatCard title="Voter Turnout" value={`${positionTurnout}%`} />
+                </div>
+
+                {/* Candidates Results */}
+                <div className="p-4">
+                  {currentPosition?.candidates &&
+                  currentPosition.candidates.length > 0 ? (
+                    currentPosition.candidates.map((candidate: any) => (
+                      <CandidateChoiceCard
+                        key={candidate.id}
+                        candidate={candidate}
+                        onViewManifesto={handleViewManifesto}
+                        onVote={handleVote}
+                        votingState={votingStates[candidate.id] || 'idle'}
+                        hasVotedInPosition={hasVotedInCurrentPosition}
+                        hasUserVotedForCandidate={candidate.hasUserVoted || false}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <p>No candidates or votes recorded for this position yet.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          </>
+        )}
+
+        {activeTab === "results" && (
+          <div className="bg-white rounded-lg border border-gray-200 p-8">
+            {isElectionOngoing() ? (
+              <div className="text-center">
+                <div className="mb-4">
+                  <svg
+                    className="mx-auto h-16 w-16 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Elections are Ongoing
+                </h3>
+                <p className="text-gray-600">
+                  The election results will be available once the voting period ends on{" "}
+                  {new Date(electionData.endDate).toLocaleDateString()}{" "}
+                  {electionData.endTime && `at ${electionData.endTime}`}.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">
+                  Election Results
+                </h3>
+
+
+                {/* Position Results */}
+                <div className="space-y-6">
+                  {electionData.positions.map((position: any, index: number) => (
+                    <div key={position.id} className="border border-gray-200 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        {position.name}
+                      </h4>
+
+                      <div className="space-y-3">
+                        {position.candidates
+                          .sort((a: any, b: any) => b.votes - a.votes)
+                          .map((candidate: any, candidateIndex: number) => (
+                            <>
+                              <div
+                                key={candidate.id}
+                                onClick={() => {
+                                  setExpandedCandidates(prev => {
+                                    const newSet = new Set(prev);
+                                    if (newSet.has(candidate.id)) {
+                                      newSet.delete(candidate.id);
+                                    } else {
+                                      newSet.add(candidate.id);
+                                    }
+                                    return newSet;
+                                  });
+                                }}
+                                className={`cursor-pointer flex items-center justify-between p-3 rounded-lg ${
+                                  candidateIndex === 0
+                                    ? "bg-green-50 border border-green-200"
+                                    : "bg-gray-50"
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                      candidateIndex === 0
+                                        ? "bg-green-500 text-white"
+                                        : "bg-gray-400 text-white"
+                                    }`}
+                                  >
+                                    {candidateIndex + 1}
+                                  </div>
+                                  <span className="font-medium text-gray-800">
+                                    {candidate.name}
+                                  </span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-semibold text-gray-800">
+                                    {candidate.votes} votes
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    {candidate.percentage}%
+                                  </div>
+                                </div>
+                              </div>
+                              {expandedCandidates.has(candidate.id) && (
+                                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                  {candidate.voters && candidate.voters.length > 0 ? (
+                                    <div className="space-y-2">
+                                      {(candidate.voters || [])
+                                        .sort((a: any, b: any) => new Date(b.votedAt).getTime() - new Date(a.votedAt).getTime())
+                                        .map((voter: any, voterIndex: number) => (
+                                          <div key={voterIndex} className="flex items-center justify-between text-sm bg-white px-3 py-2 rounded border">
+                                            <div>
+                                              <span className="font-medium text-gray-800">{voter.name}</span>
+                                              <span className="text-gray-500 ml-2">→ {candidate.name}</span>
+                                            </div>
+                                            <span className="text-gray-500 text-xs">
+                                              {new Date(voter.votedAt).toLocaleDateString()} {new Date(voter.votedAt).toLocaleTimeString()}
+                                            </span>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-gray-500 italic text-center">No voters recorded for this candidate</p>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         <ManifestoModal
           isOpen={modalOpen}
@@ -472,3 +638,4 @@ const ElectionDetailsPage = () => {
 };
 
 export default ElectionDetailsPage;
+
