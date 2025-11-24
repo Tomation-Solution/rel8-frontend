@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { FiPlus, FiChevronRight } from "react-icons/fi";
-import { fetchElections, fetchPositions, fetchElectionStatsForMembers } from "../../../api/elections/api-elections";
+import {
+  fetchElections,
+  fetchPositions,
+  fetchElectionStatsForMembers,
+} from "../../../api/elections/api-elections";
 import StatCard from "../../../components/cards/StatCard";
 import { DataTable } from "../../../components/Table/DataTable";
 import PageHeading from "../../../components/PageHeading";
@@ -51,35 +55,77 @@ const ElectionsPage = () => {
 
   const { notifyUser } = Toast();
 
-  const { data: electionsData, isLoading: electionsLoading, isError: electionsError } = useQuery('elections', fetchElections);
-  const { data: positionsData, isLoading: positionsLoading, isError: positionsError } = useQuery('positions', fetchPositions);
-  const { data: statsData, isLoading: statsLoading, isError: statsError } = useQuery('electionStats', fetchElectionStatsForMembers);
+  const {
+    data: electionsData,
+    isLoading: electionsLoading,
+    isError: electionsError,
+  } = useQuery("elections", fetchElections);
+  const {
+    data: positionsData,
+    isLoading: positionsLoading,
+    isError: positionsError,
+  } = useQuery("positions", fetchPositions);
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    isError: statsError,
+  } = useQuery("electionStats", fetchElectionStatsForMembers);
 
   const isLoading = electionsLoading || positionsLoading || statsLoading;
   const isError = electionsError || positionsError || statsError;
 
-  // Map backend data to display format
-  const elections: Election[] = electionsData?.map((item: any) => ({
-    id: item._id,
-    name: item.theme,
-    role_name: item.theme,
-    role_detail: item.description || '',
-    is_close: item.status === 'Ended',
-    election_startDate: item.startDate,
-    election_endDate: item.endDate,
-    election_endTime: item.endTime,
-    election_startTime: item.startTime,
-    positionIds: item.positionIds,
-  })) || [];
+  const currentTime = new Date().getTime();
 
+  // Map backend data to display format
+  const elections: Election[] =
+    electionsData?.map((item: any) => {
+      // Combine date and time for accurate comparison
+      const startDateTime = new Date(
+        `${item.startDate.split("T")[0]}T${item.startTime}:00`
+      ).getTime();
+      const endDateTime = new Date(
+        `${item.endDate.split("T")[0]}T${item.endTime}:00`
+      ).getTime();
+
+      // Determine status based on timestamps
+      let status: string;
+      let is_close: boolean;
+
+      if (currentTime < startDateTime) {
+        status = "Upcoming";
+        is_close = false;
+      } else if (currentTime >= startDateTime && currentTime <= endDateTime) {
+        status = "Ongoing";
+        is_close = false;
+      } else {
+        status = "Completed";
+        is_close = true;
+      }
+
+      return {
+        id: item._id,
+        name: item.theme,
+        role_name: item.theme,
+        role_detail: item.description || "",
+        is_close: is_close,
+        status: status,
+        election_startDate: item.startDate,
+        election_endDate: item.endDate,
+        election_endTime: item.endTime,
+        election_startTime: item.startTime,
+        positionIds: item.positionIds,
+        stats: item.stats,
+      };
+    }) || [];
   // Map positions data
-  const positions: Position[] = positionsData?.map((item: any) => ({
-    id: item._id,
-    name: item.name,
-    currentHolder: item.currentHolder,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-  })) || [];
+  const positions: Position[] =
+    positionsData?.map((item: any) => ({
+      id: item._id,
+      name: item.name,
+      currentHolder: item.currentHolder,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    })) || [];
 
   // Filter elections based on selected filter
   const filteredElections = React.useMemo(() => {
@@ -102,35 +148,49 @@ const ElectionsPage = () => {
     {
       key: "status",
       label: "Status",
-      render: (item: Election) => {
-        const status = item.is_close ? "Completed" : "Upcoming";
-        const bgColor = item.is_close ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800";
+      render: (item: any) => {
+        const statusColors = {
+          Upcoming: "bg-blue-100 text-blue-800",
+          Ongoing: "bg-yellow-100 text-yellow-800",
+          Completed: "bg-green-100 text-green-800",
+        };
+
+        const bgColor =
+          statusColors[item.status as keyof typeof statusColors] ||
+          "bg-gray-100 text-gray-800";
+
         return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor}`}>
-            {status}
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor}`}
+          >
+            {item.status}
           </span>
         );
-      }
+      },
     },
     {
       key: "duration",
       label: "Duration",
       render: (item: Election) => {
         if (item.election_startDate && item.election_endDate) {
-          return `${new Date(item.election_startDate).toLocaleDateString()} - ${new Date(item.election_endDate).toLocaleDateString()}`;
+          return `${new Date(
+            item.election_startDate
+          ).toLocaleDateString()} - ${new Date(
+            item.election_endDate
+          ).toLocaleDateString()}`;
         }
         return "N/A";
-      }
+      },
     },
     {
       key: "positions",
       label: "Positions",
-      render: (item: Election) => item.positionIds?.length || 0
+      render: (item: Election) => item.positionIds?.length || 0,
     },
     {
       key: "turnout",
       label: "Turnout",
-      render: (item: Election) => `${item.stats?.turnout || 0}%`
+      render: (item: Election) => `${item.stats?.turnout || 0}%`,
     },
   ];
 
@@ -139,12 +199,12 @@ const ElectionsPage = () => {
     {
       key: "currentHolder",
       label: "Current Holder",
-      render: (item: Position) => item.currentHolder?.name || "Vacant"
+      render: (item: Position) => item.currentHolder?.name || "Vacant",
     },
     {
       key: "createdAt",
       label: "Date Started",
-      render: (item: Position) => new Date(item.createdAt).toLocaleDateString()
+      render: (item: Position) => new Date(item.createdAt).toLocaleDateString(),
     },
     {
       key: "timeSpent",
@@ -155,21 +215,21 @@ const ElectionsPage = () => {
         const diffTime = Math.abs(now.getTime() - created.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return `${diffDays} day${diffDays === 1 ? "" : "s"}`;
-      }
+      },
     },
     {
       key: "pastHolders",
       label: "Past Holders",
-      render: (item: Position) => "0" // Placeholder - would need historical data
+      render: (item: Position) => "0", // Placeholder - would need historical data
     },
   ];
 
-    if (isLoading) {
+  if (isLoading) {
     return <CircleLoader />;
   }
 
   if (isError) {
-    notifyUser('Sorry, an error occurred when fetching data', 'error');
+    notifyUser("Sorry, an error occurred when fetching data", "error");
     return null;
   }
 
@@ -179,17 +239,34 @@ const ElectionsPage = () => {
       <PageHeading>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Elections</h1>
-          <p className="text-sm text-gray-500 mt-1">Here's how things are going for you.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Here's how things are going for you.
+          </p>
         </div>
       </PageHeading>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Elections Held" value={statsData?.stats?.totalElectionsHeld || 0} />
-        <StatCard title="Upcoming Elections" value={statsData?.stats?.upcomingElections || 0} />
-        <StatCard title="Average Turnout" value={`${statsData?.stats?.averageTurnout || 0}%`} />
-        <StatCard title="Total Positions" value={statsData?.stats?.totalPositions || 0} />
-        <StatCard title="Vacant Positions" value={statsData?.stats?.vacantPositions || 0} />
+        <StatCard
+          title="Total Elections Held"
+          value={statsData?.stats?.totalElectionsHeld || 0}
+        />
+        <StatCard
+          title="Upcoming Elections"
+          value={statsData?.stats?.upcomingElections || 0}
+        />
+        <StatCard
+          title="Average Turnout"
+          value={`${statsData?.stats?.averageTurnout || 0}%`}
+        />
+        <StatCard
+          title="Total Positions"
+          value={statsData?.stats?.totalPositions || 0}
+        />
+        <StatCard
+          title="Vacant Positions"
+          value={statsData?.stats?.vacantPositions || 0}
+        />
       </div>
 
       <div>

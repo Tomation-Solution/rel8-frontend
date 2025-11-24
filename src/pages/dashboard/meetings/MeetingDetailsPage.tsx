@@ -12,7 +12,10 @@ import Toast from "../../../components/toast/Toast";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-import { fetchUserMeetingById, registerForMeeting } from "../../../api/meetings/api-meetings";
+import {
+  fetchUserMeetingById,
+  registerForMeeting,
+} from "../../../api/meetings/api-meetings";
 import Button from "../../../components/button/Button";
 import styled from "styled-components";
 
@@ -24,7 +27,7 @@ const AttendDiv = styled.div<AttendButtonProps>`
 `;
 
 interface AttendButtonProps {
-  primary: boolean
+  primary: boolean;
 }
 
 const AttendLink = styled.a<{ primary?: boolean }>`
@@ -35,12 +38,12 @@ const AttendLink = styled.a<{ primary?: boolean }>`
   font-size: 16px;
   font-weight: 500;
   text-decoration: none;
-  color: ${props => props.primary ? "#1890ff" : "#333"};
+  color: ${(props) => (props.primary ? "#1890ff" : "#333")};
   cursor: pointer;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${props => props.primary ? "#40a9ff" : "#1890ff"};
+    color: ${(props) => (props.primary ? "#40a9ff" : "#1890ff")};
     text-decoration: underline;
   }
 
@@ -60,11 +63,11 @@ const AttendItem = styled.button<AttendButtonProps>`
   font-size: 16px;
   cursor: pointer;
   border: none;
-  background-color: ${props => props.primary ? "#1890ff" : "#f0f0f0"};
-  color: ${props => props.primary ? "white" : "#333"};
+  background-color: ${(props) => (props.primary ? "#1890ff" : "#f0f0f0")};
+  color: ${(props) => (props.primary ? "white" : "#333")};
 
   &:hover {
-    background-color: ${props => props.primary ? "#40a9ff" : "#d9d9d9"};
+    background-color: ${(props) => (props.primary ? "#40a9ff" : "#d9d9d9")};
   }
 `;
 
@@ -74,15 +77,20 @@ const MeetingDetailsPage = () => {
   const queryClient = useQueryClient();
 
   // Fetch meeting details
-  const { data, isLoading, isError, error } = useQuery(["meetingDetails", id], () =>
-    fetchUserMeetingById(id)
+  const { data, isLoading, isError, error } = useQuery(
+    ["meetingDetails", id],
+    () => fetchUserMeetingById(id)
   );
 
   // Meeting detail
   const meetingItem = data;
-  console.log(meetingItem,'meeting item')
+  console.log(meetingItem, "meeting item");
   // Form handling
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: { full_name: "", email: "" },
   });
 
@@ -93,7 +101,8 @@ const MeetingDetailsPage = () => {
       queryClient.invalidateQueries(["meetingDetails", id]);
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message?.error || "An error occurred.";
+      const errorMessage =
+        error?.response?.data?.message?.error || "An error occurred.";
       console.error(errorMessage); // For debugging
       notifyUser(errorMessage, "error");
     },
@@ -109,14 +118,21 @@ const MeetingDetailsPage = () => {
 
   if (isLoading) return <CircleLoader />;
   if (isError || !meetingItem) {
-    console.log('error',error)
-    return <div className="text-center py-10 text-red-500">Meeting not found or an error occurred.</div>;
+    console.log("error", error);
+    return (
+      <div className="text-center py-10 text-red-500">
+        Meeting not found or an error occurred.
+      </div>
+    );
   }
 
-  const formattedEventDate = new Date(meetingItem.event_date).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const formattedEventDate = new Date(meetingItem.event_date).toLocaleString(
+    "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
+  );
 
   return (
     <main className="grid grid-cols-1 md:grid-cols-4 gap-5 text-textColor px-5 sm:px-2 md:px-4">
@@ -126,13 +142,12 @@ const MeetingDetailsPage = () => {
 
         {/* Image Section */}
         <div className="w-full h-[200px] bg-gray-800 md:h-[400px]">
-
-        <img
-          src={meetingItem.image || meetingImage}
-          className="h-full object-cover mx-auto rounded-lg"
-          alt={meetingItem.name}
+          <img
+            src={meetingItem.image || meetingImage}
+            className="h-full object-cover mx-auto rounded-lg"
+            alt={meetingItem.name}
           />
-          </div>
+        </div>
 
         {/* Event Date and Organizer Section */}
         <div className="my-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -149,8 +164,12 @@ const MeetingDetailsPage = () => {
               className="w-10 h-10 rounded-full border"
             />
             <div>
-              <h3 className="text-base font-medium">{meetingItem.organiserName}</h3>
-              <p className="text-sm text-gray-500">{meetingItem.organiserDetails}</p>
+              <h3 className="text-base font-medium">
+                {meetingItem.organiserName}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {meetingItem.organiserDetails}
+              </p>
             </div>
           </div>
         </div>
@@ -189,9 +208,15 @@ const MeetingDetailsPage = () => {
 
         {meetingItem.is_attending ? (
           <AttendDiv primary={false}>
-            <AttendItem primary={false} className="text-base font-medium">You have successfully registered for the event.</AttendItem>
+            <AttendItem primary={false} className="text-base font-medium">
+              You have successfully registered for the event.
+            </AttendItem>
             {meetingItem.url && (
-              <a target="_blank" rel="noopener noreferrer" href={meetingItem.url}>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={meetingItem.url}
+              >
                 <AttendLink primary={true}>Click to join meeting</AttendLink>
               </a>
             )}
@@ -200,16 +225,27 @@ const MeetingDetailsPage = () => {
           <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
             <h3 className="text-lg font-semibold">Meeting Information</h3>
             <p className="text-gray-600 mt-2">
-              This meeting is scheduled for {meetingItem?.event_date ? new Date(meetingItem.event_date).toLocaleString() : "TBD"}.
+              This meeting is scheduled for{" "}
+              {meetingItem?.event_date
+                ? new Date(meetingItem.event_date).toLocaleString()
+                : "TBD"}
+              .
               {meetingItem?.url && (
                 <span className="block mt-2">
-                  Join via: <a href={meetingItem.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Meeting Link</a>
+                  Join via:{" "}
+                  <a
+                    href={meetingItem.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    Meeting Link
+                  </a>
                 </span>
               )}
             </p>
           </div>
         )}
-        
       </div>
 
       {/* Sidebar */}
