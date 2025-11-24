@@ -21,6 +21,11 @@ interface Election {
   election_endTime: string | null;
   election_startTime: string | null;
   positionIds?: string[];
+  stats?: {
+    totalVotes: number;
+    eligibleVoters: number;
+    turnout: number;
+  };
 }
 
 interface Position {
@@ -125,7 +130,7 @@ const ElectionsPage = () => {
     {
       key: "turnout",
       label: "Turnout",
-      render: (item: Election) => "0%" // Placeholder - would need to calculate actual turnout
+      render: (item: Election) => `${item.stats?.turnout || 0}%`
     },
   ];
 

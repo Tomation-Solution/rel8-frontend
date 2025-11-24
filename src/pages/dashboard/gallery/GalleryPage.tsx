@@ -56,7 +56,7 @@ const GalleryPage = () => {
                 <div className="col-span-1 md:col-span-3 md:px-0">
                     <BreadCrumb title="Albums" />
 
-                    <div className={`${isLoading && `place-items-center`} grid grid-cols-2 md:grid-cols-4 gap-2`}>
+                    <div className={`${isLoading && `place-items-center`} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
                         {isLoading && <CircleLoader />}
 
                         {data?.map((galleryItem: GalleryItem, index: number) => (

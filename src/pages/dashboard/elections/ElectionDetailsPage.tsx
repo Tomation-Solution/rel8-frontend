@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiCheck, FiEdit, FiStopCircle } from "react-icons/fi";
 import { fetchElectionDetails, castVote } from "../../../api/elections/api-elections";
+import { fetchAllUserDues } from "../../../api/dues/api-dues";
 import StatCard from "../../../components/cards/StatCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
@@ -113,10 +114,10 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
                 ? "bg-gray-400 cursor-not-allowed"
                 : votingState === 'error'
                 ? "bg-red-500 hover:bg-red-600"
-                : "bg-blue-600 hover:bg-blue-700"
+                : "bg-org-primary hover:bg-org-primary/80"
             }`}
           >
-            {votingState === 'voting' ? 'Voting...' : votingState === 'error' ? 'Try Again' : `Vote for ${candidate.name}`}
+            {votingState === 'voting' ? 'Voting...' : votingState === 'error' ? 'Try Again' : `Vote ${candidate.name}`}
           </button>
         )}
       </div>
@@ -181,6 +182,41 @@ const ManifestoModal: React.FC<{
   );
 };
 
+const DuesModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onGoToDues: () => void;
+}> = ({ isOpen, onClose, onGoToDues }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg max-w-xl border-l-[4px] border-org-secondary w-full mx-4">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Not Eligible to Vote</h2>
+          <p className="text-gray-600 mb-6">
+            You have dues from your organization that haven't been confirmed yet. You cannot vote during this election period until all your dues are confirmed. Head over to the dues section to check the status of your payments.
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onGoToDues}
+              className="px-4 py-2 bg-org-primary text-white rounded hover:bg-org-primary/80"
+            >
+              Go to Dues
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ElectionDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -192,8 +228,10 @@ const ElectionDetailsPage = () => {
     null
   );
   const [modalOpen, setModalOpen] = useState(false);
+  const [duesModalOpen, setDuesModalOpen] = useState(false);
   const [votingStates, setVotingStates] = useState<{ [candidateId: string]: 'idle' | 'voting' | 'voted' | 'error' }>({});
   const [votedCandidates, setVotedCandidates] = useState<Set<string>>(new Set());
+  const [hasOutstandingDues, setHasOutstandingDues] = useState(false);
 
   const { notifyUser } = Toast();
 
@@ -202,8 +240,34 @@ const ElectionDetailsPage = () => {
     setModalOpen(true);
   };
 
+  const handleGoToDues = () => {
+    setDuesModalOpen(false);
+    navigate('/dues'); // Navigate to dues page
+  };
+
+  const checkOutstandingDues = async () => {
+    try {
+      const duesData = await fetchAllUserDues();
+      // Check if there are any unconfirmed dues (confirmationStatus !== 'approved')
+      const hasUnconfirmedDues = duesData?.some((due: any) => due.confirmed === false) || false;
+      console.log(duesData,hasUnconfirmedDues)
+      setHasOutstandingDues(hasUnconfirmedDues);
+      return hasUnconfirmedDues;
+    } catch (error) {
+      console.error('Failed to check dues:', error);
+      return false;
+    }
+  };
+
   const handleVote = async (candidateId: string) => {
     if (votedCandidates.has(candidateId)) return;
+
+    // Check for outstanding dues first
+    const hasDues = await checkOutstandingDues();
+    if (hasDues) {
+      setDuesModalOpen(true);
+      return;
+    }
 
     setVotingStates(prev => ({ ...prev, [candidateId]: 'voting' }));
 
@@ -395,6 +459,12 @@ const ElectionDetailsPage = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           candidate={selectedCandidate}
+        />
+
+        <DuesModal
+          isOpen={duesModalOpen}
+          onClose={() => setDuesModalOpen(false)}
+          onGoToDues={handleGoToDues}
         />
       </div>
     </div>
