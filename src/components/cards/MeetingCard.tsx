@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import meetingImage from "../../assets/images/meeting-image.png";
 import Button from "../button/Button";
 
-const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {  
+const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
   const {
     name,
     event_date,
@@ -11,6 +11,8 @@ const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
     image,
     is_attending,
   } = meeting;
+
+  const meetingId = meeting.id || meeting._id;
 
   const formattedDate = new Date(event_date).toLocaleString("en-US", {
     dateStyle: "medium",
@@ -26,7 +28,7 @@ const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
         <div className="flex items-center gap-2">
           <img src={image || meetingImage} alt={name} className="w-28 h-24" />
           <div>
-            <Link to={`/${linkTo}/${meeting.id}/`} >
+            <Link to={`/${linkTo}/${meetingId}/`} >
               <h6 className="font-medium text-org-primary-blue hover:underline">{name}</h6>
             </Link>
             <p className="font-light">{formattedDate}</p>
@@ -42,7 +44,7 @@ const MeetingCard = ({ meeting, linkTo='meeting' }: any ) => {
           <Button text="Remind me to Join" borderRadius="rounded-md" padding="py-2 px-3" />
         )}
         <Link
-          to={`/${linkTo}/${meeting.id}/`}
+          to={`/${linkTo}/${meetingId}/`}
           className="w-full py-2 px-3 border border-primary-blue text-sm bg-[inherit] text-org-primaryDark rounded-md text-center"
         >
           View Details

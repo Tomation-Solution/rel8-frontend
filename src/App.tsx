@@ -359,7 +359,7 @@ function App() {
     },
 
     {
-      path: "/meeting/:meetingId",
+      path: "/meeting/:id",
       element: (
         <Suspense fallback={<Loader />} >
           <DashboardLayout >

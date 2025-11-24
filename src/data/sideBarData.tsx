@@ -59,6 +59,11 @@ export const sideBarData: SideBarLinkType[] = [
     name: "Events",
     path: "/events",
   },
+  {
+    mainIcon: FiCalendar,
+    name: "Meetings",
+    path: "/meeting",
+  },
   // {
   //   mainIcon: FiCalendar,
   //   name: "Special Events",

@@ -69,17 +69,18 @@ const AttendItem = styled.button<AttendButtonProps>`
 `;
 
 const MeetingDetailsPage = () => {
-  const { meetingId } = useParams();
+  const { id } = useParams();
   const { notifyUser } = Toast();
   const queryClient = useQueryClient();
 
   // Fetch meeting details
-  const { data, isLoading, isError } = useQuery(["meetingDetails", meetingId], () =>
-    fetchUserMeetingById(meetingId)
+  const { data, isLoading, isError, error } = useQuery(["meetingDetails", id], () =>
+    fetchUserMeetingById(id)
   );
 
-  const meetingItem = data?.data?.find((item: any) => item.id.toString() === meetingId);
-
+  // Meeting detail
+  const meetingItem = data;
+  console.log(meetingItem,'meeting item')
   // Form handling
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { full_name: "", email: "" },
@@ -89,7 +90,7 @@ const MeetingDetailsPage = () => {
   const { mutate, isLoading: isSubmitting } = useMutation(registerForMeeting, {
     onSuccess: () => {
       notifyUser("Registration successful!", "success");
-      queryClient.invalidateQueries(["meetingDetails", meetingId]);
+      queryClient.invalidateQueries(["meetingDetails", id]);
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message?.error || "An error occurred.";
@@ -100,14 +101,15 @@ const MeetingDetailsPage = () => {
 
   const onSubmit = (formData: any) => {
     const payload = {
-      meeting: meetingId,
+      meeting: id,
       proxy_participants: [formData],
     };
     mutate(payload);
   };
 
   if (isLoading) return <CircleLoader />;
-  if (isError || !data?.data?.[0]) {
+  if (isError || !meetingItem) {
+    console.log('error',error)
     return <div className="text-center py-10 text-red-500">Meeting not found or an error occurred.</div>;
   }
 
@@ -192,36 +194,18 @@ const MeetingDetailsPage = () => {
             )}
           </AttendDiv>
         ) : (
-          <>
-          {/* Registration Form */}
-          {/* <AttendItem primary={false} className="text-base font-medium border-t-4">Fill the form to register for the event.</AttendItem> */}
           <div className="mt-6 w-[70%] bg-gray-100 p-4 rounded-md">
-            <h3 className="text-lg font-semibold">Register for this Meeting</h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-              <div>
-                <label htmlFor="full_name">Full Name</label>
-                <input
-                  id="full_name"
-                  type="text"
-                  {...register("full_name", { required: true })}
-                  className="p-2 border rounded w-full"
-                />
-                {errors.full_name && <p className="text-red-500 text-sm">Full name is required.</p>}
-              </div>
-              <div>
-                <label htmlFor="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  {...register("email", { required: true })}
-                  className="p-2 border rounded w-full"
-                />
-                {errors.email && <p className="text-red-500 text-sm">Email is required.</p>}
-              </div>
-              <Button isLoading={isSubmitting} text="Register" />
-            </form>
+            <h3 className="text-lg font-semibold">Meeting Information</h3>
+            <p className="text-gray-600 mt-2">
+              This meeting is scheduled for {meetingItem?.event_date ? new Date(meetingItem.event_date).toLocaleString() : "TBD"}.
+              {meetingItem?.url && (
+                <span className="block mt-2">
+                  Join via: <a href={meetingItem.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Meeting Link</a>
+                </span>
+              )}
+            </p>
           </div>
-        </>)}
+        )}
         
       </div>
 

@@ -1,13 +1,13 @@
 import apiTenant from "../baseApi";
 
-export const fetchUserMeetings = async () =>{
+export const fetchUserMeetings = async () => {
     const response = await apiTenant.get(`/api/meetings/`);
     return response.data
 }
 
-export const fetchUserMeetingById = async (id:any) =>{
+export const fetchUserMeetingById = async (id: any) => {
     if(id){
-        const response = await apiTenant.get(`/meeting/meeting_member/?meeting_id=${id}`);
+        const response = await apiTenant.get(`/api/meetings/${id}`);
         return response.data
     }
 }
