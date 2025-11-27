@@ -4,6 +4,7 @@ import { useState } from "react";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
+import { fetchOrganizationSettings } from "../../../api/organization/organization-api";
 import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
@@ -22,6 +23,16 @@ const AccountPage = () => {
   const queryClient = useQueryClient();
   const { notifyUser } = Toast();
 
+  const currencySymbols: { [key: string]: string } = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    NGN: '₦',
+    CAD: 'C$',
+    AUD: 'A$',
+  };
+
+  
   const showPendingTable = () => {
     setShowCompleted(false);
   };
@@ -30,6 +41,10 @@ const AccountPage = () => {
   };
 
   const { data, isError, isLoading } = useQuery("userDues", fetchUserDues);
+  const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
+  
+  const currentCurrency = orgSettings?.settings?.currency || 'USD';
+  const currencySymbol = currencySymbols[currentCurrency] || '$';
 
   // Mutation for requesting confirmation
   const requestConfirmationMutation = useMutation(
@@ -119,7 +134,7 @@ const AccountPage = () => {
       accessor: "amount",
       Cell: ({ value }) => (
         <span className="text-org-primary font-semibold">
-          ${parseFloat(value).toFixed(2)}
+          {currencySymbol}{parseFloat(value).toFixed(2)}
         </span>
       ),
     },
@@ -241,7 +256,7 @@ const AccountPage = () => {
           />
           <div>
             <h3 className="text-3xl font-bold text-org-primary-blue">
-              {totalPendingAmount}
+              {currencySymbol}{totalPendingAmount?.toFixed(2)}
             </h3>
             <small>Total Outstanding fee</small>
           </div>

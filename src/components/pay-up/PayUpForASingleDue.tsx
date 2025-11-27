@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { payDue } from "../../api/dues/api-dues";
+import { fetchOrganizationSettings } from "../../api/organization/organization-api";
 import Toast from "../toast/Toast";
 
 interface Props {
@@ -16,6 +17,21 @@ const PayUpForASingleDue = ({due__Name,amount,dueId}:Props) => {
 
     const { notifyUser } = Toast();
     const {  handleSubmit } = useForm();
+
+    // Fetch organization settings
+    const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
+
+    const currencySymbols: { [key: string]: string } = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      NGN: '₦',
+      CAD: 'C$',
+      AUD: 'A$',
+    };
+
+    const currentCurrency = orgSettings?.settings?.currency || 'USD';
+    const currencySymbol = currencySymbols[currentCurrency] || '$';
 
     const {mutate} = useMutation(()=>payDue(dueId), {
         onSuccess: (data) => {
@@ -57,8 +73,8 @@ const PayUpForASingleDue = ({due__Name,amount,dueId}:Props) => {
       <br />
 
       <label className='font-medium ml-1' >
-       
-      ₦{amount}
+
+      {currencySymbol}{amount}
       </label>
       <br />
 
