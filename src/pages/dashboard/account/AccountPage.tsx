@@ -115,7 +115,7 @@ const AccountPage = () => {
   };
 
   const totalPendingAmount = data
-    ?.filter((dues: TableDataType) => true)
+    ?.filter((dues: TableDataType) => dues.status != 'approved')
     ?.reduce((total: number, dues: TableDataType) => {
       return total + parseFloat(dues.amount);
     }, 0);
@@ -148,6 +148,14 @@ const AccountPage = () => {
           month: "short",
           day: "numeric",
         });
+      },
+    },
+    {
+      Header: "Reason",
+      accessor: "reason",
+      Cell: ({ value }) => {
+        return <span>{value}</span>
+        
       },
     },
     {

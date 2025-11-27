@@ -180,6 +180,7 @@ export interface TableDataType {
   amount: string;
   is_paid: boolean;
   startDate: string;
+  status: string;
   purpose: string;
   customAccessorProperty: string;
 }
