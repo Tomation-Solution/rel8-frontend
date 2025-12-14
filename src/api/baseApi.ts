@@ -54,7 +54,7 @@ apiTenant.interceptors.response.use(
         sessionStorage.setItem('redirectAfterLogin', intendedPath);
       }
       
-      window.location.href = '/login';
+      // window.location.href = '/login';
     }
 
     return Promise.reject(error);

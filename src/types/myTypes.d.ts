@@ -112,8 +112,10 @@ export interface NewsCommentDetails {
   content: string;
   audience: string;
   orgId: string;
+  attachmentUrls?: string[];
   comments: Comment[];
   likes: string[];
+  dislikes: string[];
   createdAt?: string;
   updatedAt?: string;
   // For compatibility with existing UI

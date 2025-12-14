@@ -36,7 +36,13 @@ export const deleteNewsComment = async (newsId: string, commentId: string) => {
 };
 
 // Like or dislike a news item
-export const likeDislikeNews = async (id: number) => {
+export const likeDislikeNews = async (id: string) => {
     const response = await apiTenant.post(`/api/content/news/${id}/like`);
+    return response.data;
+};
+
+// Dislike or undislike a news item
+export const dislikeNews = async (id: string) => {
+    const response = await apiTenant.post(`/api/content/news/${id}/dislike`);
     return response.data;
 };

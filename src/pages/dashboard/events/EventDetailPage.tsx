@@ -123,7 +123,7 @@ const EventDetailPage = () => {
           <div className="col-span-3">
             <BreadCrumb title="Event's Details" />
             <div className="relative " >
-                <div className="relative flex items-center  h-[40vh]">
+                <div className="relative flex items-center bg-gray-200 h-[40vh]">
 
               <img
                 src={event?.image || event?.bannerUrl}

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { NewsCommentProps, Comment } from "../../types/myTypes";
 import { useAppContext } from "../../context/authContext";
 import { AiOutlineSend } from "react-icons/ai";
+import { getInitials } from "../../utils/strings";
 
 // Define the component with props type
 export default function NewsComment({ comments, newsId }: NewsCommentProps) {
@@ -14,8 +15,7 @@ export default function NewsComment({ comments, newsId }: NewsCommentProps) {
     const context = useAppContext();
     
     const user = context.user;
-
-    console.log(context,'context data')
+    console.log(comments,'comments')
     // const { data, isLoading, isError} = useQuery(['news', newsId], () => fetchNewsComments(newsId?.toString() || null));
 
     // const comments: Comment[] = data?.data || [];
@@ -56,8 +56,8 @@ export default function NewsComment({ comments, newsId }: NewsCommentProps) {
                 </div>
                 {/* This is the write a comment section */}
                 <div className="h-[100px] flex items-center gap-x-2">
-                    <div className="rounded-full">
-                        <Avatar imageUrl={user?.profile_image ? user.profile_image : avatarImage} />
+                    <div className="rounded-full">                        
+                        <Avatar imageUrl={user?.profile_image ? user.profile_image : `https://placehold.co/100x100?text=${getInitials(user?.name)}`} />
                     </div>
                         <textarea
                             className="w-full h-[50px] border-2 border-gray-300 rounded-md p-2"
@@ -80,8 +80,9 @@ export default function NewsComment({ comments, newsId }: NewsCommentProps) {
                     comments.toReversed().map((comment) => (
                         <div key={comment._id} className="flex gap-2 mb-4">
                             <div className="rounded-md">
-                                <Avatar imageUrl={comment?.member?.photo_url || avatarImage} />
-                                {/* <Avatar imageUrl={comment?.member?.photo_url || avatarImage} /> */}
+                                <Avatar imageUrl={comment?.userId?.imageUrl ||
+                                      `https://placehold.co/100x100?text=${getInitials(comment?.userId?.name || "")}`
+                                } />
                             </div>
                             <div className="flex flex-col gap-1 border p-4 rounded-lg w-full md:w-2/3">
                                 <h3 className="font-semibold text-sm">{comment.userId?.name}</h3>
@@ -89,7 +90,7 @@ export default function NewsComment({ comments, newsId }: NewsCommentProps) {
                                 {user?.id == comment.userId?._id && (
                                     <button
                                         className="text-red-500 text-sm text-end"
-                                        onClick={() => handleCommentDelete(comment.id)}
+                                        onClick={() => handleCommentDelete(comment._id)}
                                     >
                                         Delete
                                     </button>

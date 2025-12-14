@@ -90,11 +90,6 @@ export const sideBarData: SideBarLinkType[] = [
     path: "/gallery",
   },
   {
-    mainIcon: FiCalendar,
-    name: "Meetings",
-    path: "/meeting",
-  },
-  {
     mainIcon: FiUser,
     name: "My Account",
     path: "/account",
