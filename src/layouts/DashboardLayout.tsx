@@ -83,12 +83,12 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
         </section>
 
         {/* Outstanding Dues Modal */}
-        {/* <OutstandingDuesModal
+        <OutstandingDuesModal
           isOpen={showDuesModal}
           onClose={() => setShowDuesModal(false)}
           totalAmount={totalOutstandingAmount}
           currencySymbol={currencySymbol}
-        /> */}
+        />
     </div>
   )
 }
