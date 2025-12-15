@@ -12,11 +12,16 @@ const GalleryCard = ({ galleryItem, height }: Props) => {
 
   return (
     <div className={`relative w-full border rounded-md  ${height ? height : 'h-[250px]'}  my-2`}>
+      <div
+        className=" z-[-1] bg-black flex items-center justify-center absolute rounded-xl top-0 left-0 bottom-0 right-0 w-full max-w-full h-full object-cover max-h-[inherit]"
+      >
+
       <img
         src={galleryItem.imageUrl[0]}
-        className=" z-[-1] absolute rounded-xl top-0 left-0 bottom-0 right-0 w-full max-w-full h-full object-cover max-h-[inherit]"
+        className="w-full object-contain max-h-[inherit]"
         alt="news-image"
-      />
+        />
+        </div>
 
       <div className="w-full absolute bottom-0 flex items-center justify-between rounded-b-xl gap-3 z-[3] px-5 py-2 text-sm text-white bg-org-primary">
         <div className="">

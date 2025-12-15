@@ -313,10 +313,10 @@ export interface ChatMessageDataType {
 // ----------------------------------- Notifications
 
 export interface NotificationDataType {
-  id: string;
+  _id: string;
   createdAt: string;
   title: string;
-  body: string;
+  message: string;
   latest_update_table_name: string;
   latest_update_table_id: number;
 }

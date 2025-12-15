@@ -92,19 +92,40 @@ import { fetchAllNotifications } from '../../../api/notifications/notifications-
 import { useQuery } from 'react-query';
 import { NotificationDataType } from '../../../types/myTypes';
 import Spinner from '../../../components/loaders/CircleLoader';
+import { unformatText } from '../../../utils/strings';
 
 // Function to get the correct link for notifications
 const getNotificationLink = (notification: NotificationDataType) => {
-  switch (notification.latest_update_table_name) {
-    case 'news':
-      return `/news/${notification.latest_update_table_id}/`;
-    case 'events':
-      return `/events/${notification.latest_update_table_id}/`;
-    case 'publication':
-      return `/publication/${notification.latest_update_table_id}/`;
-    default:
-      return '/notifications';
+  const title = notification.title.toLowerCase().replace(' ', '-');
+  if(title.includes('publication')) {
+    return `/publications`;
   }
+  if(title.includes('event')) {
+    return `/events`;
+  }
+  if(title.includes("news")){
+    return `/news`;
+  }
+   if(title.includes("due")){
+    return `/account`;
+  }
+  if(title.includes("meeting")){
+    return `/meeting`;
+  }
+  if(title.includes("election")){
+    return `/election`;
+  }
+  return "/notifications";
+  // switch (notification.latest_update_table_name) {
+  //   case 'news':
+  //     return `/news/${notification.latest_update_table_id}/`;
+  //   case 'events':
+  //     return `/event/${notification.latest_update_table_id}/`;
+  //   case 'publication':
+  //     return `/publication/${notification.latest_update_table_id}/`;
+  //   default:
+  //     return '/notifications';
+  // }
 };
 
 const NotificationsPage = () => {
@@ -114,7 +135,7 @@ const NotificationsPage = () => {
   if (isError) return <div>Error loading notifications</div>;
 
   const notifications = data || [];
-
+  console.log(notifications)
   const getRelativeDate = (date: string): string => {
     const now = new Date();
     const notificationDate = new Date(date);
@@ -150,13 +171,13 @@ const NotificationsPage = () => {
           <div key={dateKey} className='flex flex-col my-2'>
             <small>{dateKey}</small>
             {groupedNotifications[dateKey].map((notification) => (
-              <Link key={notification.id} to={getNotificationLink(notification)} className="block">
+              <Link key={notification._id} to={getNotificationLink(notification)} className="block">
                 <div className='relative flex items-center p-2 bg-neutral-3 rounded-md my-1 hover:bg-gray-100 transition'>
                   <img src={pinkEllipse} className='absolute bottom-0 left-[30%] h-[30%] opacity-80' alt="" />
                   <img src={blueEllipse} className='absolute top-0 left-[50%] h-3/4 opacity-50' alt="" />
                   <div className='flex flex-col p-2 flex-1'>
                     <h3 className='text-sm font-semibold'>{notification.title}</h3>
-                    <small className='text-xs text-neutral-1'>{notification.body}</small>
+                    <small className='text-xs text-neutral-1'>{unformatText(notification.message)}</small>
                   </div>
                   <small className='text-xs'>{new Date(notification.createdAt).toLocaleTimeString()}</small>
                 </div>

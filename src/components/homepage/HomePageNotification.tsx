@@ -48,6 +48,7 @@ import calendarIcon from "../../assets/icons/calendar.png";
 import clockIcon from "../../assets/icons/clock.png";
 import { Link } from "react-router-dom";
 import { NotificationDataType, PublicationDataType, EventDataType } from "../../types/myTypes";
+import { unformatText } from "../../utils/strings";
 
 interface Props {
   notificationItem: NotificationDataType;
@@ -76,7 +77,7 @@ const getNotificationLink = (
     case "news":
       return `/news/${notification.latest_update_table_id}/`;
     case "events":
-      return `/events/${notification.latest_update_table_id}/`;
+      return `/event/${notification.latest_update_table_id}/`;
     default:
       return '/notifications';
   }
@@ -101,7 +102,7 @@ const HomePageNotification = ({ notificationItem, newsItem, eventItem }: Props) 
         <div className="flex flex-col flex-grow">
           <span className="font-bold text-org-primary-blue capitalize">{notificationItem.title}</span>
           <div className="flex justify-between gap-2">
-            <span className="text-xs text-[#3a3a3a] line-clamp-1">{notificationItem.body}</span>
+            <span className="text-xs text-[#3a3a3a] line-clamp-1">{unformatText(notificationItem.message)}</span>
             {notificationItem.createdAt && (
               <span className="whitespace-nowrap text-xs">{formatDate(notificationItem.createdAt)}</span>
             )}
