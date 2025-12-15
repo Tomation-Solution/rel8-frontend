@@ -34,17 +34,28 @@ const GalleryDetailPage = () => {
     setModalState({ isOpen: false, currentIndex: 0 });
   };
 
+  const getImagesArray = () => {
+    if (data?.images && data.images.length > 0) {
+      return data.images.map(img => img.url);
+    } else if (data?.imageUrl && data.imageUrl.length > 0) {
+      return data.imageUrl;
+    }
+    return [];
+  };
+
   const nextImage = () => {
+    const images = getImagesArray();
     setModalState(prev => ({
       ...prev,
-      currentIndex: (prev.currentIndex + 1) % data.imageUrl.length,
+      currentIndex: (prev.currentIndex + 1) % images.length,
     }));
   };
 
   const prevImage = () => {
+    const images = getImagesArray();
     setModalState(prev => ({
       ...prev,
-      currentIndex: prev.currentIndex === 0 ? data.imageUrl.length - 1 : prev.currentIndex - 1,
+      currentIndex: prev.currentIndex === 0 ? images.length - 1 : prev.currentIndex - 1,
     }));
   };
 
@@ -71,13 +82,19 @@ const GalleryDetailPage = () => {
 
     <div className=" grid grid-col-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
         {isLoading && <CircleLoader />}
-    {data?.imageUrl.map((image:any,index:number)=>(
+    {getImagesArray().map((imageUrl:string,index:number)=>(
     <div key={index} className="relative group cursor-pointer" onClick={() => openModal(index)}>
       <img
-        src={image}
+        src={imageUrl}
         alt={`Gallery image ${index + 1}`}
         className="w-full h-48 object-cover rounded-lg hover:opacity-90 transition-opacity"
       />
+      {/* Display caption if available */}
+      {data?.images && data.images[index]?.caption && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
+          {data.images[index].caption}
+        </div>
+      )}
       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
         <span className="text-white opacity-0 group-hover:opacity-100 text-lg">View</span>
       </div>
@@ -94,7 +111,8 @@ const GalleryDetailPage = () => {
     </div>
 
     <ImageModal
-      images={data?.imageUrl || []}
+      images={getImagesArray()}
+      captions={data?.images?.map(img => img.caption) || []}
       currentIndex={modalState.currentIndex}
       isOpen={modalState.isOpen}
       onClose={closeModal}

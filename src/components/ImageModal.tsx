@@ -2,6 +2,7 @@ import React from 'react';
 
 interface ImageModalProps {
   images: string[];
+  captions?: string[];
   currentIndex: number;
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +12,7 @@ interface ImageModalProps {
 
 const ImageModal: React.FC<ImageModalProps> = ({
   images,
+  captions,
   currentIndex,
   isOpen,
   onClose,
@@ -56,6 +58,13 @@ const ImageModal: React.FC<ImageModalProps> = ({
           alt={`Gallery image ${currentIndex + 1}`}
           className="max-w-full max-h-full object-contain"
         />
+
+        {/* Caption display */}
+        {captions && captions[currentIndex] && (
+          <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-white text-center p-2 bg-black bg-opacity-50 rounded max-w-[80%]">
+            {captions[currentIndex]}
+          </div>
+        )}
 
         {/* Image counter */}
         {images.length > 1 && (

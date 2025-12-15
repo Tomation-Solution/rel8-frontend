@@ -17,9 +17,13 @@ const GalleryCard = ({ galleryItem, height }: Props) => {
       >
 
       <img
-        src={galleryItem.imageUrl[0]}
+        src={galleryItem.images && galleryItem.images.length > 0
+          ? galleryItem.images[0].url
+          : galleryItem.imageUrl && galleryItem.imageUrl.length > 0
+            ? galleryItem.imageUrl[0]
+            : ''}
         className="w-full object-contain max-h-[inherit]"
-        alt="news-image"
+        alt="gallery-image"
         />
         </div>
 
