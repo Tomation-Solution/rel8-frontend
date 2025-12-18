@@ -19,7 +19,7 @@ const OutstandingDuesModal: React.FC<OutstandingDuesModalProps> = ({
   if (!isOpen) return null;
 
   const handlePayNow = () => {
-    navigate('/account');
+    navigate('/dues');
     onClose();
   };
 

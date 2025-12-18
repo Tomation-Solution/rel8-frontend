@@ -61,11 +61,11 @@ const LoginPage = () => {
       <div className="grid w-full h-full grid-cols-2 ">
         <AuthPageLeftContainer  image={loginPageCoverImage} />
         <section className="relative grid h-full col-span-2 md:col-span-1 place-items-center">
-          <img
+          {/* <img
             src={formImage}
             className=" absolute top-0 left-0 w-[250px] z-[1] 2xl:w-[450px]"
             alt=""
-          />
+          /> */}
           <div className="relative auth-form-container ">
           
             <AuthPageHeader

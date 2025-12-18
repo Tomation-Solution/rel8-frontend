@@ -116,7 +116,7 @@ const ElectionsPage = () => {
         positionIds: item.positionIds,
         stats: item.stats,
       };
-    }) || [];
+    }).reverse()   || [];
   // Map positions data
   const positions: Position[] =
     positionsData?.map((item: any) => ({

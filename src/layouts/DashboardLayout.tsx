@@ -17,10 +17,12 @@ interface DashboardLayoutInterfaceProps {
 
 const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
 
-  const { user,userProfileData } = useAppContext();
+  const { user, organization } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const { notifyUser } = Toast();
+
+  const canShowBlocker = !!organization?.settings?.show_dues_blocker
 
     const [isMobileSidebarOpen,setIsMobileSidebarOpen] = React.useState<boolean>(false)
     const [showDuesModal, setShowDuesModal] = useState(true);
@@ -44,7 +46,10 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
     });
 
     // Check if current page is account page
-    const isAccountPage = location.pathname === '/account' || location.pathname.startsWith('/dashboard/account');
+    const isAccountPage = location.pathname === '/account' 
+    || location.pathname.startsWith('/dashboard/account')
+    || location.pathname.includes('election')
+    || location.pathname.includes('dues');
 
     // Calculate total outstanding amount from dues data
     const totalOutstandingAmount = userDues
@@ -62,7 +67,7 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
     }, [user,navigate,notifyUser]);
 
     useEffect(() => {
-      if (user && userDues && totalOutstandingAmount > 0 && !isAccountPage){
+      if (user && userDues && canShowBlocker && totalOutstandingAmount > 0 && !isAccountPage){
           setShowDuesModal(true);
       } else {
         setShowDuesModal(false);
@@ -72,7 +77,7 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
   return (
     <div className="font-sans h-screen overflow-hidden relative flex justify-between">
         <Sidebar  isMobileSidebarOpen={isMobileSidebarOpen}  setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
-        <section className="lg:w-[calc(100%)] overflow-y-scroll h-screen  pb-10 relative">
+        <section className="w-full overflow-y-scroll h-screen  pb-10 relative">
           <div className="fixed w-full">
             <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
           </div>

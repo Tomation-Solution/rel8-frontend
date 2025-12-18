@@ -331,3 +331,34 @@ export interface SupportData {
   email: string;
   message: string;
 }
+
+export interface Organization{
+    colorTheme: {
+      primary: string;
+      secondary: string;
+    };
+    settings: {
+      customDomain: string | null;
+      isCustomDomainVerified: boolean;
+      preferCustomDomain: boolean;
+      show_dues_blocker: boolean;
+      magic_link: boolean;
+    };
+    _id: string;
+    name: string;
+    shortName: string;
+    logo: string;
+    numberOfMembers: number;
+    yearEstablished: number;
+    about: string;
+    vision: string;
+    mission: string;
+    email: string;
+    phone: string;
+    isVerified: boolean;
+    isActive: boolean;
+    customUrl: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  };

@@ -90,6 +90,17 @@ export const sideBarData: SideBarLinkType[] = [
     path: "/gallery",
   },
   {
+    mainIcon: MdBallot,
+    // mainIcon: electionIcon,
+    name: "Election",
+    path: "/election",
+  },
+  {
+    mainIcon: FiUser,
+    name: "Dues",
+    path: "/dues",
+  },
+  {
     mainIcon: FiUser,
     name: "My Account",
     path: "/account",
@@ -104,12 +115,6 @@ export const sideBarData: SideBarLinkType[] = [
   //   name: "Service Requests",
   //   path: "/service-requests",
   // },
-  {
-    mainIcon: MdBallot,
-    // mainIcon: electionIcon,
-    name: "Election",
-    path: "/election",
-  },
   // {
   //   mainIcon: subscribeIcon,
   //   name: "Subscribe",

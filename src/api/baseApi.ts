@@ -8,6 +8,7 @@ const PUBLIC_AUTH_ROUTES = [
   "/forgot-password",
   "/setup-new-password",
   "/enter-code",
+  "/authentication",
 ];
 
 // Helper function to check if current route is public

@@ -6,6 +6,7 @@ import Loader from "./components/Loader";
 import NotFoundPage from "./pages/NotFoundPage";
 import ActivateAccount from "./pages/ActivateAccount";
 import DashboardLayout from "./layouts/DashboardLayout";
+import DuesPage from "./pages/dashboard/dues/DuesPage";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
   const EnterCodePage = lazy(() => import("./pages/auth/forgot-password/EnterCodePage"));
   const SetupNewPasswordPage = lazy(() => import("./pages/auth/forgot-password/SetupNewPasswordPage"));
   const PayupPage = lazy(() => import("./pages/auth/PayupPage"));
+  const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
   
   
   const ChatPage = lazy(() => import("./pages/chat/ChatPage"));
@@ -103,6 +105,15 @@ function App() {
       element: (
         <Suspense fallback={<Loader/>}>
           <ForgotPasswordPage />
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/authentication",
+      element: (
+        <Suspense fallback={<Loader/>}>
+          <AuthenticationPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -251,6 +262,17 @@ function App() {
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
             <AccountPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/dues",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <DuesPage />
           </DashboardLayout>
         </Suspense>
       ),

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MemberInfoType } from '../types/myTypes';
+import { MemberInfoType, Organization } from '../types/myTypes';
 import { useQuery } from 'react-query';
 import { fetchUserProfile } from '../api/profile/profile-api';
 
@@ -8,6 +8,7 @@ interface AppContextType {
   setRel8LoginUserData: (data: MemberInfoType) => void;
   userFullName: string;
   userProfileData: any[];
+  organization: Organization;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,10 +28,15 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<MemberInfoType | null>(null);
   const [userFullName, setUserFullName] = useState<string>('');
+  const [organization,setOrganization] = useState<any>({});
   const [userProfileData, setUserProfileData] = useState<any[]>([]);
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('rel8User');
+    const tennantInfo = localStorage.getItem('tenant-info')
+    if(tennantInfo){
+      setOrganization(JSON.parse(tennantInfo)?.organization || {})
+    }
     if (storedUserData) {
       setUser(JSON.parse(storedUserData));
     }
@@ -62,7 +68,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   return (
     // @ts-ignore
-    <AppContext.Provider value={{ user, setRel8LoginUserData, userFullName, userProfileData }}>
+    <AppContext.Provider value={{ organization, user, setRel8LoginUserData, userFullName, userProfileData }}>
       {children}
     </AppContext.Provider>
   );

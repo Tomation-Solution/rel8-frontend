@@ -4,38 +4,12 @@ import { getTenantInfo, TENANT } from "../utils/constants";
 import Loader from "./Loader";
 import { apiPublic } from "../api/baseApi";
 import { useTheme } from "../context/themeContext";
+import { Organization } from "../types/myTypes";
 
 interface TenantResponse {
   message: string;
   orgId: string;
-  organization: {
-    colorTheme: {
-      primary: string;
-      secondary: string;
-    };
-    settings: {
-      customDomain: string | null;
-      isCustomDomainVerified: boolean;
-      preferCustomDomain: boolean;
-    };
-    _id: string;
-    name: string;
-    shortName: string;
-    logo: string;
-    numberOfMembers: number;
-    yearEstablished: number;
-    about: string;
-    vision: string;
-    mission: string;
-    email: string;
-    phone: string;
-    isVerified: boolean;
-    isActive: boolean;
-    customUrl: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-  };
+  organization: Organization;
 }
 
 export default function TenantGate({ children }: { children: ReactNode }) {
