@@ -14,6 +14,7 @@ const AuthenticationPage = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const token = searchParams.get("token");
+    const electionId = searchParams.get("electionId");
 
     console.log("URL search params:", Object.fromEntries(searchParams.entries()));
     console.log("Extracted token:", token);
@@ -43,7 +44,11 @@ const AuthenticationPage = () => {
         console.log("Successfully logged in via magic link, redirecting to election");
 
         // Redirect to elections page; this route already exists
-        navigate("/election", { replace: true });
+        if(electionId){
+          navigate(`/election/${electionId}`);
+        }else{
+          navigate("/election", { replace: true });
+        }
       } catch (error) {
         console.error("Magic login failed", error);
         if (error.response) {
