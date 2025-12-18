@@ -39,7 +39,7 @@ const AuthenticationPage = () => {
 
         const { token: authToken, member } = response.data;
   
-        setRel8LoginUserData({ ...member, token: token })
+        setRel8LoginUserData({ ...member, token: authToken })
         console.log(token,member);
         console.log("Successfully logged in via magic link, redirecting to election");
 
