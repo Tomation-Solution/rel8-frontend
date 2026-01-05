@@ -7,12 +7,20 @@ import PublicationCard from "../../../components/cards/PublicationCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { fetchAllUserNews } from "../../../api/news/news-api";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import NewsCard from "../../../components/cards/NewsCard";
+import { useEnvironmentContext } from "../../../context/environmentContext";
+import { filterContentByEnvironment } from "../../../utils/contentFilter";
 
 const NewsPage = () => {
   const { notifyUser } = Toast();
+  const { selectedEnvironments } = useEnvironmentContext();
   const {  data, isLoading, isError} = useQuery('news', fetchAllUserNews);
+
+  // Filter news based on selected environments
+  const filteredNews = useMemo(() => {
+    return filterContentByEnvironment(data, selectedEnvironments);
+  }, [data, selectedEnvironments]);
 
   useEffect(() => {
     if (isError) {
@@ -31,9 +39,15 @@ const NewsPage = () => {
       <div className="col-span-1 md:col-span-3 md:px-0 px-10">
           <BreadCrumb title={"News"} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {data?.map((newsItem:NewsCommentDetails, index:number) => (
-              <NewsCard key={index} newsItem={newsItem}  linkTo="news"/>
-            ))}
+            {filteredNews?.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                No news available for the selected environment(s).
+              </div>
+            ) : (
+              filteredNews?.map((newsItem:NewsCommentDetails, index:number) => (
+                <NewsCard key={index} newsItem={newsItem}  linkTo="news"/>
+              ))
+            )}
           </div>
         </div>
         <div className="col-span-1 md:col-span-1">

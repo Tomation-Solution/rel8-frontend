@@ -7,13 +7,22 @@ import { PublicationDataType } from "../../../types/myTypes";
 import PublicationCard from "../../../components/cards/PublicationCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
+import { useEnvironmentContext } from "../../../context/environmentContext";
+import { filterContentByEnvironment } from "../../../utils/contentFilter";
+import { useMemo } from "react";
 
 const PublicationsPage = () => {
   const { notifyUser } = Toast();
+  const { selectedEnvironments } = useEnvironmentContext();
 
   const {  data, isLoading, isError} = useQuery('publications', fetchUserPublications,{
     // enabled: false,
   });
+
+  // Filter publications based on selected environments
+  const filteredPublications = useMemo(() => {
+    return filterContentByEnvironment(data, selectedEnvironments);
+  }, [data, selectedEnvironments]);
 
   if (isLoading){
     return <CircleLoader/>
@@ -30,9 +39,15 @@ const PublicationsPage = () => {
         <div className="col-span-1 md:col-span-3 md:px-0 px-5">
           <BreadCrumb title={"Publications"} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {data?.map((publicationItem:PublicationDataType, index:number) => (
-              <PublicationCard key={index} publicationItem={publicationItem} />
-            ))}
+            {filteredPublications?.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                No publications available for the selected environment(s).
+              </div>
+            ) : (
+              filteredPublications?.map((publicationItem:PublicationDataType, index:number) => (
+                <PublicationCard key={index} publicationItem={publicationItem} />
+              ))
+            )}
           </div>
         </div>
          {/* Events column */}

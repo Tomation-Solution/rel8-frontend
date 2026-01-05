@@ -9,6 +9,8 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useQuery } from "react-query";
 import { fetchAllNotifications } from "../../api/notifications/notifications-api";
 import { useNavigate } from "react-router-dom";
+import { useEnvironmentContext, EnvironmentType } from "../../context/environmentContext";
+import { useState } from "react";
 
 interface Props {
   isMobileSidebarOpen: boolean;
@@ -18,6 +20,8 @@ interface Props {
 const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const { user } = useAppContext();
   const navigate = useNavigate();
+  const { toggleEnvironment, isEnvironmentActive } = useEnvironmentContext();
+  const [showEnvironmentDropdown, setShowEnvironmentDropdown] = useState(false);
 
   // Fetch notifications
   const { data: notifications } = useQuery(
@@ -28,11 +32,13 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   // Calculate the number of notifications
   const notificationCount = notifications?.length || 0;
 
-  console.log(user);
-
-  console.log(user);
+  const environments: { type: EnvironmentType; label: string }[] = [
+    { type: 'members', label: 'Members' },
+    { type: 'excos', label: 'Excos' },
+    { type: 'committee', label: 'Committee' },
+  ];
   return (
-    <header className="h-[70px] z-[999] w-full sticky px-2 border-b bg-gray-50 ">
+    <header className="h-[70px] z-[999] w-full sticky px-2 border-b bg-gray-50 " onClick={() => setShowEnvironmentDropdown(false)}>
       <div className="w-[95%] mx-auto flex items-center h-full justify-between">
         <div className="flex items-center gap-5">
           <span
@@ -71,6 +77,45 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
               />
             </button>
           </form>
+        </div>
+        {/* Environment Toggles */}
+        <div className="hidden md:flex items-center gap-2 relative">
+          <div className="relative">
+            <button
+              onClick={() => setShowEnvironmentDropdown(!showEnvironmentDropdown)}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-org-primary"
+            >
+              Environments
+            </button>
+            {showEnvironmentDropdown && (
+              <div 
+                className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="py-1">
+                  {environments.map((env) => (
+                    <label
+                      key={env.type}
+                      className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEnvironment(env.type);
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isEnvironmentActive(env.type)}
+                        onChange={() => toggleEnvironment(env.type)}
+                        className="mr-3 h-4 w-4 text-org-primary focus:ring-org-primary border-gray-300 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <span className="text-sm text-gray-700">{env.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <div

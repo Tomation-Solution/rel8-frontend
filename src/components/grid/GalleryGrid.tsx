@@ -46,6 +46,9 @@ import { fetchAllGalleryData } from "../../api/gallery/gallery-api";
 import GalleryCard from "../cards/GalleryCard";
 import CircleLoader from "../loaders/CircleLoader";
 import Toast from "../../components/toast/Toast";
+import { useEnvironmentContext } from "../../context/environmentContext";
+import { filterContentByEnvironment } from "../../utils/contentFilter";
+import { useMemo } from "react";
 
 interface Props {
   numberOfItemsToShow?: number;
@@ -54,6 +57,7 @@ interface Props {
 
 const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   const { notifyUser } = Toast();
+  const { selectedEnvironments } = useEnvironmentContext();
 
   const { data, isError, isLoading } = useQuery(
     ["galleryData", { page: 1 }],
@@ -67,6 +71,12 @@ const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
     }
   );
 
+  // Filter gallery items based on selected environments
+  const filteredGalleryData = useMemo(() => {
+    const filtered = filterContentByEnvironment(data, selectedEnvironments);
+    return filtered?.slice(0, numberOfItemsToShow);
+  }, [data, selectedEnvironments, numberOfItemsToShow]);
+
   if (isError) {
     notifyUser("An error occurred while fetching gallery data", 'error');
   }
@@ -76,11 +86,15 @@ const GalleryGrid = ({ numberOfItemsToShow, heightOfCard }: Props) => {
   }
   return (
     <div className=" xl/lg:px-0 md:px-10 px-5">
-      {data
-        ?.slice(0, numberOfItemsToShow)
-        .map((galleryItem: any, index: number) => (
+      {filteredGalleryData && filteredGalleryData.length === 0 ? (
+        <div className="text-center py-4 text-gray-500 text-sm">
+          No gallery items available for the selected environment(s).
+        </div>
+      ) : (
+        filteredGalleryData?.map((galleryItem: any, index: number) => (
           <GalleryCard height={heightOfCard} key={index} galleryItem={galleryItem} />
-        ))}
+        ))
+      )}
     </div>
   );
 };

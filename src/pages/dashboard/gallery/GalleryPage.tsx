@@ -1,5 +1,5 @@
 import EventGrid from "../../../components/grid/EventGrid";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "react-query";
 import Toast from "../../../components/toast/Toast";
 import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
@@ -8,6 +8,8 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 import GalleryCard from "../../../components/cards/GalleryCard";
 import SeeAll from "../../../components/SeeAll";
 import QuickNav from "../../../components/navigation/QuickNav";
+import { useEnvironmentContext } from "../../../context/environmentContext";
+import { filterContentByEnvironment } from "../../../utils/contentFilter";
 
 interface GalleryItem {
     id: number;
@@ -23,9 +25,15 @@ interface Link {
 const GalleryPage = () => {
     const [page, setPage] = useState<number>(1);
     const { notifyUser } = Toast();
+    const { selectedEnvironments } = useEnvironmentContext();
     const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
         keepPreviousData: true,
     });
+
+    // Filter gallery items based on selected environments
+    const filteredGalleryData = useMemo(() => {
+        return filterContentByEnvironment(data, selectedEnvironments);
+    }, [data, selectedEnvironments]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -59,7 +67,13 @@ const GalleryPage = () => {
                     <div className={`${isLoading && `place-items-center`} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
                         {isLoading && <CircleLoader />}
 
-                        {data?.map((galleryItem: GalleryItem, index: number) => (
+                        {!isLoading && filteredGalleryData && filteredGalleryData.length === 0 && (
+                            <div className="col-span-full text-center py-8 text-gray-500">
+                                No gallery items available for the selected environment(s).
+                            </div>
+                        )}
+
+                        {filteredGalleryData?.map((galleryItem: GalleryItem, index: number) => (
                             <GalleryCard key={index} galleryItem={galleryItem} />
                         ))}
                     </div>
