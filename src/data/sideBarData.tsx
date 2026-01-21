@@ -6,6 +6,7 @@ import {
   FiBell,
   FiHelpCircle,
   FiLogOut,
+  FiBriefcase,
 } from "react-icons/fi";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { PiChatTeardropText } from "react-icons/pi";
@@ -105,16 +106,16 @@ export const sideBarData: SideBarLinkType[] = [
     name: "My Account",
     path: "/account",
   },
-  // {
-  //   mainIcon: fundaProjectIcon,
-  //   name: "Fund a Project",
-  //   path: "/fund-a-project",
-  // },
-  // {
-  //   mainIcon: serviceRequestsIcon,
-  //   name: "Service Requests",
-  //   path: "/service-requests",
-  // },
+  {
+    mainIcon: FiUser,
+    name: "Fund a Project",
+    path: "/fund-a-project",
+  },
+  {
+    mainIcon: FiBriefcase,
+    name: "Service Requests",
+    path: "/service-requests",
+  },
   // {
   //   mainIcon: subscribeIcon,
   //   name: "Subscribe",

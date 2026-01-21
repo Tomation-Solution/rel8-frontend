@@ -50,13 +50,14 @@ function App() {
   const ElectionStepPage = lazy(() => import("./pages/dashboard/elections/ElectionStepsPage"));
   const ElectionCreateAspirantPage = lazy(() => import("./pages/dashboard/elections/ElectionCreateAspirantPage"));
   const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
-  const FundAProjectPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectPage"));
+  const FundAProjectPage = lazy(() => import("./pages/dashboard/projects/FundAProjectPage"));
   const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
   const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
   const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
   const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
   const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
   const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
+  const ServicePaymentSuccess = lazy(() => import("./components/PaymentSuccess/ServicePaymentSuccess"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
   const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
@@ -207,6 +208,15 @@ function App() {
           <DashboardLayout >
             <ServiceRequestSubmission />
           </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/service-requests/success/:serviceId",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <ServicePaymentSuccess />
         </Suspense>
       ),
       errorElement: <ErrorPage />,

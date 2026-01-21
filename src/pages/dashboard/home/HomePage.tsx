@@ -181,7 +181,7 @@ const HomePage = () => {
                 No publications available for the selected environment(s).
               </div>
             ) : (
-              filteredPublications?.map((publicationItem: PublicationDataType, index: number) => (
+              filteredPublications?.map((publicationItem: any, index: number) => (
                 <PublicationCard key={index} publicationItem={publicationItem} /> 
               ))
             )}

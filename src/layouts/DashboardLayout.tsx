@@ -12,10 +12,10 @@ import { TableDataType } from "../types/myTypes";
 
 
 interface DashboardLayoutInterfaceProps {
-    children: ReactNode;
-  }
+  children: ReactNode;
+}
 
-const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
+const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
 
   const { user, organization } = useAppContext();
   const navigate = useNavigate();
@@ -24,76 +24,74 @@ const DashboardLayout = ({children}:DashboardLayoutInterfaceProps) => {
 
   const canShowBlocker = !!organization?.settings?.show_dues_blocker
 
-    const [isMobileSidebarOpen,setIsMobileSidebarOpen] = React.useState<boolean>(false)
-    const [showDuesModal, setShowDuesModal] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState<boolean>(false)
+  const [showDuesModal, setShowDuesModal] = useState(true);
 
-    // Get organization settings for currency
-    const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
-    const currentCurrency = orgSettings?.settings?.currency || 'USD';
-    const currencySymbols: { [key: string]: string } = {
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      NGN: '₦',
-      CAD: 'C$',
-      AUD: 'A$',
-    };
-    const currencySymbol = currencySymbols[currentCurrency] || '$';
+  // Get organization settings for currency
+  const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
+  const currentCurrency = orgSettings?.settings?.currency || 'USD';
+  const currencySymbols: { [key: string]: string } = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    NGN: '₦',
+    CAD: 'C$',
+    AUD: 'A$',
+  };
+  const currencySymbol = currencySymbols[currentCurrency] || '$';
 
-    // Get user dues data
-    const { data: userDues } = useQuery("userDues", fetchUserDues, {
-      enabled: !!user, // Only fetch if user is logged in
-    });
+  // Get user dues data
+  const { data: userDues } = useQuery("userDues", fetchUserDues, {
+    enabled: !!user, // Only fetch if user is logged in
+  });
 
-    // Check if current page is account page
-    const isAccountPage = location.pathname === '/account' 
+  // Check if current page is account page
+  const isAccountPage = location.pathname === '/account'
     || location.pathname.startsWith('/dashboard/account')
     || location.pathname.includes('election')
     || location.pathname.includes('dues');
 
-    // Calculate total outstanding amount from dues data
-    const totalOutstandingAmount = userDues
-      ?.filter((dues: TableDataType) => dues.status !== 'approved')
-      ?.reduce((total: number, dues: TableDataType) => {
-        return total + parseFloat(dues.amount || '0');
-      }, 0) || 0;
+  // Calculate total outstanding amount from dues data
+  const totalOutstandingAmount = userDues
+    ?.filter((dues: TableDataType) => dues.status !== 'approved')
+    ?.reduce((total: number, dues: TableDataType) => {
+      return total + parseFloat(dues.amount || '0');
+    }, 0) || 0;
 
-    useEffect(() => {
-      if (!user) {
+  useEffect(() => {
+    if (!user) {
 
-        notifyUser("You must be logged in to view this page","error");
-        navigate('/login');
-      }
-    }, [user,navigate,notifyUser]);
+      notifyUser("You must be logged in to view this page", "error");
+      navigate('/login');
+    }
+  }, [user, navigate, notifyUser]);
 
-    useEffect(() => {
-      if (user && userDues && canShowBlocker && totalOutstandingAmount > 0 && !isAccountPage){
-          setShowDuesModal(true);
-      } else {
-        setShowDuesModal(false);
-      }
-    }, [user, userDues, totalOutstandingAmount, isAccountPage]);
+  useEffect(() => {
+    if (user && userDues && canShowBlocker && totalOutstandingAmount > 0 && !isAccountPage) {
+      setShowDuesModal(true);
+    } else {
+      setShowDuesModal(false);
+    }
+  }, [user, userDues, totalOutstandingAmount, isAccountPage]);
 
   return (
-    <div className="font-sans h-screen overflow-hidden relative flex justify-between">
-        <Sidebar  isMobileSidebarOpen={isMobileSidebarOpen}  setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
-        <section className="w-full overflow-y-scroll h-screen  pb-10 relative">
-          <div className="fixed w-full">
-            <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
-          </div>
-            <div className="scrollbar-thin mt-12 scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto text-black z-1 w-[95%] mx-auto py-4 pt-[70px]" >
-                {children}
-            </div>
+    <div className="font-sans h-screen overflow-hidden relative flex">
+      <Sidebar isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
+      <section className="flex-1 overflow-hidden h-screen relative flex flex-col min-w-0">
+        <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
+        <div className="scrollbar-thin scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto text-black z-1 w-full px-2 md:px-4 lg:px-6 py-4 pt-[70px]" >
+          {children}
+        </div>
 
-        </section>
+      </section>
 
-        {/* Outstanding Dues Modal */}
-        <OutstandingDuesModal
-          isOpen={showDuesModal}
-          onClose={() => setShowDuesModal(false)}
-          totalAmount={totalOutstandingAmount}
-          currencySymbol={currencySymbol}
-        />
+      {/* Outstanding Dues Modal */}
+      <OutstandingDuesModal
+        isOpen={showDuesModal}
+        onClose={() => setShowDuesModal(false)}
+        totalAmount={totalOutstandingAmount}
+        currencySymbol={currencySymbol}
+      />
     </div>
   )
 }

@@ -73,7 +73,7 @@ const GalleryPage = () => {
                             </div>
                         )}
 
-                        {filteredGalleryData?.map((galleryItem: GalleryItem, index: number) => (
+                        {filteredGalleryData?.map((galleryItem: any, index: number) => (
                             <GalleryCard key={index} galleryItem={galleryItem} />
                         ))}
                     </div>
