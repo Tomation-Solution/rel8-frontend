@@ -1,5 +1,5 @@
 import EventGrid from "../../../components/grid/EventGrid";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import Toast from "../../../components/toast/Toast";
 import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
@@ -8,8 +8,6 @@ import CircleLoader from "../../../components/loaders/CircleLoader";
 import GalleryCard from "../../../components/cards/GalleryCard";
 import SeeAll from "../../../components/SeeAll";
 import QuickNav from "../../../components/navigation/QuickNav";
-import { useEnvironmentContext } from "../../../context/environmentContext";
-import { filterContentByEnvironment } from "../../../utils/contentFilter";
 
 interface GalleryItem {
     id: number;
@@ -25,15 +23,9 @@ interface Link {
 const GalleryPage = () => {
     const [page, setPage] = useState<number>(1);
     const { notifyUser } = Toast();
-    const { selectedEnvironments } = useEnvironmentContext();
     const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
         keepPreviousData: true,
     });
-
-    // Filter gallery items based on selected environments
-    const filteredGalleryData = useMemo(() => {
-        return filterContentByEnvironment(data, selectedEnvironments);
-    }, [data, selectedEnvironments]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -52,7 +44,8 @@ const GalleryPage = () => {
     };
 
     const handleNextPage = () => {
-        if (data?.data?.links?.some((link: Link) => link.label === page + 1)) {
+        // Simple pagination: if we got 10 items (the limit), assume there's a next page
+        if (data && Array.isArray(data) && data.length === 10) {
             setPage(page + 1);
         }
     };
@@ -67,13 +60,13 @@ const GalleryPage = () => {
                     <div className={`${isLoading && `place-items-center`} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
                         {isLoading && <CircleLoader />}
 
-                        {!isLoading && filteredGalleryData && filteredGalleryData.length === 0 && (
+                        {!isLoading && data && Array.isArray(data) && data.length === 0 && (
                             <div className="col-span-full text-center py-8 text-gray-500">
-                                No gallery items available for the selected environment(s).
+                                No gallery items available.
                             </div>
                         )}
 
-                        {filteredGalleryData?.map((galleryItem: any, index: number) => (
+                        {data && Array.isArray(data) && data.map((galleryItem: any, index: number) => (
                             <GalleryCard key={index} galleryItem={galleryItem} />
                         ))}
                     </div>
@@ -92,8 +85,8 @@ const GalleryPage = () => {
                             <li>
                                 <button
                                     onClick={handleNextPage}
-                                    disabled={!data?.data?.links?.some((link: Link) => link.label === page + 1)}
-                                    className={`px-4 py-2 rounded-md ${!data?.data?.links?.some((link: Link) => link.label === page + 1) ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
+                                    disabled={!data || !Array.isArray(data) || data.length < 10}
+                                    className={`px-4 py-2 rounded-md ${!data || !Array.isArray(data) || data.length < 10 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
                                 >
                                     Next
                                 </button>

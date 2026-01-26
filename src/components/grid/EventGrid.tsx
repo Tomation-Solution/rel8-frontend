@@ -20,8 +20,7 @@ const EventGrid = ({numberOfItemsToShow=2,heightOfCard}:Props) => {
 
   // Filter events based on selected environments
   const filteredEvents = useMemo(() => {
-    const eventsData = data?.data || data || [];
-    const filtered = filterContentByEnvironment(eventsData, selectedEnvironments);
+    const filtered = filterContentByEnvironment(data, selectedEnvironments);
     return filtered?.slice(0, numberOfItemsToShow);
   }, [data, selectedEnvironments, numberOfItemsToShow]);
 

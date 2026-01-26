@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { fetchAllExcos, fetchAllMembers } from "../../../api/members/api-members";
+import { fetchAllExcos } from "../../../api/members/api-members";
 import { useState } from "react";
 import { ExcoMemberDataType } from "../../../types/myTypes";
 import ExcosMemberCard from "../../../components/cards/ExcosMemberCard";
@@ -8,15 +8,15 @@ import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 
 const ExcosPage = () => {
-  const { data, isLoading, isError } = useQuery("excos", fetchAllMembers);
+  const { data, isLoading, isError } = useQuery("excos", fetchAllExcos);
   const [currentPage, setCurrentPage] = useState(1);
   const { notifyUser } = Toast();
 
   const itemsPerPage = 12;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data?.filter((m) => m.exco.isExco)?.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(data?.length / itemsPerPage);
+  const currentItems = data && Array.isArray(data) ? data.slice(indexOfFirstItem, indexOfLastItem) : [];
+  const totalPages = Math.ceil((data && Array.isArray(data) ? data.length : 0) / itemsPerPage);
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   if (isLoading) {
@@ -24,7 +24,7 @@ const ExcosPage = () => {
   }
 
   if (isError) {
-    notifyUser("An error occured while trying to fetch galey items", "error");
+    notifyUser("An error occurred while trying to fetch excos", "error");
   }
 
   return (
@@ -36,8 +36,11 @@ const ExcosPage = () => {
         ))}
       </div>
 
-      {currentItems?.length <= 0 && (
-        <h3 className="text-org-primary-blue text-xl">No Excos Available</h3>
+      {!isLoading && (!data || (Array.isArray(data) && data.length === 0)) && (
+        <div className="text-center py-8">
+          <h3 className="text-org-primary-blue text-xl">No Excos Available</h3>
+          <p className="text-gray-500 mt-2">Excos will be listed here when available.</p>
+        </div>
       )}
 
       {pageNumbers.length > 0 && (

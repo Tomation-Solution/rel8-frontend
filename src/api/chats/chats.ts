@@ -5,9 +5,9 @@ export const getGroupMessages = async () => {
     const response = await apiTenant.get('/api/chat/group');
     // Transform data to match frontend expectations
     const transformedData = response.data.map((msg: any) => ({
-        user__id: msg.senderId._id,
+        user__id: msg.senderId?._id || msg.senderId || null,
         message: msg.content,
-        full_name: msg.senderId.name,
+        full_name: msg.senderId?.name || 'System',
         time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
     }));
 
@@ -52,9 +52,9 @@ export const getGroupMessagesById = async (groupId: string) => {
   const response = await apiTenant.get(`/api/chat/group/${groupId}`);
   // Transform data to match frontend expectations
   const transformedData = response.data.map((msg: any) => ({
-      user__id: msg.senderId._id,
+      user__id: msg.senderId?._id || msg.senderId || null,
       message: msg.content,
-      full_name: msg.senderId.name,
+      full_name: msg.senderId?.name || 'System',
       time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
   }));
 

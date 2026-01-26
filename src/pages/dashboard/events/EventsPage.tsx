@@ -7,25 +7,14 @@ import GalleryGrid from "../../../components/grid/GalleryGrid";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import QuickNav from "../../../components/navigation/QuickNav";
 import Toast from "../../../components/toast/Toast";
-import { useEnvironmentContext } from "../../../context/environmentContext";
-import { filterContentByEnvironment } from "../../../utils/contentFilter";
-import { useMemo } from "react";
 
 const EventsPage = () => {
     const { notifyUser } = Toast();
-    const { selectedEnvironments } = useEnvironmentContext();
     const { data, isError, isLoading } = useQuery("events", fetchAllUserEvents);
-
-    // Filter events based on selected environments
-    const filteredEvents = useMemo(() => {
-        return filterContentByEnvironment(data, selectedEnvironments);
-    }, [data, selectedEnvironments]);
 
     if (isError) {
         notifyUser("An error occurred while fetching events", "error");
     }
-
-    console.log(data);
 
     return (
         <main className='grid grid-cols-1 md:grid-cols-4 gap-7'>
@@ -34,12 +23,17 @@ const EventsPage = () => {
 
                 <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
                     {isLoading && <CircleLoader />}
-                    {!isLoading && filteredEvents && filteredEvents.length === 0 && (
+                    {!isLoading && data && Array.isArray(data) && data.length === 0 && (
                         <div className="py-10 text-center col-span-full md:text-[25px]">
-                            No events available for the selected environment(s).
+                            No events available.
                         </div>
                     )}
-                    {!isLoading && filteredEvents?.map((eventItem: any, index: number) => (
+                    {!isLoading && !data && (
+                        <div className="py-10 text-center col-span-full md:text-[25px]">
+                            No events available.
+                        </div>
+                    )}
+                    {!isLoading && data && Array.isArray(data) && data.map((eventItem: any, index: number) => (
                         <EventsCard key={index} eventItem={eventItem} />
                     ))}
                 </div>

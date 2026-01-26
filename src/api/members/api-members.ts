@@ -57,7 +57,8 @@ export const fetchAllMembers = async () =>{
     return response.data
 }
 export const fetchAllExcos = async () =>{
-    const response = await apiTenant.get(`/user/memberlist-info/get_all_exco/`);
-    return response.data
+    const response = await apiTenant.get(`/api/excos`);
+    // Backend returns { message, excos } so we extract excos array
+    return response.data.excos || response.data || [];
 }
 

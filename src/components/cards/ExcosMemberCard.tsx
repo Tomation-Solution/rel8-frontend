@@ -9,22 +9,23 @@ const ExcosMemberCard = ({ item }: Props) => {
   return (
     <div className="bg-white my-2 border border-[#ececec] p-2 flex flex-col justify-between rounded-md">
       <img
-        src={item?.imageUrl ? item.imageUrl : profileImage}
+        src={item?.profileImage || item?.imageUrl || profileImage}
         className="w-full object-center object-cover rounded-md"
         alt=""
       />
       <div className="my-3">
-        <h6 className="font-semibold">{item?.name}</h6>
+        <h6 className="font-semibold">{item?.name || "Name Not Available"}</h6>
         <p className="text-sm text-textColor">
-          {item.exco.isExco ? item.exco.position 
-            : "Position Not Available"}
+          {item?.position || "Position Not Available"}
         </p>
-        <small className="text-xs text-org-primaryBlue">
-          {item?.member_info && item.member_info[4]?.value
-            ? item.member_info[4].value
-            : "Grade Not Available"}
-        </small>
-        <p className="text-sm line-clamp-2 text-textColor">{item.bio}</p>
+        {item?.email && (
+          <small className="text-xs text-org-primaryBlue">
+            {item.email}
+          </small>
+        )}
+        {item?.bio && (
+          <p className="text-sm line-clamp-2 text-textColor mt-2">{item.bio}</p>
+        )}
       </div>
     </div>
   );
