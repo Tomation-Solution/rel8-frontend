@@ -57,10 +57,12 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   }, [showEnvironmentDropdown]);
 
   return (
-    <header className="h-[70px] w-full border-b bg-gray-50">
+    <header className="relative z-50 h-[70px] w-full border-b bg-gray-50">
       <div className="w-full h-full mx-auto flex items-center justify-between gap-2 md:gap-3 lg:gap-4 px-2 md:px-4 lg:px-6 overflow-x-auto">
         <div className="flex items-center gap-3 md:gap-5 flex-shrink-0 min-w-0">
-          <span
+          <button
+            type="button"
+            aria-label={isMobileSidebarOpen ? "Close menu" : "Open menu"}
             className="lg:hidden cursor-pointer flex-shrink-0"
             onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
           >
@@ -69,7 +71,7 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
             ) : (
               <FaBars className="w-7 h-7 cursor-pointer" />
             )}
-          </span>
+          </button>
           <h3 className="font-bold text-neutral-1 capitalize text-sm md:text-xl flex-shrink-0 whitespace-nowrap truncate">
             <span className="text-textColor !capitalize">Hello</span>{" "}
             <span className="!capitalize">{user?.name}</span>

@@ -76,29 +76,30 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
             </nav>
 
             {/* Mobile Navbar */}
-            {/* {isMobileSidebarOpen && (
-                <div
-                    onClick={() => setIsMobileSidebarOpen(false)}
-                    className={`lg:hidden fixed top-0 w-full min-h-screen h-full bg-black/70 transition-transform z-10 ${
-                        isMobileSidebarOpen ? 'translate-x-0 ease-in duration-900' : '-translate-x-full ease-out duration-900'
+            <div
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className={`lg:hidden fixed left-0 right-0 bottom-0 top-[70px] bg-black/60 z-40 transition-opacity duration-200 ${
+                    isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}
+            >
+                <nav
+                    className={`fixed left-0 bottom-0 top-[70px] w-[80%] max-w-[320px] bg-white px-3 py-6 overflow-y-auto transform transition-transform duration-200 ${
+                        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Mobile navigation"
                 >
-                    <nav 
-                        className="lg:hidden fixed top-[60px] w-[80%] sm:w-[40%] md:w-[36%] overflow-y-auto min-h-screen h-full bg-white px-3 py-6"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {sideBarData.map((item, index) => (
-                            <NavItem
-                                key={index}
-                                item={item}
-                                isMobileSidebarOpen={isMobileSidebarOpen}
-                                setIsMobileSidebarOpen={setIsMobileSidebarOpen}
-                                onLogout={item.name === 'Logout' ? handleLogout : undefined}
-                            />
-                        ))}
-                    </nav>
-                </div>
-            )} */}
+                    {sideBarData.map((item, index) => (
+                        <NavItem
+                            key={index}
+                            item={item}
+                            isMobileSidebarOpen={isMobileSidebarOpen}
+                            setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+                            onLogout={item.name === 'Logout' ? handleLogout : undefined}
+                        />
+                    ))}
+                </nav>
+            </div>
         </>
     );
 };
