@@ -5,14 +5,16 @@ import apiTenant from './baseApi'
 type PayProp = {
     payment_id:number,
     forWhat:string,
-    query_param?:string}
+    query_param?:string,
+    openInNewTab?: boolean
+}
 const useDynamicPaymentApi =  ()=>{
    
     const [loading,setIsloading] = useState(false)
     
     const {notifyUser} = Toast()
     
-    const pay = async ({payment_id,forWhat,query_param=''}:PayProp) => {
+    const pay = async ({payment_id,forWhat,query_param='', openInNewTab=false}:PayProp) => {
         notifyUser('Loading Gateway ','success')
         try{
             if(setIsloading){
@@ -20,7 +22,12 @@ const useDynamicPaymentApi =  ()=>{
             }
              const resp = await apiTenant.post(`/dues/process_payment/${forWhat}/${payment_id}/${query_param}`)
             
-             window.location.href=resp.data.data.data.authorization_url
+             const url = resp.data.data.data.authorization_url
+             if (openInNewTab) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+             } else {
+                window.location.href = url
+             }
 
              return resp.data.data
         }

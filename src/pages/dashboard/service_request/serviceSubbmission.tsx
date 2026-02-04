@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "react-query";
 import { useState } from "react";
 import Toast from "../../../components/toast/Toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { getServiceDetail, createServiceRequest, DeliveryAddress } from "../../../api/serviceRequestApi";
+import { getServiceDetail, createServiceRequest, DeliveryAddress, uploadServiceRequestPaymentProof } from "../../../api/serviceRequestApi";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import InputWithLabel from "../../../components/form/InputWithLabel";
 import Button from "../../../components/button/Button";
@@ -27,6 +27,7 @@ const ServiceSubmission = () => {
     const { pay, loadingPay } = useDynamicPaymentApi();
     const { notifyUser } = Toast();
     const [paymentProof, setPaymentProof] = useState<File | null>(null);
+    const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
 
     const {
         register,
@@ -46,13 +47,35 @@ const ServiceSubmission = () => {
         }
     );
 
-    const { isLoading: submitting, mutate: submitRequest } = useMutation(createServiceRequest, {
+    // Create a pending request (used for payment_link flow so user can upload proof later)
+    const { isLoading: creatingRequest, mutateAsync: createRequestAsync } = useMutation(createServiceRequest, {
+        onSuccess: (created) => {
+            setCreatedRequestId(created?._id || null);
+            notifyUser('Request created. Proceed to payment, then upload proof on this page.', 'success');
+        },
+        onError: (error: any) => {
+            notifyUser(error.response?.data?.message || 'Failed to create service request', 'error');
+        },
+    });
+
+    // Bank transfer submission: create request with proof (required)
+    const { isLoading: submittingBankTransfer, mutate: submitBankTransfer } = useMutation(createServiceRequest, {
         onSuccess: () => {
             notifyUser('Service request submitted successfully!', 'success');
             navigate(`/service-requests/${serviceId}`);
         },
         onError: (error: any) => {
             notifyUser(error.response?.data?.message || 'Failed to submit service request', 'error');
+        },
+    });
+
+    const { isLoading: uploadingProof, mutate: uploadProof } = useMutation(uploadServiceRequestPaymentProof, {
+        onSuccess: () => {
+            notifyUser('Payment proof uploaded. An admin will verify it shortly.', 'success');
+            navigate(`/service-requests/${serviceId}`);
+        },
+        onError: (error: any) => {
+            notifyUser(error.response?.data?.message || 'Failed to upload payment proof', 'error');
         },
     });
 
@@ -77,23 +100,13 @@ const ServiceSubmission = () => {
             postalCode: data.postalCode,
         };
 
-        // Handle based on payment type
-        if (service.paymentType === 'payment_link') {
-            // For payment link, redirect to external payment
-            // Note: payment_id expects a number, but we're using string ID
-            // We'll pass it as a string and let the backend handle it
-            pay({
-                payment_id: parseInt(service._id.slice(-8), 16) || Date.now(), // Generate a numeric ID from string
-                forWhat: 'service',
-                query_param: `?serviceId=${serviceId}&address=${encodeURIComponent(JSON.stringify(deliveryAddress))}`,
-            });
-        } else {
-            // For bank transfer, submit request with payment proof
+        // For bank transfer: submit request WITH payment proof (required)
+        if (service.paymentType !== 'payment_link') {
             if (!paymentProof) {
                 notifyUser('Please upload payment proof', 'error');
                 return;
             }
-            submitRequest({
+            submitBankTransfer({
                 serviceId: serviceId!,
                 deliveryAddress: deliveryAddress,
                 paymentProof: paymentProof,
@@ -101,27 +114,44 @@ const ServiceSubmission = () => {
         }
     };
 
-    // Handle payment success callback (this would be called after payment is completed)
-    const handlePaymentSuccess = async (paymentData: any) => {
-        const addressData = JSON.parse(decodeURIComponent(paymentData.address));
-        
+    const handleProceedToPayment = async (data: FormI) => {
+        if (!service) return;
+
         const deliveryAddress: DeliveryAddress = {
-            street: addressData.street || '',
-            city: addressData.city || '',
-            country: addressData.country || '',
-            state: addressData.state,
-            postalCode: addressData.postalCode,
+            street: data.street || '',
+            city: data.city || '',
+            country: data.country || '',
+            state: data.state,
+            postalCode: data.postalCode,
         };
-        
-        submitRequest({
-            serviceId: serviceId!,
-            deliveryAddress: deliveryAddress,
+
+        // Create a pending request first (so we can attach payment proof later)
+        if (!createdRequestId) {
+            try {
+                const created = await createRequestAsync({
+                    serviceId: serviceId!,
+                    deliveryAddress,
+                });
+                setCreatedRequestId(created._id);
+            } catch (e) {
+                return;
+            }
+        }
+
+        // Open payment gateway in a new tab so user can still upload proof on this page
+        pay({
+            payment_id: parseInt(service._id.slice(-8), 16) || Date.now(),
+            forWhat: 'service',
+            query_param: `?serviceId=${serviceId}&address=${encodeURIComponent(JSON.stringify(deliveryAddress))}`,
+            openInNewTab: true,
         });
     };
 
+    // Note: payment-success handling is done via the dedicated success page flow.
+
     return (
         <div>
-            {(loadingService || submitting) && <CircleLoader />}
+            {(loadingService || creatingRequest || submittingBankTransfer || uploadingProof) && <CircleLoader />}
             
             <div className="max-w-2xl">
                 <div className="bg-white ">
@@ -190,11 +220,11 @@ const ServiceSubmission = () => {
                             />
                         </div>
 
-                        {/* Payment Proof Upload (for bank transfer) */}
-                        {service?.paymentType === 'bank_transfer' && (
+                        {/* Payment Proof Upload */}
+                        {(service?.paymentType === 'bank_transfer' || service?.paymentType === 'payment_link') && (
                             <div className="mt-6">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Payment Proof <span className="text-red-500">*</span>
+                                    Payment Proof {service?.paymentType === 'bank_transfer' && <span className="text-red-500">*</span>}
                                 </label>
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                                     <input
@@ -205,6 +235,14 @@ const ServiceSubmission = () => {
                                             const file = e.target.files?.[0];
                                             if (file) {
                                                 setPaymentProof(file);
+                                                if (service?.paymentType === 'payment_link') {
+                                                    if (!createdRequestId) {
+                                                        notifyUser('Click "Proceed to Payment" first to create the request, then upload proof.', 'error');
+                                                        return;
+                                                    }
+                                                    uploadProof({ requestId: createdRequestId, paymentProof: file });
+                                                    e.currentTarget.value = '';
+                                                }
                                             }
                                         }}
                                         className="hidden"
@@ -219,6 +257,11 @@ const ServiceSubmission = () => {
                                                 <p className="text-xs text-gray-500 mt-1">
                                                     {(paymentProof.size / 1024).toFixed(2)} KB
                                                 </p>
+                                                {service?.paymentType === 'payment_link' && (
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {uploadingProof ? 'Uploading proof...' : 'Proof will be saved to your request'}
+                                                    </p>
+                                                )}
                                             </div>
                                         ) : (
                                             <div>
@@ -239,7 +282,7 @@ const ServiceSubmission = () => {
                             <p className="text-sm text-gray-700">
                                 <strong>Note:</strong> {service?.paymentType === 'bank_transfer'
                                     ? 'After uploading your payment proof, your service request will be submitted for review.'
-                                    : 'You will be redirected to the payment gateway to complete your payment. After successful payment, your service request will be submitted automatically.'}
+                                    : 'Proceed to payment in a new tab, then upload proof of payment here so an admin can verify it.'}
                             </p>
                         </div>
 
@@ -247,15 +290,24 @@ const ServiceSubmission = () => {
                             <Button
                                 text="Cancel"
                                 className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
-                                onClick={() => navigate(`/service-requests/${serviceId}`)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    navigate(`/service-requests/${serviceId}`);
+                                }}
                             />
                             <Button
-                                text={service?.paymentType === 'bank_transfer'
-                                    ? (submitting ? "Submitting Request..." : "Submit Request")
-                                    : (loadingPay ? "Processing Payment..." : "Proceed to Payment")
+                                text={
+                                    service?.paymentType === 'bank_transfer'
+                                        ? (submittingBankTransfer ? "Submitting Request..." : "Submit Request")
+                                        : (loadingPay ? "Processing Payment..." : "Proceed to Payment")
                                 }
                                 className="flex-1"
-                                isLoading={loadingPay || submitting}
+                                isLoading={loadingPay || creatingRequest || submittingBankTransfer || uploadingProof}
+                                onClick={
+                                    service?.paymentType === 'payment_link'
+                                        ? handleSubmit(handleProceedToPayment)
+                                        : undefined
+                                }
                             />
                         </div>
                     </form>
