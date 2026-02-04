@@ -114,7 +114,7 @@ const ServiceSubmission = () => {
         }
     };
 
-    const handleProceedToPayment = async (data: FormI) => {
+    const handleSubmitRequest = async (data: FormI) => {
         if (!service) return;
 
         const deliveryAddress: DeliveryAddress = {
@@ -138,13 +138,20 @@ const ServiceSubmission = () => {
             }
         }
 
-        // Open payment gateway in a new tab so user can still upload proof on this page
-        pay({
-            payment_id: parseInt(service._id.slice(-8), 16) || Date.now(),
-            forWhat: 'service',
-            query_param: `?serviceId=${serviceId}&address=${encodeURIComponent(JSON.stringify(deliveryAddress))}`,
-            openInNewTab: true,
-        });
+        // If we have payment proof, upload it
+        if (paymentProof && createdRequestId) {
+            uploadProof({ requestId: createdRequestId, paymentProof: paymentProof });
+        }
+
+        // Open payment gateway in a new tab for payment_link type
+        if (service.paymentType === 'payment_link') {
+            pay({
+                payment_id: parseInt(service._id.slice(-8), 16) || Date.now(),
+                forWhat: 'service',
+                query_param: `?serviceId=${serviceId}&address=${encodeURIComponent(JSON.stringify(deliveryAddress))}`,
+                openInNewTab: true,
+            });
+        }
     };
 
     // Note: payment-success handling is done via the dedicated success page flow.
@@ -221,62 +228,62 @@ const ServiceSubmission = () => {
                         </div>
 
                         {/* Payment Proof Upload */}
-                        {(service?.paymentType === 'bank_transfer' || service?.paymentType === 'payment_link') && (
-                            <div className="mt-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Payment Proof {service?.paymentType === 'bank_transfer' && <span className="text-red-500">*</span>}
-                                </label>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                                    <input
-                                        type="file"
-                                        id="paymentProof"
-                                        accept="image/*,.pdf"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                setPaymentProof(file);
-                                                if (service?.paymentType === 'payment_link') {
-                                                    if (!createdRequestId) {
-                                                        notifyUser('Click "Proceed to Payment" first to create the request, then upload proof.', 'error');
-                                                        return;
-                                                    }
-                                                    uploadProof({ requestId: createdRequestId, paymentProof: file });
-                                                    e.currentTarget.value = '';
-                                                }
+                        <div className="mt-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Payment Proof <span className="text-red-500">*</span>
+                            </label>
+                            <div className={`border-2 border-dashed ${paymentProof ? 'border-green-500 bg-green-50' : 'border-gray-300'} rounded-lg p-6`}>
+                                <input
+                                    type="file"
+                                    id="paymentProof"
+                                    accept="image/*,.pdf"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setPaymentProof(file);
+                                            // If request is already created, upload proof immediately
+                                            if (createdRequestId) {
+                                                uploadProof({ requestId: createdRequestId, paymentProof: file });
                                             }
-                                        }}
-                                        className="hidden"
-                                    />
-                                    <label
-                                        htmlFor="paymentProof"
-                                        className="cursor-pointer"
-                                    >
-                                        {paymentProof ? (
-                                            <div>
-                                                <p className="text-sm text-gray-800 font-medium">{paymentProof.name}</p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    {(paymentProof.size / 1024).toFixed(2)} KB
-                                                </p>
-                                                {service?.paymentType === 'payment_link' && (
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        {uploadingProof ? 'Uploading proof...' : 'Proof will be saved to your request'}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p className="text-sm text-gray-600">
-                                                    Click to upload payment proof
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Supports: Images, PDF (Max 5MB)
-                                                </p>
-                                            </div>
-                                        )}
-                                    </label>
-                                </div>
+                                            e.currentTarget.value = '';
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+                                <label
+                                    htmlFor="paymentProof"
+                                    className="cursor-pointer flex flex-col items-center justify-center"
+                                >
+                                    {paymentProof ? (
+                                        <div className="text-center">
+                                            <svg className="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <p className="text-sm text-gray-800 font-medium mt-2">{paymentProof.name}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {(paymentProof.size / 1024).toFixed(2)} KB
+                                            </p>
+                                            <p className="text-xs text-green-600 mt-2 font-medium">
+                                                {uploadingProof ? 'Uploading...' : 'Click to change file'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            </svg>
+                                            <p className="text-sm text-gray-600 mt-2">
+                                                Click to upload payment proof
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Supports: Images, PDF (Max 5MB)
+                                            </p>
+                                        </div>
+                                    )}
+                                </label>
                             </div>
-                        )}
+                        </div>
+
 
                         <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
                             <p className="text-sm text-gray-700">
@@ -289,7 +296,7 @@ const ServiceSubmission = () => {
                         <div className="mt-6 flex gap-4">
                             <Button
                                 text="Cancel"
-                                className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
+                                className="flex-1 border border-gray-500 bg-transparent text-[#000] hover:bg-gray-500 hover:text-white"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     navigate(`/service-requests/${serviceId}`);
@@ -297,17 +304,13 @@ const ServiceSubmission = () => {
                             />
                             <Button
                                 text={
-                                    service?.paymentType === 'bank_transfer'
-                                        ? (submittingBankTransfer ? "Submitting Request..." : "Submit Request")
-                                        : (loadingPay ? "Processing Payment..." : "Proceed to Payment")
+                                    loadingPay || creatingRequest || uploadingProof 
+                                        ? "Submitting..." 
+                                        : "Submit Request"
                                 }
                                 className="flex-1"
-                                isLoading={loadingPay || creatingRequest || submittingBankTransfer || uploadingProof}
-                                onClick={
-                                    service?.paymentType === 'payment_link'
-                                        ? handleSubmit(handleProceedToPayment)
-                                        : undefined
-                                }
+                                isLoading={loadingPay || creatingRequest || uploadingProof}
+                                onClick={handleSubmit(handleSubmitRequest)}
                             />
                         </div>
                     </form>
