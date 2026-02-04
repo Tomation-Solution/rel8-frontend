@@ -17,7 +17,8 @@ export type DeliveryAddress = {
     "city": string,
     "country": string,
     "state"?: string,
-    "postalCode"?: string
+    "postalCode"?: string,
+    "zipCode"?: string
 }
 
 export type ServiceRequestType = {
@@ -37,6 +38,7 @@ export type ServiceRequestType = {
     },
     "deliveryAddress": DeliveryAddress,
     "paymentProof": string | null,
+    "paymentReference"?: string | null,
     "paymentStatus": "pending" | "confirmed" | "rejected",
     "requestStatus": "pending" | "confirmed" | "dispatched" | "completed" | "cancelled",
     "adminNotes": string | null,
@@ -103,4 +105,21 @@ export const postServicePaymentSuccess = async (data: {
 }): Promise<any> => {
     const resp = await apiTenant.post(`/api/services/payment-success`, data);
     return resp.data;
+}
+
+// Upload/replace payment proof for an existing service request
+export const uploadServiceRequestPaymentProof = async (data: {
+    requestId: string;
+    paymentProof: File;
+}): Promise<ServiceRequestType> => {
+    const formData = new FormData();
+    formData.append('paymentProof', data.paymentProof);
+
+    const resp = await apiTenant.put(`/api/services/requests/${data.requestId}/payment-proof`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+
+    return resp.data.serviceRequest;
 }

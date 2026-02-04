@@ -1,13 +1,19 @@
 import { useNavigate, useParams } from "react-router-dom"
-import { getServiceDetail, getMyServiceRequests } from "../../../api/serviceRequestApi"
-import { useQuery } from "react-query"
+import { getServiceDetail, getMyServiceRequests, uploadServiceRequestPaymentProof } from "../../../api/serviceRequestApi"
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import Button from "../../../components/button/Button"
 import CircleLoader from "../../../components/loaders/CircleLoader"
+import { useRef, useState } from "react"
+import Toast from "../../../components/toast/Toast"
 
 const ServiceRequestDetail = () => {
 
     const { id: serviceId } = useParams();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { notifyUser } = Toast();
+    const [uploadingForRequestId, setUploadingForRequestId] = useState<string | null>(null);
+    const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
     const { isLoading: loadingService, data: service } = useQuery(
         ['getServiceDetail', serviceId],
@@ -28,6 +34,23 @@ const ServiceRequestDetail = () => {
     // Filter requests for this specific service
     const serviceRequests = requests?.filter(req => req.serviceId._id === serviceId) || [];
     const hasPendingRequest = serviceRequests.some(req => req.requestStatus === 'pending');
+
+    const { mutate: uploadProof, isLoading: isUploadingProof } = useMutation(
+        async ({ requestId, file }: { requestId: string; file: File }) => {
+            return await uploadServiceRequestPaymentProof({ requestId, paymentProof: file });
+        },
+        {
+            onSuccess: () => {
+                notifyUser('Payment proof uploaded. An admin will verify it shortly.', 'success');
+                queryClient.invalidateQueries(['getMyServiceRequests']);
+                setUploadingForRequestId(null);
+            },
+            onError: (error: any) => {
+                notifyUser(error?.response?.data?.message || 'Failed to upload payment proof', 'error');
+                setUploadingForRequestId(null);
+            }
+        }
+    );
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('en-NG', {
@@ -162,6 +185,38 @@ const ServiceRequestDetail = () => {
                                             >
                                                 View Payment Proof
                                             </a>
+                                        )}
+                                        {(!request.paymentProof || request.paymentStatus === 'rejected') && (
+                                            <>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*,.pdf"
+                                                    className="hidden"
+                                                    ref={(el) => {
+                                                        fileInputRefs.current[request._id] = el;
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (!file) return;
+                                                        setUploadingForRequestId(request._id);
+                                                        uploadProof({ requestId: request._id, file });
+                                                        // reset input so same file can be selected again if needed
+                                                        e.currentTarget.value = '';
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="text-sm text-org-primary hover:underline disabled:opacity-60"
+                                                    disabled={isUploadingProof && uploadingForRequestId === request._id}
+                                                    onClick={() => fileInputRefs.current[request._id]?.click()}
+                                                >
+                                                    {isUploadingProof && uploadingForRequestId === request._id
+                                                        ? 'Uploading...'
+                                                        : request.paymentStatus === 'rejected'
+                                                            ? 'Re-upload Payment Proof'
+                                                            : 'Upload Payment Proof'}
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </div>
