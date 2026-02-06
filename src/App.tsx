@@ -41,6 +41,7 @@ function App() {
 
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
+  const ExcoDetailPage = lazy(() => import("./pages/dashboard/members/ExcoDetailPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
   const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
   const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
@@ -362,6 +363,17 @@ function App() {
         <Suspense fallback={<Loader />} >
           <DashboardLayout >
             <ExcosPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/excos/:id",
+      element: (
+        <Suspense fallback={<Loader />} >
+          <DashboardLayout >
+            <ExcoDetailPage />
           </DashboardLayout>
         </Suspense>
       ),

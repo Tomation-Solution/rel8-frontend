@@ -6,11 +6,13 @@ import { ExcoMemberDataType } from "../../../types/myTypes";
 import ExcosMemberCard from "../../../components/cards/ExcosMemberCard";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import { useNavigate } from "react-router-dom";
 
 const ExcosPage = () => {
   const { data, isLoading, isError } = useQuery("excos", fetchAllExcos);
   const [currentPage, setCurrentPage] = useState(1);
   const { notifyUser } = Toast();
+  const navigate = useNavigate();
 
   const itemsPerPage = 12;
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -32,7 +34,14 @@ const ExcosPage = () => {
       <BreadCrumb title={"Meet the Excos"} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 flex-1">
         {currentItems?.map((item: ExcoMemberDataType, index: number) => (
-          <ExcosMemberCard key={index} item={item} />
+          <ExcosMemberCard
+            key={index}
+            item={item}
+            onClick={() => {
+              const excoId = (item as any)?._id || (item as any)?.id;
+              if (excoId) navigate(`/excos/${excoId}`);
+            }}
+          />
         ))}
       </div>
 

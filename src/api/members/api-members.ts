@@ -62,3 +62,8 @@ export const fetchAllExcos = async () =>{
     return response.data.excos || response.data || [];
 }
 
+export const fetchExcoById = async (excoId: string) => {
+    const response = await apiTenant.get(`/api/excos/${excoId}`);
+    return response.data.exco || response.data;
+}
+
