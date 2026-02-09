@@ -87,9 +87,8 @@ const ExcoDetailPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-gray-900">Bio</h3>
-                <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">
-                  {exco.bio || "No bio provided."}
-                </p>
+                <p dangerouslySetInnerHTML={{ __html: exco?.bio}} className="text-sm text-gray-700 mt-2 whitespace-pre-wrap"/>
+
               </div>
             </div>
           </div>

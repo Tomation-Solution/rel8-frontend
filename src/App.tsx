@@ -26,7 +26,7 @@ function App() {
   
   const ChatPage = lazy(() => import("./pages/chat/ChatPage"));
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
-  const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
+  // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
   const EventsPage = lazy(() => import("./pages/dashboard/events/EventsPage"));
   const EventDetailPage = lazy(() => import("./pages/dashboard/events/EventDetailPage"));
   const GalleryPage = lazy(() => import("./pages/dashboard/gallery/GalleryPage"));
@@ -158,17 +158,17 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
-    {
-      path: "/profile",
-      element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
-            <ProfilePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
+    // {
+    //   path: "/profile",
+    //   element: (
+    //     <Suspense fallback={<Loader />} >
+    //       <DashboardLayout >
+    //         <ProfilePage />
+    //       </DashboardLayout>
+    //     </Suspense>
+    //   ),
+    //   errorElement: <ErrorPage />,
+    // },
     {
       path: "/events",
       element: (

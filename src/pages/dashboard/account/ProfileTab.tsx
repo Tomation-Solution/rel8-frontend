@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchUserProfile, updateUserProfile } from "../../../api/account/account-api";
 import Toast from "../../../components/toast/Toast";
@@ -16,7 +16,8 @@ const ProfileTab = () => {
     phone: '',
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [currentProfileImage, setCurrentProfileImage] = useState<string>('');
+  const [serverProfileImage, setServerProfileImage] = useState<string>('');
+  const [previewProfileImage, setPreviewProfileImage] = useState<string | null>(null);
 
   // Profile queries and mutations
   const { data: profile, isLoading: profileLoading } = useQuery("userProfile", fetchUserProfile, {
@@ -27,20 +28,33 @@ const ProfileTab = () => {
           email: data.email || '',
           phone: data.phone || '',
         });
-        setCurrentProfileImage(data.imageUrl || '');
+        // Only update server image if no preview is active
+        if (!previewProfileImage) {
+          setServerProfileImage(data.imageUrl || '');
+        }
       }
     }
   });
 
   const updateProfileMutation = useMutation(
-    (formData: FormData) => {
-      const userId = localStorage.getItem('userId') || '';
+    ({ formData, userId }: { formData: FormData; userId: string }) => {
       return updateUserProfile(userId, formData);
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         notifyUser("Profile updated successfully", "success");
         queryClient.invalidateQueries("userProfile");
+        // clear selected file and revoke preview (will be refreshed from server)
+        setProfileImage(null);
+        // Update server image with the new image from the response
+        if (data?.imageUrl) {
+          setServerProfileImage(data.imageUrl);
+        }
+        // Clear preview
+        if (previewProfileImage) {
+          URL.revokeObjectURL(previewProfileImage);
+          setPreviewProfileImage(null);
+        }
       },
       onError: (error: any) => {
         notifyUser(error?.response?.data?.message || "Failed to update profile", "error");
@@ -58,7 +72,17 @@ const ProfileTab = () => {
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setProfileImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setProfileImage(file);
+      console.log(file,'file here')
+
+
+      // create a temporary preview and clean up the previous one
+      const url = URL.createObjectURL(file);
+      setPreviewProfileImage(url);
+      if (previewProfileImage) {
+        URL.revokeObjectURL(previewProfileImage);
+      }
     }
   };
 
@@ -72,10 +96,26 @@ const ProfileTab = () => {
 
     if (profileImage) {
       formData.append('file', profileImage);
+      console.log('file', profileImage)
+    }
+    // prefer server-provided id, fall back to localStorage (defensive)
+    const userId = profile && (profile._id || profile.id) ? (profile._id || profile.id) : (localStorage.getItem('userId') || '');
+    if (!userId) {
+      notifyUser('Unable to determine user id for profile update', 'error');
+      return;
     }
 
-    updateProfileMutation.mutate(formData);
+    updateProfileMutation.mutate({ formData, userId });
   };
+
+  // revoke object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (previewProfileImage) {
+        URL.revokeObjectURL(previewProfileImage);
+      }
+    };
+  }, [previewProfileImage]);
 
   return (
     <div className="max-w-2xl">
@@ -92,7 +132,7 @@ const ProfileTab = () => {
 
                 <img
                   className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                  src={currentProfileImage || `https://placehold.co/100x100?text=${getInitials(profileData.name)}`}
+                  src={previewProfileImage || serverProfileImage || `https://placehold.co/100x100?text=${getInitials(profileData.name)}`}
                   alt="Profile"
                 />
               </div>

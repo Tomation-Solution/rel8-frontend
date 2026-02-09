@@ -13,10 +13,11 @@ export const fetchUserProfile = async () => {
 };
 
 export const updateUserProfile = async (userId: string, profileData: FormData) => {
+    // Let the browser/axios set the Content-Type (boundary) for multipart requests.
     const response = await apiTenant.put(`/api/members/${userId}`, profileData, {
         headers: {
-            'Content-Type': 'multipart/form-data',
-        },
+            'Content-Type': 'multipart/form-data'
+        }
     });
     return response.data;
 };

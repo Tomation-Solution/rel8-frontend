@@ -18,10 +18,10 @@ const NewsCard = ({newsItem,hidePostDetails,linkTo='news'}:Props) => {
         <img className="rounded-t-lg w-full md:h-[180px] h-[170px] object-contain" src={(newsItem as any).image || (newsItem as any).bannerUrl} alt="" />
     <div className="p-5">
         <Link to={`/${linkTo}/${(newsItem as any).id || (newsItem as any)._id}/`} >
-            <h5 className="mb-1 text-[15px] font-bold tracking-tight text-textColor line-clamp-1 dark:text-white">{(newsItem as any).name || (newsItem as any).topic}</h5>
+            <h5 className="mb-1 text-[15px] font-bold tracking-tight text-textColor truncate line-clamp-1 dark:text-white">{(newsItem as any).name || (newsItem as any).topic}</h5>
         </Link>
-        <p className="text-[10px] line-clamp-1">{formattedDate}</p>
-        <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{(newsItem as any).body || (newsItem as any).content}</p>
+        <p className="text-[10px] line-clamp-1 mb-2">{formattedDate}</p>
+        {/* <p className="mb-3 font-normal text-textColor line-clamp-2 text-sm">{(newsItem as any).body || (newsItem as any).content}</p> */}
        {!hidePostDetails && (
        <div className="flex items-center justify-between" >
             <div className="grid grid-cols-2  divide-x-2 " >
