@@ -649,14 +649,14 @@ const ElectionDetailsPage = () => {
                                                     → {candidate.name}
                                                   </span> */}
                                                 </div>
-                                                <span className="text-gray-500 text-xs">
+                                                {/* <span className="text-gray-500 text-xs">
                                                   {new Date(
                                                     voter.votedAt,
                                                   ).toLocaleDateString()}{" "}
                                                   {new Date(
                                                     voter.votedAt,
                                                   ).toLocaleTimeString()}
-                                                </span>
+                                                </span> */}
                                               </div>
                                             ),
                                           )}
