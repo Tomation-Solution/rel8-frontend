@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiCheck, FiEdit, FiStopCircle } from "react-icons/fi";
-import { fetchElectionDetails, castVote } from "../../../api/elections/api-elections";
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiCheck } from "react-icons/fi";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllUserDues } from "../../../api/dues/api-dues";
+import {
+  castVote,
+  fetchElectionDetails,
+} from "../../../api/elections/api-elections";
 import StatCard from "../../../components/cards/StatCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
@@ -36,7 +39,7 @@ interface CandidateChoiceCardProps {
   candidate: Candidate;
   onViewManifesto: (candidate: Candidate) => void;
   onVote: (candidateId: string) => void;
-  votingState: 'idle' | 'voting' | 'voted' | 'error';
+  votingState: "idle" | "voting" | "voted" | "error";
   hasVotedInPosition: boolean;
   hasUserVotedForCandidate: boolean;
 }
@@ -86,8 +89,7 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
   hasVotedInPosition,
   hasUserVotedForCandidate,
 }) => {
-  const percentage = candidate.percentage || "0.0";
-  const hasVoted = hasUserVotedForCandidate || votingState === 'voted';
+  const hasVoted = hasUserVotedForCandidate || votingState === "voted";
 
   return (
     <div className="py-4 border-b border-gray-200 last:border-b-0">
@@ -109,16 +111,20 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
         ) : (
           <button
             onClick={() => onVote(candidate.id)}
-            disabled={hasVotedInPosition || votingState === 'voting'}
+            disabled={hasVotedInPosition || votingState === "voting"}
             className={`px-4 py-2 text-sm rounded text-white ${
-              hasVotedInPosition || votingState === 'voting'
+              hasVotedInPosition || votingState === "voting"
                 ? "bg-gray-400 cursor-not-allowed"
-                : votingState === 'error'
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-org-primary hover:bg-org-primary/80"
+                : votingState === "error"
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-org-primary hover:bg-org-primary/80"
             }`}
           >
-            {votingState === 'voting' ? 'Voting...' : votingState === 'error' ? 'Try Again' : `Vote ${candidate.name}`}
+            {votingState === "voting"
+              ? "Voting..."
+              : votingState === "error"
+                ? "Try Again"
+                : `Vote ${candidate.name}`}
           </button>
         )}
       </div>
@@ -196,7 +202,10 @@ const DuesModal: React.FC<{
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4">Not Eligible to Vote</h2>
           <p className="text-gray-600 mb-6">
-            You have dues from your organization that haven't been confirmed yet. You cannot vote during this election period until all your dues are confirmed. Head over to the dues section to check the status of your payments.
+            You have dues from your organization that haven't been confirmed
+            yet. You cannot vote during this election period until all your dues
+            are confirmed. Head over to the dues section to check the status of
+            your payments.
           </p>
           <div className="flex justify-end gap-3">
             <button
@@ -226,16 +235,21 @@ const ElectionDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
-    null
+    null,
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [duesModalOpen, setDuesModalOpen] = useState(false);
-  const [votingStates, setVotingStates] = useState<{ [candidateId: string]: 'idle' | 'voting' | 'voted' | 'error' }>({});
-  const [votedCandidates, setVotedCandidates] = useState<Set<string>>(new Set());
+  const [votingStates, setVotingStates] = useState<{
+    [candidateId: string]: "idle" | "voting" | "voted" | "error";
+  }>({});
+  const [votedCandidates, setVotedCandidates] = useState<Set<string>>(
+    new Set(),
+  );
   const [hasOutstandingDues, setHasOutstandingDues] = useState(false);
   const [activeTab, setActiveTab] = useState("positions");
-  const [expandedCandidates, setExpandedCandidates] = useState<Set<string>>(new Set());
-  const [resultsData, setResultsData] = useState<any>(null);
+  const [expandedCandidates, setExpandedCandidates] = useState<Set<string>>(
+    new Set(),
+  );
 
   const { notifyUser } = Toast();
 
@@ -249,7 +263,7 @@ const ElectionDetailsPage = () => {
     const now = new Date();
     const endDateTime = new Date(electionData.endDate);
     if (electionData.endTime) {
-      const [hours, minutes] = electionData.endTime.split(':');
+      const [hours, minutes] = electionData.endTime.split(":");
       endDateTime.setHours(parseInt(hours), parseInt(minutes));
     }
     return now < endDateTime;
@@ -262,19 +276,20 @@ const ElectionDetailsPage = () => {
 
   const handleGoToDues = () => {
     setDuesModalOpen(false);
-    navigate('/dues'); // Navigate to dues page
+    navigate("/dues"); // Navigate to dues page
   };
 
   const checkOutstandingDues = async () => {
     try {
       const duesData = await fetchAllUserDues();
       // Check if there are any unconfirmed dues (confirmationStatus !== 'approved')
-      const hasUnconfirmedDues = duesData?.some((due: any) => due.confirmed === false) || false;
-      console.log(duesData,hasUnconfirmedDues)
+      const hasUnconfirmedDues =
+        duesData?.some((due: any) => due.confirmed === false) || false;
+      console.log(duesData, hasUnconfirmedDues);
       setHasOutstandingDues(hasUnconfirmedDues);
       return hasUnconfirmedDues;
     } catch (error) {
-      console.error('Failed to check dues:', error);
+      console.error("Failed to check dues:", error);
       return false;
     }
   };
@@ -289,20 +304,23 @@ const ElectionDetailsPage = () => {
       return;
     }
 
-    setVotingStates(prev => ({ ...prev, [candidateId]: 'voting' }));
+    setVotingStates((prev) => ({ ...prev, [candidateId]: "voting" }));
 
     try {
       await castVote(candidateId);
-      setVotedCandidates(prev => new Set([...prev, candidateId]));
-      setVotingStates(prev => ({ ...prev, [candidateId]: 'voted' }));
-      notifyUser('Vote cast successfully!', 'success');
+      setVotedCandidates((prev) => new Set([...prev, candidateId]));
+      setVotingStates((prev) => ({ ...prev, [candidateId]: "voted" }));
+      notifyUser("Vote cast successfully!", "success");
 
       // Refresh election data to show updated vote counts
       const data = await fetchElectionDetails(id!);
       setElectionData(data);
     } catch (error: any) {
-      setVotingStates(prev => ({ ...prev, [candidateId]: 'error' }));
-      notifyUser(error.response?.data?.message || 'Failed to cast vote', 'error');
+      setVotingStates((prev) => ({ ...prev, [candidateId]: "error" }));
+      notifyUser(
+        error.response?.data?.message || "Failed to cast vote",
+        "error",
+      );
     }
   };
 
@@ -357,7 +375,7 @@ const ElectionDetailsPage = () => {
   const currentPosition = electionData.positions[selectedPosition];
   const positionTotalVotes = currentPosition?.totalVotes;
   const positionEligibleVoters = Math.floor(
-    electionData.stats.eligibleVoters / electionData.positions.length
+    electionData.stats.eligibleVoters / electionData.positions.length,
   );
   const positionTurnout =
     positionEligibleVoters > 0
@@ -365,9 +383,10 @@ const ElectionDetailsPage = () => {
       : "0";
 
   // Check if user has voted in current position
-  const hasVotedInCurrentPosition = currentPosition?.candidates?.some(candidate =>
-    votedCandidates.has(candidate.id)
-  ) || false;
+  const hasVotedInCurrentPosition =
+    currentPosition?.candidates?.some((candidate) =>
+      votedCandidates.has(candidate.id),
+    ) || false;
 
   return (
     <div className="min-h-screen">
@@ -441,14 +460,16 @@ const ElectionDetailsPage = () => {
                 </div>
                 <div className="p-4 space-y-3">
                   {electionData.positions.length > 0 ? (
-                    electionData.positions.map((position: any, index: number) => (
-                      <PositionItem
-                        key={position.id}
-                        position={position}
-                        isSelected={selectedPosition === index}
-                        onClick={() => setSelectedPosition(index)}
-                      />
-                    ))
+                    electionData.positions.map(
+                      (position: any, index: number) => (
+                        <PositionItem
+                          key={position.id}
+                          position={position}
+                          isSelected={selectedPosition === index}
+                          onClick={() => setSelectedPosition(index)}
+                        />
+                      ),
+                    )
                   ) : (
                     <div className="p-4 text-center text-gray-500">
                       <p>No positions available for this election.</p>
@@ -467,8 +488,14 @@ const ElectionDetailsPage = () => {
 
                 {/* Position Stats */}
                 <div className="grid grid-cols-2 gap-4 p-4">
-                  <StatCard title="Total Votes Cast" value={positionTotalVotes} />
-                  <StatCard title="Voter Turnout" value={`${positionTurnout}%`} />
+                  <StatCard
+                    title="Total Votes Cast"
+                    value={positionTotalVotes}
+                  />
+                  <StatCard
+                    title="Voter Turnout"
+                    value={`${positionTurnout}%`}
+                  />
                 </div>
 
                 {/* Candidates Results */}
@@ -481,14 +508,18 @@ const ElectionDetailsPage = () => {
                         candidate={candidate}
                         onViewManifesto={handleViewManifesto}
                         onVote={handleVote}
-                        votingState={votingStates[candidate.id] || 'idle'}
+                        votingState={votingStates[candidate.id] || "idle"}
                         hasVotedInPosition={hasVotedInCurrentPosition}
-                        hasUserVotedForCandidate={candidate.hasUserVoted || false}
+                        hasUserVotedForCandidate={
+                          candidate.hasUserVoted || false
+                        }
                       />
                     ))
                   ) : (
                     <div className="text-center text-gray-500 py-8">
-                      <p>No candidates or votes recorded for this position yet.</p>
+                      <p>
+                        No candidates or votes recorded for this position yet.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -520,8 +551,8 @@ const ElectionDetailsPage = () => {
                   Elections are Ongoing
                 </h3>
                 <p className="text-gray-600">
-                  The election results will be available once the voting period ends on{" "}
-                  {new Date(electionData.endDate).toLocaleDateString()}{" "}
+                  The election results will be available once the voting period
+                  ends on {new Date(electionData.endDate).toLocaleDateString()}{" "}
                   {electionData.endTime && `at ${electionData.endTime}`}.
                 </p>
               </div>
@@ -531,90 +562,118 @@ const ElectionDetailsPage = () => {
                   Election Results
                 </h3>
 
-
                 {/* Position Results */}
                 <div className="space-y-6">
-                  {electionData.positions.map((position: any, index: number) => (
-                    <div key={position.id} className="border border-gray-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                        {position.name}
-                      </h4>
+                  {electionData.positions.map(
+                    (position: any, index: number) => (
+                      <div
+                        key={position.id}
+                        className="border border-gray-200 rounded-lg p-6"
+                      >
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                          {position.name}
+                        </h4>
 
-                      <div className="space-y-3">
-                        {position.candidates
-                          .sort((a: any, b: any) => b.votes - a.votes)
-                          .map((candidate: any, candidateIndex: number) => (
-                            <>
-                              <div
-                                key={candidate.id}
-                                onClick={() => {
-                                  setExpandedCandidates(prev => {
-                                    const newSet = new Set(prev);
-                                    if (newSet.has(candidate.id)) {
-                                      newSet.delete(candidate.id);
-                                    } else {
-                                      newSet.add(candidate.id);
-                                    }
-                                    return newSet;
-                                  });
-                                }}
-                                className={`cursor-pointer flex items-center justify-between p-3 rounded-lg ${
-                                  candidateIndex === 0
-                                    ? "bg-green-50 border border-green-200"
-                                    : "bg-gray-50"
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                      candidateIndex === 0
-                                        ? "bg-green-500 text-white"
-                                        : "bg-gray-400 text-white"
-                                    }`}
-                                  >
-                                    {candidateIndex + 1}
-                                  </div>
-                                  <span className="font-medium text-gray-800">
-                                    {candidate.name}
-                                  </span>
-                                </div>
-                                <div className="text-right">
-                                  <div className="font-semibold text-gray-800">
-                                    {candidate.votes} votes
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    {candidate.percentage}%
-                                  </div>
-                                </div>
-                              </div>
-                              {expandedCandidates.has(candidate.id) && (
-                                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
-                                  {candidate.voters && candidate.voters.length > 0 ? (
-                                    <div className="space-y-2">
-                                      {(candidate.voters || [])
-                                        .sort((a: any, b: any) => new Date(b.votedAt).getTime() - new Date(a.votedAt).getTime())
-                                        .map((voter: any, voterIndex: number) => (
-                                          <div key={voterIndex} className="flex items-center justify-between text-sm bg-white px-3 py-2 rounded border">
-                                            <div>
-                                              <span className="font-medium text-gray-800">{voter.name}</span>
-                                              <span className="text-gray-500 ml-2">→ {candidate.name}</span>
-                                            </div>
-                                            <span className="text-gray-500 text-xs">
-                                              {new Date(voter.votedAt).toLocaleDateString()} {new Date(voter.votedAt).toLocaleTimeString()}
-                                            </span>
-                                          </div>
-                                        ))}
+                        <div className="space-y-3">
+                          {position.candidates
+                            .sort((a: any, b: any) => b.votes - a.votes)
+                            .map((candidate: any, candidateIndex: number) => (
+                              <>
+                                <div
+                                  key={candidate.id}
+                                  onClick={() => {
+                                    setExpandedCandidates((prev) => {
+                                      const newSet = new Set(prev);
+                                      if (newSet.has(candidate.id)) {
+                                        newSet.delete(candidate.id);
+                                      } else {
+                                        newSet.add(candidate.id);
+                                      }
+                                      return newSet;
+                                    });
+                                  }}
+                                  className={`cursor-pointer flex items-center justify-between p-3 rounded-lg ${
+                                    candidateIndex === 0
+                                      ? "bg-green-50 border border-green-200"
+                                      : "bg-gray-50"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                        candidateIndex === 0
+                                          ? "bg-green-500 text-white"
+                                          : "bg-gray-400 text-white"
+                                      }`}
+                                    >
+                                      {candidateIndex + 1}
                                     </div>
-                                  ) : (
-                                    <p className="text-sm text-gray-500 italic text-center">No voters recorded for this candidate</p>
-                                  )}
+                                    <span className="font-medium text-gray-800">
+                                      {candidate.name}
+                                    </span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-semibold text-gray-800">
+                                      {candidate.votes} votes
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      {candidate.percentage}%
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                            </>
-                          ))}
+                                {expandedCandidates.has(candidate.id) && (
+                                  <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                    {candidate.voters &&
+                                    candidate.voters.length > 0 ? (
+                                      <div className="space-y-2">
+                                        {(candidate.voters || [])
+                                          .sort(
+                                            (a: any, b: any) =>
+                                              new Date(b.votedAt).getTime() -
+                                              new Date(a.votedAt).getTime(),
+                                          )
+                                          .map(
+                                            (
+                                              voter: any,
+                                              voterIndex: number,
+                                            ) => (
+                                              <div
+                                                key={voterIndex}
+                                                className="flex items-center justify-between text-sm bg-white px-3 py-2 rounded border"
+                                              >
+                                                <div>
+                                                  <span className="font-medium text-gray-800">
+                                                    {voter.name}
+                                                  </span>
+                                                  {/* <span className="text-gray-500 ml-2">
+                                                    → {candidate.name}
+                                                  </span> */}
+                                                </div>
+                                                <span className="text-gray-500 text-xs">
+                                                  {new Date(
+                                                    voter.votedAt,
+                                                  ).toLocaleDateString()}{" "}
+                                                  {new Date(
+                                                    voter.votedAt,
+                                                  ).toLocaleTimeString()}
+                                                </span>
+                                              </div>
+                                            ),
+                                          )}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-500 italic text-center">
+                                        No voters recorded for this candidate
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -638,4 +697,3 @@ const ElectionDetailsPage = () => {
 };
 
 export default ElectionDetailsPage;
-

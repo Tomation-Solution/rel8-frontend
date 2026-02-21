@@ -1,84 +1,173 @@
 import { Suspense, lazy } from "react";
-import "./App.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import ErrorPage from "./pages/ErrorPage";
+import "./App.css";
 import Loader from "./components/Loader";
-import NotFoundPage from "./pages/NotFoundPage";
-import ActivateAccount from "./pages/ActivateAccount";
 import DashboardLayout from "./layouts/DashboardLayout";
+import ActivateAccount from "./pages/ActivateAccount";
 import DuesPage from "./pages/dashboard/dues/DuesPage";
-
+import ErrorPage from "./pages/ErrorPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
-  
-  const  ServiceRequestSubmission = lazy(()=> import( "./pages/dashboard/service_request/serviceSubbmission"));
-  const  ServiceRequest = lazy(()=> import( "./pages/dashboard/service_request"));
-  const  ServiceRequestDetail = lazy(()=> import( "./pages/dashboard/service_request/details"));
+  const ServiceRequestSubmission = lazy(
+    () => import("./pages/dashboard/service_request/serviceSubbmission"),
+  );
+  const ServiceRequest = lazy(
+    () => import("./pages/dashboard/service_request"),
+  );
+  const ServiceRequestDetail = lazy(
+    () => import("./pages/dashboard/service_request/details"),
+  );
   const VerifyMemberPage = lazy(() => import("./pages/auth/VerifyMemberPage"));
   const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
   const RegistrationPage = lazy(() => import("./pages/auth/RegistrationPage"));
-  const ForgotPasswordPage = lazy(() => import("./pages/auth/forgot-password/ForgotPasswordPage"));
-  const EnterCodePage = lazy(() => import("./pages/auth/forgot-password/EnterCodePage"));
-  const SetupNewPasswordPage = lazy(() => import("./pages/auth/forgot-password/SetupNewPasswordPage"));
+  const ForgotPasswordPage = lazy(
+    () => import("./pages/auth/forgot-password/ForgotPasswordPage"),
+  );
+  const EnterCodePage = lazy(
+    () => import("./pages/auth/forgot-password/EnterCodePage"),
+  );
+  const SetupNewPasswordPage = lazy(
+    () => import("./pages/auth/forgot-password/SetupNewPasswordPage"),
+  );
   const PayupPage = lazy(() => import("./pages/auth/PayupPage"));
-  const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
-  
-  
+  const AuthenticationPage = lazy(
+    () => import("./pages/auth/AuthenticationPage"),
+  );
+
   const ChatPage = lazy(() => import("./pages/chat/ChatPage"));
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
   // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
   const EventsPage = lazy(() => import("./pages/dashboard/events/EventsPage"));
-  const EventDetailPage = lazy(() => import("./pages/dashboard/events/EventDetailPage"));
-  const GalleryPage = lazy(() => import("./pages/dashboard/gallery/GalleryPage"));
-  const GalleryDetailPage = lazy(() => import("./pages/dashboard/gallery/GalleryDetailPage"));
-  const AccountPage = lazy(() => import("./pages/dashboard/account/AccountPage"));
-  const NotificationsPage = lazy(() => import("./pages/dashboard/notifications/NotificationsPage"));
-  const PublicationsPage = lazy(() => import("./pages/dashboard/publications/PublicationsPage"));
-  const PublicationsDetailPage = lazy(() => import("./pages/dashboard/publications/PublicationsDetailPage"));
+  const EventDetailPage = lazy(
+    () => import("./pages/dashboard/events/EventDetailPage"),
+  );
+  const GalleryPage = lazy(
+    () => import("./pages/dashboard/gallery/GalleryPage"),
+  );
+  const GalleryDetailPage = lazy(
+    () => import("./pages/dashboard/gallery/GalleryDetailPage"),
+  );
+  const AccountPage = lazy(
+    () => import("./pages/dashboard/account/AccountPage"),
+  );
+  const NotificationsPage = lazy(
+    () => import("./pages/dashboard/notifications/NotificationsPage"),
+  );
+  const PublicationsPage = lazy(
+    () => import("./pages/dashboard/publications/PublicationsPage"),
+  );
+  const PublicationsDetailPage = lazy(
+    () => import("./pages/dashboard/publications/PublicationsDetailPage"),
+  );
 
   const NewsPage = lazy(() => import("./pages/dashboard/news/index"));
-  const NewsDetailPage = lazy(() => import("./pages/dashboard/news/NewsDetailPage"));
+  const NewsDetailPage = lazy(
+    () => import("./pages/dashboard/news/NewsDetailPage"),
+  );
 
-  const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
+  const MembersPage = lazy(
+    () => import("./pages/dashboard/members/MembersPage"),
+  );
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
-  const ExcoDetailPage = lazy(() => import("./pages/dashboard/members/ExcoDetailPage"));
-  const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
-  const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
-  const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
-  const ElectionsContestantDetailPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantDetailPage"));
-  const ElectionsContestantsPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantsPage"));
-  const ElectionAllVotesPage = lazy(() => import("./pages/dashboard/elections/ElectionAllVotes"));
-  const ElectionStepPage = lazy(() => import("./pages/dashboard/elections/ElectionStepsPage"));
-  const ElectionCreateAspirantPage = lazy(() => import("./pages/dashboard/elections/ElectionCreateAspirantPage"));
-  const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
-  const FundAProjectPage = lazy(() => import("./pages/dashboard/projects/FundAProjectPage"));
-  const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
-  const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
-  const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
-  const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
-  const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
-  const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
-  const ServicePaymentSuccess = lazy(() => import("./components/PaymentSuccess/ServicePaymentSuccess"));
-  const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
-  const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
-  const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
-  const DeactivationOfMembershipPage = lazy(() => import("./pages/dashboard/services/DeactivationOfMembershipPage"));
-  const ReIssuanceOfCertificatePage = lazy(() => import("./pages/dashboard/services/ReIssuanceOfCertificatePage"));
-  const FactoryLocationUpdatePage = lazy(() => import("./pages/dashboard/services/FactoryLocationUpdatePage"));
-  const ChangeOfNamePage = lazy(() => import("./pages/dashboard/services/ChangeOfNamePage"));
-  const MergerOfCompaniesPage = lazy(() => import("./pages/dashboard/services/MergerOfCompaniesPage"));
-  const ProductManufacturingUpdatePage = lazy(() => import("./pages/dashboard/services/ProductManufacturingUpdatePage"));
-  const SupportPage = lazy(() => import("./pages/dashboard/support/SupportPage"));
-  const FAQPage = lazy(() => import("./pages/dashboard/support/FAQPage"));
-  const TechnicalSupportPage = lazy(() => import("./pages/dashboard/support/TechnicalSupportPage"));
-  const AdminSupportPage = lazy(() => import("./pages/dashboard/support/AdminSupportPage"));
+  const ExcoDetailPage = lazy(
+    () => import("./pages/dashboard/members/ExcoDetailPage"),
+  );
+  const MeetingPage = lazy(
+    () => import("./pages/dashboard/meetings/MeetingPage"),
+  );
+  const MeetingDetailsPage = lazy(
+    () => import("./pages/dashboard/meetings/MeetingDetailsPage"),
+  );
+  const ElectionsPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionsPage"),
+  );
+  const ElectionsContestantDetailPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionContestantDetailPage"),
+  );
 
-  const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
+  const ElectionAllVotesPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionAllVotes"),
+  );
+  const ElectionStepPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionStepsPage"),
+  );
+  const ElectionCreateAspirantPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionCreateAspirantPage"),
+  );
+  const ElectionDetailsPage = lazy(
+    () => import("./pages/dashboard/elections/ElectionDetailsPage"),
+  );
+  const FundAProjectPage = lazy(
+    () => import("./pages/dashboard/projects/FundAProjectPage"),
+  );
+  const FundAProjectDetailPage = lazy(
+    () => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"),
+  );
+  const SupportInKindPage = lazy(
+    () => import("./pages/dashboard/fund-a-project/SuportInKindPage"),
+  );
+  const SupportInCashPage = lazy(
+    () => import("./pages/dashboard/fund-a-project/SupportInCashPage"),
+  );
+  const PaymentSuccessPage = lazy(
+    () => import("./components/PaymentSuccess/paymentSuccess"),
+  ); //FundAProject-PaymentSuccessPage
+  const ThankYouSuccessPage = lazy(
+    () => import("./components/PaymentSuccess/ThankYou"),
+  );
+  const EventPaymentSuccess = lazy(
+    () => import("./components/PaymentSuccess/EventPaymentSuccess"),
+  );
+  const ServicePaymentSuccess = lazy(
+    () => import("./components/PaymentSuccess/ServicePaymentSuccess"),
+  );
+  const ServicesPage = lazy(
+    () => import("./pages/dashboard/services/ServicesPage"),
+  );
+  const LossOfCertificatePage = lazy(
+    () => import("./pages/dashboard/services/LossOfCertificatePage"),
+  );
+  const ReIssuanceFormPage = lazy(
+    () => import("./pages/dashboard/services/ReIssuanceFormPage"),
+  );
+  const DeactivationOfMembershipPage = lazy(
+    () => import("./pages/dashboard/services/DeactivationOfMembershipPage"),
+  );
+  const ReIssuanceOfCertificatePage = lazy(
+    () => import("./pages/dashboard/services/ReIssuanceOfCertificatePage"),
+  );
+  const FactoryLocationUpdatePage = lazy(
+    () => import("./pages/dashboard/services/FactoryLocationUpdatePage"),
+  );
+  const ChangeOfNamePage = lazy(
+    () => import("./pages/dashboard/services/ChangeOfNamePage"),
+  );
+  const MergerOfCompaniesPage = lazy(
+    () => import("./pages/dashboard/services/MergerOfCompaniesPage"),
+  );
+  const ProductManufacturingUpdatePage = lazy(
+    () => import("./pages/dashboard/services/ProductManufacturingUpdatePage"),
+  );
+  const SupportPage = lazy(
+    () => import("./pages/dashboard/support/SupportPage"),
+  );
+  const FAQPage = lazy(() => import("./pages/dashboard/support/FAQPage"));
+  const TechnicalSupportPage = lazy(
+    () => import("./pages/dashboard/support/TechnicalSupportPage"),
+  );
+  const AdminSupportPage = lazy(
+    () => import("./pages/dashboard/support/AdminSupportPage"),
+  );
+
+  const CommitteeDetails = lazy(
+    () => import("./pages/dashboard/committees/CommitteesDetails"),
+  );
   const router = createBrowserRouter([
     {
       path: "/verify-membership",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <VerifyMemberPage />
         </Suspense>
       ),
@@ -87,7 +176,7 @@ function App() {
     {
       path: "/login",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <LoginPage />
         </Suspense>
       ),
@@ -96,7 +185,7 @@ function App() {
     {
       path: "/register",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <RegistrationPage />
         </Suspense>
       ),
@@ -105,7 +194,7 @@ function App() {
     {
       path: "/forgot-password",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <ForgotPasswordPage />
         </Suspense>
       ),
@@ -114,7 +203,7 @@ function App() {
     {
       path: "/authentication",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <AuthenticationPage />
         </Suspense>
       ),
@@ -123,7 +212,7 @@ function App() {
     {
       path: "/setup-new-password",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <SetupNewPasswordPage />
         </Suspense>
       ),
@@ -132,7 +221,7 @@ function App() {
     {
       path: "/enter-code",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <EnterCodePage />
         </Suspense>
       ),
@@ -141,7 +230,7 @@ function App() {
     {
       path: "/pay-dues",
       element: (
-        <Suspense fallback={<Loader/>}>
+        <Suspense fallback={<Loader />}>
           <PayupPage />
         </Suspense>
       ),
@@ -150,8 +239,8 @@ function App() {
     {
       path: "/",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <HomePage />
           </DashboardLayout>
         </Suspense>
@@ -172,8 +261,8 @@ function App() {
     {
       path: "/events",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <EventsPage />
           </DashboardLayout>
         </Suspense>
@@ -183,8 +272,8 @@ function App() {
     {
       path: "/service-requests",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ServiceRequest />
           </DashboardLayout>
         </Suspense>
@@ -194,8 +283,8 @@ function App() {
     {
       path: "/service-requests/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ServiceRequestDetail />
           </DashboardLayout>
         </Suspense>
@@ -205,8 +294,8 @@ function App() {
     {
       path: "/service-requests-submission/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ServiceRequestSubmission />
           </DashboardLayout>
         </Suspense>
@@ -216,18 +305,18 @@ function App() {
     {
       path: "/service-requests/success/:serviceId",
       element: (
-        <Suspense fallback={<Loader />} >
+        <Suspense fallback={<Loader />}>
           <ServicePaymentSuccess />
         </Suspense>
       ),
       errorElement: <ErrorPage />,
     },
-    
+
     {
       path: "/event/:eventId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <EventDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -237,9 +326,9 @@ function App() {
     {
       path: "/event/success/:eventId",
       element: (
-        <Suspense fallback={<Loader />} >
+        <Suspense fallback={<Loader />}>
           {/* <DashboardLayout > */}
-            <EventPaymentSuccess />
+          <EventPaymentSuccess />
           {/* </DashboardLayout> */}
         </Suspense>
       ),
@@ -248,8 +337,8 @@ function App() {
     {
       path: "/gallery/",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <GalleryPage />
           </DashboardLayout>
         </Suspense>
@@ -259,8 +348,8 @@ function App() {
     {
       path: "/gallery/:galleryId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <GalleryDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -270,8 +359,8 @@ function App() {
     {
       path: "/account",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <AccountPage />
           </DashboardLayout>
         </Suspense>
@@ -281,8 +370,8 @@ function App() {
     {
       path: "/dues",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <DuesPage />
           </DashboardLayout>
         </Suspense>
@@ -292,8 +381,8 @@ function App() {
     {
       path: "/notifications",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <NotificationsPage />
           </DashboardLayout>
         </Suspense>
@@ -303,8 +392,8 @@ function App() {
     {
       path: "/publications",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <PublicationsPage />
           </DashboardLayout>
         </Suspense>
@@ -314,8 +403,8 @@ function App() {
     {
       path: "/publication/:publicationId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <PublicationsDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -326,8 +415,8 @@ function App() {
     {
       path: "/news",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <NewsPage />
           </DashboardLayout>
         </Suspense>
@@ -337,8 +426,8 @@ function App() {
     {
       path: "/news/:newsId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <NewsDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -349,8 +438,8 @@ function App() {
     {
       path: "/registry",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <MembersPage />
           </DashboardLayout>
         </Suspense>
@@ -360,8 +449,8 @@ function App() {
     {
       path: "/excos",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ExcosPage />
           </DashboardLayout>
         </Suspense>
@@ -371,8 +460,8 @@ function App() {
     {
       path: "/excos/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ExcoDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -382,8 +471,8 @@ function App() {
     {
       path: "/members",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <MembersPage />
           </DashboardLayout>
         </Suspense>
@@ -393,8 +482,8 @@ function App() {
     {
       path: "/meeting",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <MeetingPage />
           </DashboardLayout>
         </Suspense>
@@ -405,8 +494,8 @@ function App() {
     {
       path: "/meeting/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <MeetingDetailsPage />
           </DashboardLayout>
         </Suspense>
@@ -414,12 +503,11 @@ function App() {
       errorElement: <ErrorPage />,
     },
 
-
     {
       path: "/election",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionsPage />
           </DashboardLayout>
         </Suspense>
@@ -429,8 +517,8 @@ function App() {
     {
       path: "/elections-contestant/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionsContestantDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -440,8 +528,8 @@ function App() {
     {
       path: "/all-votes",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionAllVotesPage />
           </DashboardLayout>
         </Suspense>
@@ -450,8 +538,8 @@ function App() {
     {
       path: "/election-steps",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionStepPage />
           </DashboardLayout>
         </Suspense>
@@ -460,8 +548,8 @@ function App() {
     {
       path: "/create-aspirant",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionCreateAspirantPage />
           </DashboardLayout>
         </Suspense>
@@ -470,8 +558,8 @@ function App() {
     {
       path: "/election/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ElectionDetailsPage />
           </DashboardLayout>
         </Suspense>
@@ -480,8 +568,8 @@ function App() {
     {
       path: "/fund-a-project",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <FundAProjectPage />
           </DashboardLayout>
         </Suspense>
@@ -491,8 +579,8 @@ function App() {
     {
       path: "/fund-a-project/:projectId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <FundAProjectDetailPage />
           </DashboardLayout>
         </Suspense>
@@ -502,8 +590,8 @@ function App() {
     {
       path: "/support-in-kind/:projectId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <SupportInKindPage />
           </DashboardLayout>
         </Suspense>
@@ -513,8 +601,8 @@ function App() {
     {
       path: "/support-in-cash/:projectId",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <SupportInCashPage />
           </DashboardLayout>
         </Suspense>
@@ -524,9 +612,9 @@ function App() {
     {
       path: "/fund-a-project/success",
       element: (
-        <Suspense fallback={<Loader />} >
+        <Suspense fallback={<Loader />}>
           {/* <DashboardLayout > */}
-            <PaymentSuccessPage />
+          <PaymentSuccessPage />
           {/* </DashboardLayout> */}
         </Suspense>
       ),
@@ -535,19 +623,19 @@ function App() {
     {
       path: "/fund-a-project/thank-you/:project_id",
       element: (
-        <Suspense fallback={<Loader />} >
+        <Suspense fallback={<Loader />}>
           {/* <DashboardLayout > */}
-            <ThankYouSuccessPage />
+          <ThankYouSuccessPage />
           {/* </DashboardLayout> */}
         </Suspense>
       ),
       errorElement: <ErrorPage />,
-    },     
+    },
     {
       path: "/services",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ServicesPage />
           </DashboardLayout>
         </Suspense>
@@ -557,8 +645,8 @@ function App() {
     {
       path: "/loss-of-certificate-page",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <LossOfCertificatePage />
           </DashboardLayout>
         </Suspense>
@@ -568,8 +656,8 @@ function App() {
     {
       path: "/reissuance-form",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ReIssuanceFormPage />
           </DashboardLayout>
         </Suspense>
@@ -579,8 +667,8 @@ function App() {
     {
       path: "/deactivate-membership",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <DeactivationOfMembershipPage />
           </DashboardLayout>
         </Suspense>
@@ -590,8 +678,8 @@ function App() {
     {
       path: "/reissuance-of-certificate",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ReIssuanceOfCertificatePage />
           </DashboardLayout>
         </Suspense>
@@ -601,8 +689,8 @@ function App() {
     {
       path: "/factory-location-update",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <FactoryLocationUpdatePage />
           </DashboardLayout>
         </Suspense>
@@ -612,8 +700,8 @@ function App() {
     {
       path: "/product-manufacturing-update",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ProductManufacturingUpdatePage />
           </DashboardLayout>
         </Suspense>
@@ -623,8 +711,8 @@ function App() {
     {
       path: "/change-of-name",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ChangeOfNamePage />
           </DashboardLayout>
         </Suspense>
@@ -634,8 +722,8 @@ function App() {
     {
       path: "/merger-of-companies",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <MergerOfCompaniesPage />
           </DashboardLayout>
         </Suspense>
@@ -645,8 +733,8 @@ function App() {
     {
       path: "/support",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <SupportPage />
           </DashboardLayout>
         </Suspense>
@@ -656,8 +744,8 @@ function App() {
     {
       path: "/faq",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <FAQPage />
           </DashboardLayout>
         </Suspense>
@@ -667,8 +755,8 @@ function App() {
     {
       path: "/technical-support",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <TechnicalSupportPage />
           </DashboardLayout>
         </Suspense>
@@ -678,8 +766,8 @@ function App() {
     {
       path: "/admin-support",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <AdminSupportPage />
           </DashboardLayout>
         </Suspense>
@@ -689,8 +777,8 @@ function App() {
     {
       path: "/chat",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <ChatPage />
           </DashboardLayout>
         </Suspense>
@@ -699,8 +787,8 @@ function App() {
     {
       path: "/committees/:id",
       element: (
-        <Suspense fallback={<Loader />} >
-          <DashboardLayout >
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
             <CommitteeDetails />
           </DashboardLayout>
         </Suspense>
@@ -709,18 +797,18 @@ function App() {
     {
       path: "/logout",
       element: (
-          <Suspense fallback={<Loader/>}>
-            <LoginPage />
-          </Suspense>
+        <Suspense fallback={<Loader />}>
+          <LoginPage />
+        </Suspense>
       ),
       errorElement: <ErrorPage />,
     },
     {
       path: "/mailing",
       element: (
-          <Suspense fallback={<Loader/>}>
-            <ActivateAccount />
-          </Suspense>
+        <Suspense fallback={<Loader />}>
+          <ActivateAccount />
+        </Suspense>
       ),
       errorElement: <ErrorPage />,
     },
@@ -729,4 +817,4 @@ function App() {
   return <RouterProvider router={router} fallbackElement={<Loader />} />;
 }
 
-export default App
+export default App;
