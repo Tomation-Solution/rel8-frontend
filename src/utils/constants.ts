@@ -1,30 +1,26 @@
+import BpmiLogo from "../assets/cover-images/bpmi-logo.jpg";
+import anniLogo from "../assets/cover-images/aanilogo.png";
+import nimnLogo from "../assets/cover-images/nimnlogoo.svg";
+import bukaalogo from "../assets/cover-images/bukaalogo.png";
 
-import BpmiLogo from '../assets/cover-images/bpmi-logo.jpg'
-import anniLogo from '../assets/cover-images/aanilogo.png'
-import nimnLogo from '../assets/cover-images/nimnlogoo.svg'
-import bukaalogo from '../assets/cover-images/bukaalogo.png'
-
-import { getSubdomain } from './extra_functions';
-import { apiPublic } from '../api/baseApi';
-
+import { getSubdomain } from "./extra_functions";
+import { apiPublic } from "../api/baseApi";
 
 // export const ENDPOINT_URL = "https://rel8.watchdoglogisticsng.com";
-// export const ENDPOINT_URL = "https://testnode.rel8.watchdoglogisticsng.com";
-export const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL ?? "https://testnode.rel8.watchdoglogisticsng.com";
-export const TENANT = getSubdomain() || 'aani';
+// export const ENDPOINT_URL = "http://localhost:8080";
+export const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL ?? "http://localhost:8080";
+export const TENANT = getSubdomain() || "aani";
 export const WSS = `ws://rel8.watchdoglogisticsng.com/ws/chat/${TENANT}/`;
-export const sitename = 'rel8.watchdoglogisticsng.com'
-
+export const sitename = "rel8.watchdoglogisticsng.com";
 
 export const getTenantInfo = () => {
-    const data = JSON.parse(localStorage.getItem('tenant-info') || "null");
+  const data = JSON.parse(localStorage.getItem("tenant-info") || "null");
 
-    return {
-        organization: data?.organization || null,
-        logo: data?.organization?.logo || null
-    }
-}
-
+  return {
+    organization: data?.organization || null,
+    logo: data?.organization?.logo || null,
+  };
+};
 
 // export const  getTenantInfo = ()=>{
 //     const currentTenant = TENANT

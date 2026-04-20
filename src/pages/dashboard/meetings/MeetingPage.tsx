@@ -59,9 +59,7 @@ const MeetingPage = () => {
         <section className="col-span-3">
           <BreadCrumb title="Meetings" />
           {meetings.length > 0 ? (
-            meetings.map((meeting: any, index: number) => (
-              <MeetingCard key={meeting._id || meeting.id || index} meeting={meeting} linkTo="meeting" />
-            ))
+            meetings.map((meeting: any, index: number) => <MeetingCard key={meeting._id || meeting.id || index} meeting={meeting} linkTo="meeting" />)
           ) : (
             <h3 className="text-org-primary-blue font-light text-center py-8">No Meetings Available</h3>
           )}
