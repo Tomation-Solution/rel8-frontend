@@ -10,98 +10,88 @@ import SeeAll from "../../../components/SeeAll";
 import QuickNav from "../../../components/navigation/QuickNav";
 
 interface GalleryItem {
-    id: number;
-    title: string;
-    imageUrl: string;
+  id: number;
+  title: string;
+  imageUrl: string;
 }
 
 interface Link {
-    label: number;
-    active: boolean;
+  label: number;
+  active: boolean;
 }
 
 const GalleryPage = () => {
-    const [page, setPage] = useState<number>(1);
-    const { notifyUser } = Toast();
-    const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
-        keepPreviousData: true,
-    });
+  const [page, setPage] = useState<number>(1);
+  const { notifyUser } = Toast();
+  const { data, isError, isLoading } = useQuery(["galleryData", page], () => fetchAllGalleryData(page), {
+    keepPreviousData: true,
+  });
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [page]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
 
-    useEffect(() => {
-        if (isError) {
-            notifyUser("An error occurred while trying to fetch gallery items", "error");
-        }
-    }, [isError, notifyUser]);
+  useEffect(() => {
+    if (isError) {
+      notifyUser("An error occurred while trying to fetch gallery items", "error");
+    }
+  }, [isError, notifyUser]);
 
-    const handlePreviousPage = () => {
-        if (page > 1) {
-            setPage(page - 1);
-        }
-    };
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
 
-    const handleNextPage = () => {
-        // Simple pagination: if we got 10 items (the limit), assume there's a next page
-        if (data && Array.isArray(data) && data.length === 10) {
-            setPage(page + 1);
-        }
-    };
+  const handleNextPage = () => {
+    // Simple pagination: if we got 10 items (the limit), assume there's a next page
+    if (data && Array.isArray(data) && data.length === 10) {
+      setPage(page + 1);
+    }
+  };
 
-    console.log(data)
-    return (
-        <main>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-                <div className="col-span-1 md:col-span-3 md:px-0">
-                    <BreadCrumb title="Albums" />
+  console.log(data);
+  return (
+    <main>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
+        <div className="col-span-1 md:col-span-3 md:px-0 min-w-0 overflow-hidden max-w-[900px]">
+          <BreadCrumb title="Albums" />
 
-                    <div className={`${isLoading && `place-items-center`} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
-                        {isLoading && <CircleLoader />}
+          <div className={`${isLoading && `place-items-center`} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
+            {isLoading && <CircleLoader />}
 
-                        {!isLoading && data && Array.isArray(data) && data.length === 0 && (
-                            <div className="col-span-full text-center py-8 text-gray-500">
-                                No gallery items available.
-                            </div>
-                        )}
+            {!isLoading && data && Array.isArray(data) && data.length === 0 && <div className="col-span-full text-center py-8 text-gray-500">No gallery items available.</div>}
 
-                        {data && Array.isArray(data) && data.map((galleryItem: any, index: number) => (
-                            <GalleryCard key={index} galleryItem={galleryItem} />
-                        ))}
-                    </div>
+            {data && Array.isArray(data) && data.map((galleryItem: any, index: number) => <GalleryCard key={index} galleryItem={galleryItem} />)}
+          </div>
 
-                    <nav>
-                        <ul className="flex justify-center gap-4 mt-4">
-                            <li>
-                                <button
-                                    onClick={handlePreviousPage}
-                                    disabled={page === 1}
-                                    className={`px-4 py-2 rounded-md ${page === 1 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
-                                >
-                                    Previous
-                                </button>
-                            </li>
-                            <li>
-                                <button
-                                    onClick={handleNextPage}
-                                    disabled={!data || !Array.isArray(data) || data.length < 10}
-                                    className={`px-4 py-2 rounded-md ${!data || !Array.isArray(data) || data.length < 10 ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#0070f3] text-white hover:bg-blue-700'}`}
-                                >
-                                    Next
-                                </button>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                <div className="col-span-1 md:col-span-1">
-                    <SeeAll title="Highlights" path="/" />
-                    <EventGrid heightOfCard="h-[170px]" numberOfItemsToShow={2} />
-                    <QuickNav />
-                </div>
-            </div>
-        </main>
-    );
+          <nav>
+            <ul className="flex justify-center gap-4 mt-4">
+              <li>
+                <button onClick={handlePreviousPage} disabled={page === 1} className={`px-4 py-2 rounded-md ${page === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-[#0070f3] text-white hover:bg-blue-700"}`}>
+                  Previous
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleNextPage}
+                  disabled={!data || !Array.isArray(data) || data.length < 10}
+                  className={`px-4 py-2 rounded-md ${!data || !Array.isArray(data) || data.length < 10 ? "bg-gray-200 cursor-not-allowed" : "bg-[#0070f3] text-white hover:bg-blue-700"}`}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div className="min-w-0">
+          <SeeAll title="Highlights" path="/" />
+          <EventGrid heightOfCard="h-[170px]" numberOfItemsToShow={2} />
+          <QuickNav />
+        </div>
+      </div>
+    </main>
+  );
 };
 
 export default GalleryPage;
