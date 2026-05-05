@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react"
+import React, { ReactNode, useEffect, useState } from "react";
 import Sidebar from "../components/navigation/Sidebar";
 import Navbar from "../components/navigation/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -10,35 +10,33 @@ import { fetchUserDues } from "../api/account/account-api";
 import { fetchOrganizationSettings } from "../api/organization/organization-api";
 import { TableDataType } from "../types/myTypes";
 
-
 interface DashboardLayoutInterfaceProps {
   children: ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
-
   const { user, organization } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const { notifyUser } = Toast();
 
-  const canShowBlocker = !!organization?.settings?.show_dues_blocker
+  const canShowBlocker = !!organization?.settings?.show_dues_blocker;
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState<boolean>(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState<boolean>(false);
   const [showDuesModal, setShowDuesModal] = useState(true);
 
   // Get organization settings for currency
   const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
-  const currentCurrency = orgSettings?.settings?.currency || 'USD';
+  const currentCurrency = orgSettings?.settings?.currency || "USD";
   const currencySymbols: { [key: string]: string } = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    NGN: '₦',
-    CAD: 'C$',
-    AUD: 'A$',
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    NGN: "₦",
+    CAD: "C$",
+    AUD: "A$",
   };
-  const currencySymbol = currencySymbols[currentCurrency] || '$';
+  const currencySymbol = currencySymbols[currentCurrency] || "$";
 
   // Get user dues data
   const { data: userDues } = useQuery("userDues", fetchUserDues, {
@@ -46,23 +44,20 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
   });
 
   // Check if current page is account page
-  const isAccountPage = location.pathname === '/account'
-    || location.pathname.startsWith('/dashboard/account')
-    || location.pathname.includes('election')
-    || location.pathname.includes('dues');
+  const isAccountPage = location.pathname === "/account" || location.pathname.startsWith("/dashboard/account") || location.pathname.includes("election") || location.pathname.includes("dues");
 
   // Calculate total outstanding amount from dues data
-  const totalOutstandingAmount = userDues
-    ?.filter((dues: TableDataType) => dues.status !== 'approved')
-    ?.reduce((total: number, dues: TableDataType) => {
-      return total + parseFloat(dues.amount || '0');
-    }, 0) || 0;
+  const totalOutstandingAmount =
+    userDues
+      ?.filter((dues: TableDataType) => dues.status !== "approved")
+      ?.reduce((total: number, dues: TableDataType) => {
+        return total + parseFloat(dues.amount || "0");
+      }, 0) || 0;
 
   useEffect(() => {
     if (!user) {
-
       notifyUser("You must be logged in to view this page", "error");
-      navigate('/login');
+      navigate("/login");
     }
   }, [user, navigate, notifyUser]);
 
@@ -79,21 +74,13 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
       <Sidebar isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
       <section className="flex-1 overflow-hidden h-screen relative flex flex-col min-w-0">
         <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
-        <div className="scrollbar-thin scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto text-black z-1 w-full px-2 md:px-4 lg:px-6 py-4 pt-[70px]" >
-          {children}
-        </div>
-
+        <div className="scrollbar-thin scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto overflow-x-hidden text-black z-1 w-full px-2 md:px-4 lg:px-6 py-4 pt-[70px]">{children}</div>
       </section>
 
       {/* Outstanding Dues Modal */}
-      <OutstandingDuesModal
-        isOpen={showDuesModal}
-        onClose={() => setShowDuesModal(false)}
-        totalAmount={totalOutstandingAmount}
-        currencySymbol={currencySymbol}
-      />
+      <OutstandingDuesModal isOpen={showDuesModal} onClose={() => setShowDuesModal(false)} totalAmount={totalOutstandingAmount} currencySymbol={currencySymbol} />
     </div>
-  )
-}
+  );
+};
 
-export default DashboardLayout
+export default DashboardLayout;

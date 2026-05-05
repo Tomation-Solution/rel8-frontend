@@ -127,8 +127,8 @@ const FundAProjectPage = () => {
   };
 
   return (
-    <main className="grid grid-cols-1 md:grid-cols-4 gap-7">
-      <div className="col-span-1 md:col-span-3 md:px-0 px-5">
+    <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,_1fr)_280px] gap-7">
+      <div className="min-w-0 overflow-hidden md:px-0 px-5">
         <BreadCrumb title="Fund a Project" />
 
         {isLoading && <CircleLoader />}
