@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface SubMenuItem {
   name: string;
@@ -18,5 +18,7 @@ export interface SideBarLinkType {
   mainIcon?: React.ElementType;
   activeLinkIcon?: string;
   notActiveLinkIcon?: string;
-  subMenu?: SubMenuItem[]; // Updated to use SubMenuItem interface
+  subMenu?: SubMenuItem[];
+  requiresExco?: boolean;
+  requiresCommittee?: boolean;
 }

@@ -1,18 +1,9 @@
-import {
-  FiGrid,
-  FiImage,
-  FiCalendar,
-  FiUser,
-  FiBell,
-  FiHelpCircle,
-  FiLogOut,
-  FiBriefcase,
-} from "react-icons/fi";
+import { FiGrid, FiImage, FiCalendar, FiUser, FiBell, FiHelpCircle, FiLogOut, FiBriefcase } from "react-icons/fi";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { PiChatTeardropText } from "react-icons/pi";
 import { CgWebsite } from "react-icons/cg";
 import { MdBallot, MdOutlineAdminPanelSettings } from "react-icons/md";
-import { SideBarLinkType } from '../types/sidebarDataType'
+import { SideBarLinkType } from "../types/sidebarDataType";
 
 export const sideBarData: SideBarLinkType[] = [
   {
@@ -38,14 +29,16 @@ export const sideBarData: SideBarLinkType[] = [
   //   notActiveLinkIcon:'',
   // },
   {
-    mainIcon: HiOutlineUserGroup,
-    name: "Members Enviroment",
-    path: "/members",
-  },
-  {
     mainIcon: MdOutlineAdminPanelSettings,
     name: "Excos Enviroment",
     path: "/excos",
+    requiresExco: true,
+  },
+  {
+    mainIcon: HiOutlineUserGroup,
+    name: "Committee Environment",
+    path: "/committees",
+    requiresCommittee: true,
   },
   // {
   //   mainIcon: comiteeEnviromentIcon,
