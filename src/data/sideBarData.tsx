@@ -52,6 +52,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiCalendar,
     name: "Events",
     path: "/events",
+    activeFor: ["/event"],
   },
   {
     mainIcon: FiCalendar,
@@ -67,6 +68,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: CgWebsite,
     name: "Publication",
     path: "/publications",
+    activeFor: ["/publication"],
   },
   {
     mainIcon: CgWebsite,
@@ -88,6 +90,7 @@ export const sideBarData: SideBarLinkType[] = [
     // mainIcon: electionIcon,
     name: "Election",
     path: "/election",
+    activeFor: ["/elections-contestant", "/election-steps", "/all-votes", "/create-aspirant"],
   },
   {
     mainIcon: FiUser,
@@ -103,11 +106,13 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiUser,
     name: "Fund a Project",
     path: "/fund-a-project",
+    activeFor: ["/support-in-kind", "/support-in-cash"],
   },
   {
     mainIcon: FiBriefcase,
     name: "Service Requests",
     path: "/service-requests",
+    activeFor: ["/service-requests-submission"],
   },
   // {
   //   mainIcon: subscribeIcon,
@@ -118,6 +123,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiHelpCircle,
     name: "Support",
     path: "/support",
+    activeFor: ["/faq", "/technical-support", "/admin-support"],
   },
   {
     mainIcon: FiLogOut,

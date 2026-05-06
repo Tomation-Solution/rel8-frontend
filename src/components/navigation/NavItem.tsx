@@ -37,7 +37,11 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
     setIsMobileSidebarOpen(false);
   };
 
-  const isActive = item.path ? (item.path === "/" ? location.pathname === "/" : location.pathname === item.path || location.pathname.startsWith(item.path + "/")) : false;
+  const isActive = item.path
+    ? item.path === "/"
+      ? location.pathname === "/"
+      : location.pathname === item.path || location.pathname.startsWith(item.path + "/") || (item.activeFor?.some(prefix => location.pathname === prefix || location.pathname.startsWith(prefix + "/")) ?? false)
+    : false;
 
   return (
     <>

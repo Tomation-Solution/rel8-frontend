@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import { fetchCommitteeDetails, CommitteeType } from "../../../api/committee/committee";
+import { fetchAllUserNews } from "../../../api/news/news-api";
+import { fetchUserPublications } from "../../../api/publications/publications-api";
+import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import NewsCard from "../../../components/cards/NewsCard";
@@ -17,31 +20,26 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "gallery", label: "Gallery" },
 ];
 
-const EmptyState = ({ label }: { label: string }) => (
-  <p className="text-gray-400 text-sm py-10 text-center">No {label} for this committee yet.</p>
-);
+const EmptyState = ({ label }: { label: string }) => <p className="text-gray-400 text-sm py-10 text-center">No {label} for this committee yet.</p>;
 
 const CommitteeDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<Tab>("info");
 
-  const { data, isLoading, isError } = useQuery(
-    ["committeeDetails", id],
-    () => fetchCommitteeDetails(id as string),
-    { enabled: !!id }
-  );
+  const { data, isLoading, isError } = useQuery(["committeeDetails", id], () => fetchCommitteeDetails(id as string), { enabled: !!id });
 
-  // TODO: replace with real useQuery calls once endpoints are provided
-  const committeeNews: any[] = [];
-  const committeePublications: any[] = [];
-  const committeeGallery: any[] = [];
+  const { data: newsData } = useQuery("news", fetchAllUserNews);
+  const { data: publicationsData } = useQuery("publications", fetchUserPublications);
+  const { data: galleryData } = useQuery(["galleryData", 1], () => fetchAllGalleryData(1));
+
+  const isCommitteeItem = (item: any) => item.audience === "committee" && (item.committeeId === id || item.committee_id === id);
+
+  const committeeNews: any[] = Array.isArray(newsData) ? newsData.filter(isCommitteeItem) : [];
+  const committeePublications: any[] = Array.isArray(publicationsData) ? publicationsData.filter(isCommitteeItem) : [];
+  const committeeGallery: any[] = Array.isArray(galleryData) ? galleryData.filter(isCommitteeItem) : [];
 
   if (isLoading) return <CircleLoader />;
-  if (isError) return (
-    <div className="flex items-center justify-center h-screen text-red-500">
-      Error loading committee details
-    </div>
-  );
+  if (isError) return <div className="flex items-center justify-center h-screen text-red-500">Error loading committee details</div>;
 
   const committee: CommitteeType = data;
 
@@ -51,15 +49,11 @@ const CommitteeDetails = () => {
 
       {/* Tab bar */}
       <div className="mt-4 border-b border-gray-200 flex gap-1 overflow-x-auto">
-        {TABS.map((tab) => (
+        {TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-              activeTab === tab.key
-                ? "border-org-primary text-org-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.key ? "border-org-primary text-org-primary" : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
             {tab.label}
           </button>
@@ -72,9 +66,7 @@ const CommitteeDetails = () => {
           <div className="bg-white shadow-sm border rounded-lg p-6 space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">{committee?.name}</h2>
-              {committee?.description && (
-                <p className="text-gray-600 mt-1">{committee.description}</p>
-              )}
+              {committee?.description && <p className="text-gray-600 mt-1">{committee.description}</p>}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -99,12 +91,10 @@ const CommitteeDetails = () => {
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-700 mb-3">
-                Members ({committee?.members?.length ?? 0})
-              </h3>
+              <h3 className="font-semibold text-gray-700 mb-3">Members ({committee?.members?.length ?? 0})</h3>
               {committee?.members?.length > 0 ? (
                 <ul className="space-y-2">
-                  {committee.members.map((member) => (
+                  {committee.members.map(member => (
                     <li key={member._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-800 text-sm">{member.name}</p>
@@ -121,43 +111,40 @@ const CommitteeDetails = () => {
         )}
 
         {/* NEWS TAB */}
-        {activeTab === "news" && (
-          committeeNews.length > 0 ? (
+        {activeTab === "news" &&
+          (committeeNews.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeNews.map((item) => (
+              {committeeNews.map(item => (
                 <NewsCard key={item._id} newsItem={item} hidePostDetails linkTo="news" />
               ))}
             </div>
           ) : (
             <EmptyState label="news" />
-          )
-        )}
+          ))}
 
         {/* PUBLICATIONS TAB */}
-        {activeTab === "publications" && (
-          committeePublications.length > 0 ? (
+        {activeTab === "publications" &&
+          (committeePublications.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeePublications.map((item) => (
+              {committeePublications.map(item => (
                 <PublicationCard key={item._id} publicationItem={item} linkTo="publication" />
               ))}
             </div>
           ) : (
             <EmptyState label="publications" />
-          )
-        )}
+          ))}
 
         {/* GALLERY TAB */}
-        {activeTab === "gallery" && (
-          committeeGallery.length > 0 ? (
+        {activeTab === "gallery" &&
+          (committeeGallery.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeGallery.map((item) => (
+              {committeeGallery.map(item => (
                 <GalleryCard key={item._id} galleryItem={item} />
               ))}
             </div>
           ) : (
             <EmptyState label="gallery" />
-          )
-        )}
+          ))}
       </div>
     </main>
   );

@@ -21,4 +21,5 @@ export interface SideBarLinkType {
   subMenu?: SubMenuItem[];
   requiresExco?: boolean;
   requiresCommittee?: boolean;
+  activeFor?: string[];
 }
