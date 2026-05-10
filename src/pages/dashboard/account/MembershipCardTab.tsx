@@ -27,32 +27,104 @@ const getCardColors = (organization: any): { primary: string; secondary: string 
 const CARD_W = 340;
 const CARD_H = 214;
 
-// ── PDF download (front + back, CR80 sized pages) ─────────────────────────
+// ── PDF download ────────────────────────────────────────────────────────────
+//
+// Strategy: build one off-screen "print sheet" that contains both cards
+// stacked vertically (with labels), capture it in a single html2canvas call,
+// then place that one image on one PDF page sized to match.
+// One capture = no per-card alignment drift; one page = one file.
+
+const LABEL_H = 22; // px — height of the "FRONT" / "BACK" label row
+const GAP = 32; // px — space between the two cards
+const PADDING = 24; // px — sheet padding on all sides
+
+const SHEET_W = PADDING + CARD_W + PADDING;
+const SHEET_H = PADDING + LABEL_H + CARD_H + GAP + LABEL_H + CARD_H + PADDING;
 
 const downloadAsPDF = async (frontEl: HTMLElement, backEl: HTMLElement, orgName: string) => {
   try {
     const { default: html2canvas } = await import("html2canvas");
     const { default: jsPDF } = await import("jspdf");
 
-    const capture = (el: HTMLElement) =>
-      html2canvas(el, {
+    // ── build the off-screen print sheet ──────────────────────────────────
+    const sheet = document.createElement("div");
+    sheet.style.cssText = [
+      `position:fixed`,
+      `top:-${SHEET_H + 200}px`,
+      `left:-${SHEET_W + 200}px`,
+      `width:${SHEET_W}px`,
+      `height:${SHEET_H}px`,
+      `background:#f8f9fa`,
+      `display:flex`,
+      `flex-direction:column`,
+      `align-items:center`,
+      `padding:${PADDING}px`,
+      `gap:0`,
+      `box-sizing:border-box`,
+      `z-index:-9999`,
+      `font-family:system-ui,-apple-system,sans-serif`,
+    ].join(";");
+
+    const makeLabel = (text: string) => {
+      const el = document.createElement("div");
+      el.textContent = text;
+      el.style.cssText = [`width:${CARD_W}px`, `height:${LABEL_H}px`, `display:flex`, `align-items:center`, `justify-content:center`, `font-size:10px`, `font-weight:700`, `letter-spacing:0.15em`, `text-transform:uppercase`, `color:#6b7280`].join(
+        ";",
+      );
+      return el;
+    };
+
+    const cloneCard = (src: HTMLElement) => {
+      const clone = src.cloneNode(true) as HTMLElement;
+      const card = clone.firstElementChild as HTMLElement | null;
+      if (card) {
+        card.style.boxShadow = "none";
+        card.style.borderRadius = "12px"; // keep radius but shadow is gone
+        card.style.width = `${CARD_W}px`;
+        card.style.height = `${CARD_H}px`;
+        card.style.flexShrink = "0";
+      }
+      return clone;
+    };
+
+    const spacer = document.createElement("div");
+    spacer.style.cssText = `width:${CARD_W}px;height:${GAP}px;flex-shrink:0;`;
+
+    sheet.appendChild(makeLabel("— Front —"));
+    sheet.appendChild(cloneCard(frontEl));
+    sheet.appendChild(spacer);
+    sheet.appendChild(makeLabel("— Back —"));
+    sheet.appendChild(cloneCard(backEl));
+
+    document.body.appendChild(sheet);
+
+    // ── capture ────────────────────────────────────────────────────────────
+    let dataUrl: string;
+    try {
+      const canvas = await html2canvas(sheet, {
         scale: 3,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: null,
+        backgroundColor: "#f8f9fa",
+        width: SHEET_W,
+        height: SHEET_H,
+        scrollX: 0,
+        scrollY: 0,
         logging: false,
       });
+      dataUrl = canvas.toDataURL("image/png");
+    } finally {
+      document.body.removeChild(sheet);
+    }
 
-    const [frontCanvas, backCanvas] = await Promise.all([capture(frontEl), capture(backEl)]);
+    // ── write single-page PDF sized to the sheet ───────────────────────────
+    // Convert px → mm at 96 dpi: mm = px × 25.4 / 96
+    const px2mm = (px: number) => (px * 25.4) / 96;
+    const W_mm = px2mm(SHEET_W);
+    const H_mm = px2mm(SHEET_H);
 
-    // CR80 card: 85.6 × 54 mm
-    const W = 85.6;
-    const H = 54;
-
-    const pdf = new jsPDF({ unit: "mm", format: [W, H] });
-    pdf.addImage(frontCanvas.toDataURL("image/png"), "PNG", 0, 0, W, H);
-    pdf.addPage([W, H]);
-    pdf.addImage(backCanvas.toDataURL("image/png"), "PNG", 0, 0, W, H);
+    const pdf = new jsPDF({ unit: "mm", format: [W_mm, H_mm] });
+    pdf.addImage(dataUrl, "PNG", 0, 0, W_mm, H_mm);
     pdf.save(`membership-card-${orgName.replace(/\s+/g, "-").toLowerCase()}-${currentYear}.pdf`);
   } catch {
     window.print();
