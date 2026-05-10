@@ -10,17 +10,22 @@ import GalleryCard from "../../../components/cards/GalleryCard";
 import { fetchAllUserNews } from "../../../api/news/news-api";
 import { fetchUserPublications } from "../../../api/publications/publications-api";
 import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
+import { fetchAllUserEvents } from "../../../api/events/events-api";
+import { fetchUserMeetings } from "../../../api/meetings/api-meetings";
+import EventsCard from "../../../components/cards/EventsCard";
+import MeetingCard from "../../../components/cards/MeetingCard";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import { useNavigate } from "react-router-dom";
 
-type Tab = "members" | "news" | "publications" | "gallery";
+type Tab = "members" | "news" | "publications" | "gallery" | "events" | "meetings";
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "members", label: "Meet the Excos" },
+  { key: "members", label: "Leadership" },
   { key: "news", label: "News" },
   { key: "publications", label: "Publications" },
   { key: "gallery", label: "Gallery" },
+  { key: "events", label: "Events" },
+  { key: "meetings", label: "Meetings" },
 ];
 
 const EmptyState = ({ label }: { label: string }) => <p className="text-gray-400 text-sm py-10 text-center">No {label} for the Excos yet.</p>;
@@ -30,24 +35,24 @@ const ExcosPage = () => {
   const { data: newsData } = useQuery("news", fetchAllUserNews);
   const { data: publicationsData } = useQuery("publications", fetchUserPublications);
   const { data: galleryData } = useQuery(["galleryData", 1], () => fetchAllGalleryData(1));
+  const { data: eventsData } = useQuery("events", fetchAllUserEvents);
+  const { data: meetingsData } = useQuery("meetings", fetchUserMeetings);
 
   const [activeTab, setActiveTab] = useState<Tab>("members");
-  const [currentPage, setCurrentPage] = useState(1);
   const { notifyUser } = Toast();
-  const navigate = useNavigate();
+
+  // New response: array of groups, each with positions[]
+  // Legacy response: flat array of exco records
+  const groups: any[] = Array.isArray(data) ? data : [];
+  const isNewShape = groups.length > 0 && Array.isArray(groups[0]?.positions);
 
   const isExcoItem = (item: any) => item.audience === "exco";
 
   const excoNews: any[] = Array.isArray(newsData) ? newsData.filter(isExcoItem) : [];
   const excoPublications: any[] = Array.isArray(publicationsData) ? publicationsData.filter(isExcoItem) : [];
   const excoGallery: any[] = Array.isArray(galleryData) ? galleryData.filter(isExcoItem) : [];
-
-  const itemsPerPage = 12;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data && Array.isArray(data) ? data.slice(indexOfFirstItem, indexOfLastItem) : [];
-  const totalPages = Math.ceil((data && Array.isArray(data) ? data.length : 0) / itemsPerPage);
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const excoEvents: any[] = Array.isArray(eventsData) ? eventsData.filter(isExcoItem) : [];
+  const excoMeetings: any[] = Array.isArray(meetingsData) ? meetingsData.filter(isExcoItem) : [];
 
   if (isLoading) {
     return <CircleLoader />;
@@ -75,39 +80,44 @@ const ExcosPage = () => {
       </div>
 
       <div className="mt-6">
-        {/* MEMBERS TAB */}
+        {/* MEMBERS (LEADERSHIP) TAB */}
         {activeTab === "members" && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 flex-1">
-              {currentItems?.map((item: ExcoMemberDataType, index: number) => (
-                <ExcosMemberCard
-                  key={index}
-                  item={item}
-                  onClick={() => {
-                    const excoId = (item as any)?._id || (item as any)?.id;
-                    if (excoId) navigate(`/excos/${excoId}`);
-                  }}
-                />
-              ))}
-            </div>
-
-            {!isLoading && (!data || (Array.isArray(data) && data.length === 0)) && (
-              <div className="text-center py-8">
-                <h3 className="text-org-primary-blue text-xl">No Excos Available</h3>
-                <p className="text-gray-500 mt-2">Excos will be listed here when available.</p>
-              </div>
-            )}
-
-            {pageNumbers.length > 0 && (
-              <ul className="flex space-x-2 items-center justify-center my-2">
-                {pageNumbers?.map((number, index) => (
-                  <li key={index}>
-                    <button className={`${currentPage === number ? "bg-org-primary text-white" : "bg-neutral-3"} px-3 py-2 rounded-sm focus:outline-none`} onClick={() => setCurrentPage(number)}>
-                      {number}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            {isNewShape ? (
+              // New API: groups → positions
+              groups.length === 0 ? (
+                <div className="text-center py-8">
+                  <h3 className="text-org-primary-blue text-xl">No Leadership Available</h3>
+                </div>
+              ) : (
+                groups.map((group: any) => (
+                  <div key={group._id} className="mb-8">
+                    {groups.length > 1 && <h3 className="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">{group.name}</h3>}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {(group.positions || [])
+                        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+                        .map((pos: any) => (
+                          <ExcosMemberCard key={pos._id} item={{ ...pos, position: pos.title, profileImage: pos.imageUrl }} />
+                        ))}
+                    </div>
+                    {(!group.positions || group.positions.length === 0) && <p className="text-gray-400 text-sm py-4 text-center">No positions listed for this group.</p>}
+                  </div>
+                ))
+              )
+            ) : (
+              // Legacy flat array response
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 flex-1">
+                  {groups.map((item: ExcoMemberDataType, index: number) => (
+                    <ExcosMemberCard key={index} item={item} />
+                  ))}
+                </div>
+                {groups.length === 0 && (
+                  <div className="text-center py-8">
+                    <h3 className="text-org-primary-blue text-xl">No Excos Available</h3>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
@@ -146,6 +156,30 @@ const ExcosPage = () => {
             </div>
           ) : (
             <EmptyState label="gallery" />
+          ))}
+
+        {/* EVENTS TAB */}
+        {activeTab === "events" &&
+          (excoEvents.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl">
+              {excoEvents.map(item => (
+                <EventsCard key={item._id} eventItem={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState label="events" />
+          ))}
+
+        {/* MEETINGS TAB */}
+        {activeTab === "meetings" &&
+          (excoMeetings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl">
+              {excoMeetings.map(item => (
+                <MeetingCard key={item._id} meeting={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState label="meetings" />
           ))}
       </div>
     </main>

@@ -1,16 +1,9 @@
 import { sideBarData as initialSideBarData } from "../../data/sideBarData";
 import NavItem from "./NavItem";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "react-query";
-import { fetchAllCommittees } from "../../api/committee/committee";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { SubMenuItem, SideBarLinkType } from "../../types/sidebarDataType";
 import { useAppContext } from "../../context/authContext";
-
-interface Committee {
-  id: string;
-  name: string;
-}
 
 interface Props {
   isMobileSidebarOpen: boolean;
@@ -20,49 +13,24 @@ interface Props {
 const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const navigate = useNavigate();
   const { user } = useAppContext();
-  const [committees, setCommittees] = useState<SubMenuItem[]>([]);
   const [sideBarData, setSideBarData] = useState<SideBarLinkType[]>(initialSideBarData);
 
   const isExco: boolean = user?.exco?.isExco === true;
-  const isCommitteeMember: boolean = user?.committee?.isMember === true;
-
-  const { data } = useQuery("committees", fetchAllCommittees);
+  const userGroups: { _id: string; name: string }[] = Array.isArray(user?.groups) ? user.groups : [];
 
   useEffect(() => {
-    if (data && data.data) {
-      if (data.data.length === 0) {
-        const messageItem: SubMenuItem = {
-          name: "You are not part of any committee",
-          path: "#",
-          isMessage: true,
-        };
-        setCommittees([messageItem]);
-      } else {
-        const committeeItems: SubMenuItem[] = data.data.map((committee: Committee) => ({
-          name: committee.name,
-          path: `/committees/${committee.id}`,
-          isMessage: false,
-        }));
-        setCommittees(committeeItems);
-      }
-    }
-  }, [data]);
+    const environmentsSubMenu: SubMenuItem[] = [{ name: "Members Environment", path: "/members" }];
+    // Excos Environment is now served via groups (isPublic groups) — commented out
+    // if (isExco) {
+    //   environmentsSubMenu.push({ name: "Excos Environment", path: "/excos" });
+    // }
+    userGroups.forEach(group => {
+      environmentsSubMenu.push({ name: group.name, path: `/groups/${group._id}` });
+    });
 
-  useEffect(() => {
-    const updatedSideBarData = initialSideBarData.map(item => {
-      if (item.name === "Committee Environment") {
-        return { ...item, subMenu: committees };
-      }
-      return item;
-    });
-    // Filter out items the user doesn't qualify for
-    const filtered = updatedSideBarData.filter(item => {
-      if (item.requiresExco && !isExco) return false;
-      if (item.requiresCommittee && !isCommitteeMember) return false;
-      return true;
-    });
-    setSideBarData(filtered);
-  }, [committees, isExco, isCommitteeMember]);
+    const updated = initialSideBarData.map(item => (item.name === "Environments" ? { ...item, subMenu: environmentsSubMenu } : item));
+    setSideBarData(updated);
+  }, [isExco, userGroups.length]);
 
   const handleLogout = () => {
     localStorage.removeItem("rel8User");

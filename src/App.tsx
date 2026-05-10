@@ -72,6 +72,7 @@ function App() {
 
   const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
   const CommitteesPage = lazy(() => import("./pages/dashboard/committees/CommitteesPage"));
+  const GroupDetailPage = lazy(() => import("./pages/dashboard/groups/GroupDetailPage"));
   const router = createBrowserRouter([
     {
       path: "/verify-membership",
@@ -355,17 +356,18 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
-    {
-      path: "/excos",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ExcosPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
+    // Excos Environment page replaced by groups-based pages — kept for reference
+    // {
+    //   path: "/excos",
+    //   element: (
+    //     <Suspense fallback={<Loader />}>
+    //       <DashboardLayout>
+    //         <ExcosPage />
+    //       </DashboardLayout>
+    //     </Suspense>
+    //   ),
+    //   errorElement: <ErrorPage />,
+    // },
     {
       path: "/committees",
       element: (
@@ -377,17 +379,17 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
-    {
-      path: "/excos/:id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ExcoDetailPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
+    // {
+    //   path: "/excos/:id",
+    //   element: (
+    //     <Suspense fallback={<Loader />}>
+    //       <DashboardLayout>
+    //         <ExcoDetailPage />
+    //       </DashboardLayout>
+    //     </Suspense>
+    //   ),
+    //   errorElement: <ErrorPage />,
+    // },
     {
       path: "/members",
       element: (
@@ -710,6 +712,16 @@ function App() {
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <CommitteeDetails />
+          </DashboardLayout>
+        </Suspense>
+      ),
+    },
+    {
+      path: "/groups/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <GroupDetailPage />
           </DashboardLayout>
         </Suspense>
       ),

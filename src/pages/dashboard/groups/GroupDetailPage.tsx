@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
-import { fetchCommitteeDetails, CommitteeType } from "../../../api/committee/committee";
+import { fetchGroupById, fetchGroupMembers } from "../../../api/groups/groups-api";
 import { fetchAllUserNews } from "../../../api/news/news-api";
 import { fetchUserPublications } from "../../../api/publications/publications-api";
 import { fetchAllGalleryData } from "../../../api/gallery/gallery-api";
@@ -14,11 +14,13 @@ import PublicationCard from "../../../components/cards/PublicationCard";
 import GalleryCard from "../../../components/cards/GalleryCard";
 import EventsCard from "../../../components/cards/EventsCard";
 import MeetingCard from "../../../components/cards/MeetingCard";
+import profileImage from "../../../assets/images/dummy.jpg";
 
-type Tab = "info" | "news" | "publications" | "gallery" | "events" | "meetings";
+type Tab = "info" | "members" | "news" | "publications" | "gallery" | "events" | "meetings";
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "info", label: "Committee Info" },
+  { key: "info", label: "Group Info" },
+  { key: "members", label: "Members" },
   { key: "news", label: "News" },
   { key: "publications", label: "Publications" },
   { key: "gallery", label: "Gallery" },
@@ -26,13 +28,15 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "meetings", label: "Meetings" },
 ];
 
-const EmptyState = ({ label }: { label: string }) => <p className="text-gray-400 text-sm py-10 text-center">No {label} for this committee yet.</p>;
+const EmptyState = ({ label }: { label: string }) => <p className="text-gray-400 text-sm py-10 text-center">No {label} for this group yet.</p>;
 
-const CommitteeDetails = () => {
+const GroupDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<Tab>("info");
 
-  const { data, isLoading, isError } = useQuery(["committeeDetails", id], () => fetchCommitteeDetails(id as string), { enabled: !!id });
+  const { data: group, isLoading, isError } = useQuery(["groupDetails", id], () => fetchGroupById(id as string), { enabled: !!id });
+
+  const { data: membersData, isLoading: membersLoading } = useQuery(["groupMembers", id], () => fetchGroupMembers(id as string), { enabled: !!id && activeTab === "members" });
 
   const { data: newsData } = useQuery("news", fetchAllUserNews);
   const { data: publicationsData } = useQuery("publications", fetchUserPublications);
@@ -40,22 +44,20 @@ const CommitteeDetails = () => {
   const { data: eventsData } = useQuery("events", fetchAllUserEvents);
   const { data: meetingsData } = useQuery("meetings", fetchUserMeetings);
 
-  const isCommitteeItem = (item: any) => item.audience === "committee" && (item.committeeId === id || item.committee_id === id);
+  const isGroupItem = (item: any) => item.groupId === id || item.group_id === id;
 
-  const committeeNews: any[] = Array.isArray(newsData) ? newsData.filter(isCommitteeItem) : [];
-  const committeePublications: any[] = Array.isArray(publicationsData) ? publicationsData.filter(isCommitteeItem) : [];
-  const committeeGallery: any[] = Array.isArray(galleryData) ? galleryData.filter(isCommitteeItem) : [];
-  const committeeEvents: any[] = Array.isArray(eventsData) ? eventsData.filter(isCommitteeItem) : [];
-  const committeeMeetings: any[] = Array.isArray(meetingsData) ? meetingsData.filter(isCommitteeItem) : [];
+  const groupNews: any[] = Array.isArray(newsData) ? newsData.filter(isGroupItem) : [];
+  const groupPublications: any[] = Array.isArray(publicationsData) ? publicationsData.filter(isGroupItem) : [];
+  const groupGallery: any[] = Array.isArray(galleryData) ? galleryData.filter(isGroupItem) : [];
+  const groupEvents: any[] = Array.isArray(eventsData) ? eventsData.filter(isGroupItem) : [];
+  const groupMeetings: any[] = Array.isArray(meetingsData) ? meetingsData.filter(isGroupItem) : [];
 
   if (isLoading) return <CircleLoader />;
-  if (isError) return <div className="flex items-center justify-center h-screen text-red-500">Error loading committee details</div>;
-
-  const committee: CommitteeType = data;
+  if (isError || !group) return <div className="p-6 text-red-500">Failed to load group details.</div>;
 
   return (
     <main>
-      <BreadCrumb title={committee?.name ?? "Committee Details"} />
+      <BreadCrumb title={group.name ?? "Group"} />
 
       {/* Tab bar */}
       <div className="mt-4 border-b border-gray-200 flex gap-1 overflow-x-auto">
@@ -75,56 +77,61 @@ const CommitteeDetails = () => {
         {activeTab === "info" && (
           <div className="bg-white shadow-sm border rounded-lg p-6 space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">{committee?.name}</h2>
-              {committee?.description && <p className="text-gray-600 mt-1">{committee.description}</p>}
+              <h2 className="text-2xl font-bold text-gray-800">{group.name}</h2>
+              {group.description && <p className="text-gray-600 mt-1">{group.description}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {group.positions && group.positions.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Chairperson</h3>
-                <p className="text-gray-800">{committee?.chairperson?.name}</p>
-                <p className="text-gray-400 text-sm">{committee?.chairperson?.email}</p>
-              </div>
-
-              {committee?.positions?.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">Positions</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {committee.positions.map((pos, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                        {pos}
-                      </span>
+                <h3 className="font-semibold text-gray-700 mb-4">Positions</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {group.positions
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map(pos => (
+                      <div key={pos._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <img src={pos.imageUrl || profileImage} alt={pos.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-800 text-sm truncate">{pos.name}</p>
+                          <p className="text-org-primary text-xs">{pos.title}</p>
+                          {pos.email && <p className="text-gray-400 text-xs truncate">{pos.email}</p>}
+                        </div>
+                      </div>
                     ))}
-                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
+        )}
 
-            <div>
-              <h3 className="font-semibold text-gray-700 mb-3">Members ({committee?.members?.length ?? 0})</h3>
-              {committee?.members?.length > 0 ? (
+        {/* MEMBERS TAB */}
+        {activeTab === "members" &&
+          (membersLoading ? (
+            <CircleLoader />
+          ) : (
+            <>
+              {Array.isArray(membersData) && membersData.length > 0 ? (
                 <ul className="space-y-2">
-                  {committee.members.map(member => (
-                    <li key={member._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-800 text-sm">{member.name}</p>
-                        <p className="text-gray-400 text-xs">{member.email}</p>
+                  {membersData.map(member => (
+                    <li key={member._id} className="flex items-center gap-3 p-3 bg-white border rounded-lg">
+                      <img src={member.imageUrl || profileImage} alt={member.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-800 text-sm truncate">{member.name}</p>
+                        {member.email && <p className="text-gray-400 text-xs truncate">{member.email}</p>}
                       </div>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400 text-sm">No members in this committee.</p>
+                <EmptyState label="members" />
               )}
-            </div>
-          </div>
-        )}
+            </>
+          ))}
 
         {/* NEWS TAB */}
         {activeTab === "news" &&
-          (committeeNews.length > 0 ? (
+          (groupNews.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeNews.map(item => (
+              {groupNews.map(item => (
                 <NewsCard key={item._id} newsItem={item} hidePostDetails linkTo="news" />
               ))}
             </div>
@@ -134,9 +141,9 @@ const CommitteeDetails = () => {
 
         {/* PUBLICATIONS TAB */}
         {activeTab === "publications" &&
-          (committeePublications.length > 0 ? (
+          (groupPublications.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeePublications.map(item => (
+              {groupPublications.map(item => (
                 <PublicationCard key={item._id} publicationItem={item} linkTo="publication" />
               ))}
             </div>
@@ -146,9 +153,9 @@ const CommitteeDetails = () => {
 
         {/* GALLERY TAB */}
         {activeTab === "gallery" &&
-          (committeeGallery.length > 0 ? (
+          (groupGallery.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeGallery.map(item => (
+              {groupGallery.map(item => (
                 <GalleryCard key={item._id} galleryItem={item} />
               ))}
             </div>
@@ -158,9 +165,9 @@ const CommitteeDetails = () => {
 
         {/* EVENTS TAB */}
         {activeTab === "events" &&
-          (committeeEvents.length > 0 ? (
+          (groupEvents.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeEvents.map(item => (
+              {groupEvents.map(item => (
                 <EventsCard key={item._id} eventItem={item} />
               ))}
             </div>
@@ -170,9 +177,9 @@ const CommitteeDetails = () => {
 
         {/* MEETINGS TAB */}
         {activeTab === "meetings" &&
-          (committeeMeetings.length > 0 ? (
+          (groupMeetings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {committeeMeetings.map(item => (
+              {groupMeetings.map(item => (
                 <MeetingCard key={item._id} meeting={item} />
               ))}
             </div>
@@ -184,4 +191,4 @@ const CommitteeDetails = () => {
   );
 };
 
-export default CommitteeDetails;
+export default GroupDetailPage;

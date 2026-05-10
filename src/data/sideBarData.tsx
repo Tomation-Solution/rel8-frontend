@@ -1,8 +1,7 @@
-import { FiGrid, FiImage, FiCalendar, FiUser, FiBell, FiHelpCircle, FiLogOut, FiBriefcase } from "react-icons/fi";
-import { HiOutlineUserGroup } from "react-icons/hi2";
+import { FiGrid, FiImage, FiCalendar, FiUser, FiBell, FiHelpCircle, FiLogOut, FiBriefcase, FiLayers } from "react-icons/fi";
 import { PiChatTeardropText } from "react-icons/pi";
 import { CgWebsite } from "react-icons/cg";
-import { MdBallot, MdOutlineAdminPanelSettings } from "react-icons/md";
+import { MdBallot } from "react-icons/md";
 import { SideBarLinkType } from "../types/sidebarDataType";
 
 export const sideBarData: SideBarLinkType[] = [
@@ -29,24 +28,11 @@ export const sideBarData: SideBarLinkType[] = [
   //   notActiveLinkIcon:'',
   // },
   {
-    mainIcon: MdOutlineAdminPanelSettings,
-    name: "Excos Enviroment",
-    path: "/excos",
-    requiresExco: true,
+    mainIcon: FiLayers,
+    name: "Environments",
+    subMenu: [], // populated dynamically in Sidebar.tsx based on user role
+    activeFor: ["/members", "/excos", "/committees", "/groups"],
   },
-  {
-    mainIcon: HiOutlineUserGroup,
-    name: "Committee Environment",
-    path: "/committees",
-    requiresCommittee: true,
-  },
-  // {
-  //   mainIcon: comiteeEnviromentIcon,
-  //   name: "Committee Environment",
-  //   activeLinkIcon: togglerIcon,
-  //   notActiveLinkIcon: togglerIcon,
-  //   subMenu: [] // This will be filled with committee data fetched from the backend
-  // },
 
   {
     mainIcon: FiCalendar,
