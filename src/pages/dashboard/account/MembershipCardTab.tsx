@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import {} from "react";
 import { useQuery } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
 import { useAppContext } from "../../../context/authContext";
@@ -27,106 +27,405 @@ const getCardColors = (organization: any): { primary: string; secondary: string 
 const CARD_W = 340;
 const CARD_H = 214;
 
-// ── PDF download ────────────────────────────────────────────────────────────
+// ── PDF download ─────────────────────────────────────────────────────────────
 //
-// Strategy: build one off-screen "print sheet" that contains both cards
-// stacked vertically (with labels), capture it in a single html2canvas call,
-// then place that one image on one PDF page sized to match.
-// One capture = no per-card alignment drift; one page = one file.
+// Draws both card faces directly onto a Canvas 2D context (no html2canvas /
+// DOM cloning) then embeds the result into an A4 PDF page via jsPDF.
+// This eliminates every text-clipping and layout-drift problem caused by
+// html2canvas trying to re-render live DOM nodes.
 
-const LABEL_H = 22; // px — height of the "FRONT" / "BACK" label row
-const GAP = 32; // px — space between the two cards
-const PADDING = 24; // px — sheet padding on all sides
+const A4_W_MM = 210;
+const A4_H_MM = 297;
+const MM_TO_PX = 96 / 25.4; // 1 mm in CSS px at 96 dpi
+const SCALE = 3; // retina-quality canvas
 
-const SHEET_W = PADDING + CARD_W + PADDING;
-const SHEET_H = PADDING + LABEL_H + CARD_H + GAP + LABEL_H + CARD_H + PADDING;
+// helpers
+const mm2px = (mm: number) => mm * MM_TO_PX * SCALE;
+const A4_W = mm2px(A4_W_MM);
+const A4_H = mm2px(A4_H_MM);
 
-const downloadAsPDF = async (frontEl: HTMLElement, backEl: HTMLElement, orgName: string) => {
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function drawCircleDecor(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,255,255,0.10)";
+  ctx.fill();
+  ctx.restore();
+}
+
+async function loadImage(url: string): Promise<HTMLImageElement | null> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function drawFrontCard(
+  ctx: CanvasRenderingContext2D,
+  ox: number,
+  oy: number,
+  cw: number,
+  ch: number,
+  opts: {
+    primaryColor: string;
+    secondaryColor: string;
+    orgName: string;
+    orgLogoImg: HTMLImageElement | null;
+    memberName: string;
+    memberImg: HTMLImageElement | null;
+    memberId: string;
+    groups: string;
+    validFrom: string;
+    validTo: string;
+  },
+) {
+  const r = 16 * SCALE;
+  const { primaryColor, secondaryColor } = opts;
+
+  ctx.save();
+  roundRect(ctx, ox, oy, cw, ch, r);
+  ctx.clip();
+
+  // background gradient
+  const grad = ctx.createLinearGradient(ox, oy, ox + cw, oy + ch);
+  grad.addColorStop(0, primaryColor);
+  grad.addColorStop(1, secondaryColor);
+  ctx.fillStyle = grad;
+  ctx.fillRect(ox, oy, cw, ch);
+
+  // decorative corner circles (drawn after clip — bleed naturally into corners)
+  ctx.fillStyle = "rgba(255,255,255,0.10)";
+  ctx.beginPath();
+  ctx.arc(ox + cw - 10 * SCALE, oy - 10 * SCALE, 70 * SCALE, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(ox + 10 * SCALE, oy + ch + 10 * SCALE, 80 * SCALE, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── header row ──────────────────────────────────────────────────────────
+  const headerY = oy + 14 * SCALE;
+  const logoSize = 28 * SCALE;
+
+  if (opts.orgLogoImg) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(ox + 20 * SCALE + logoSize / 2, headerY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(opts.orgLogoImg, ox + 20 * SCALE, headerY, logoSize, logoSize);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.beginPath();
+    ctx.arc(ox + 20 * SCALE + logoSize / 2, headerY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = primaryColor;
+    ctx.font = `700 ${10 * SCALE}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(getInitials(opts.orgName), ox + 20 * SCALE + logoSize / 2, headerY + logoSize / 2);
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.font = `600 ${11 * SCALE}px system-ui`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(opts.orgName, ox + (20 + logoSize / SCALE + 8) * SCALE, headerY + logoSize / 2, 160 * SCALE);
+
+  // MEMBER badge
+  ctx.fillStyle = "rgba(255,255,255,0.20)";
+  const badgeW = 54 * SCALE;
+  const badgeH = 18 * SCALE;
+  const badgeX = ox + cw - 20 * SCALE - badgeW;
+  const badgeY = headerY + (logoSize - badgeH) / 2;
+  roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9 * SCALE);
+  ctx.fill();
+  ctx.fillStyle = "white";
+  ctx.font = `900 ${9 * SCALE}px system-ui`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("MEMBER", badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+  // ── avatar + name block ─────────────────────────────────────────────────
+  const avatarTop = oy + 56 * SCALE;
+  const avatarSize = 60 * SCALE;
+  const avatarX = ox + 20 * SCALE;
+  const avatarY = avatarTop;
+  const avatarR = 12 * SCALE;
+
+  if (opts.memberImg) {
+    ctx.save();
+    roundRect(ctx, avatarX, avatarY, avatarSize, avatarSize, avatarR);
+    ctx.clip();
+    ctx.drawImage(opts.memberImg, avatarX, avatarY, avatarSize, avatarSize);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = "rgba(255,255,255,0.20)";
+    roundRect(ctx, avatarX, avatarY, avatarSize, avatarSize, avatarR);
+    ctx.fill();
+    ctx.fillStyle = "white";
+    ctx.font = `700 ${20 * SCALE}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(getInitials(opts.memberName), avatarX + avatarSize / 2, avatarY + avatarSize / 2);
+  }
+
+  ctx.strokeStyle = "rgba(255,255,255,0.40)";
+  ctx.lineWidth = 2 * SCALE;
+  roundRect(ctx, avatarX, avatarY, avatarSize, avatarSize, avatarR);
+  ctx.stroke();
+
+  const textX = avatarX + avatarSize + 16 * SCALE;
+  const maxTW = cw - avatarSize - 56 * SCALE;
+
+  ctx.fillStyle = "white";
+  ctx.font = `700 ${14 * SCALE}px system-ui`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText(opts.memberName, textX, avatarY + 4 * SCALE, maxTW);
+
+  if (opts.groups) {
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = `400 ${10 * SCALE}px system-ui`;
+    ctx.fillText(opts.groups, textX, avatarY + 22 * SCALE, maxTW);
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.60)";
+  ctx.font = `400 ${10 * SCALE}px monospace`;
+  ctx.fillText(`ID ${opts.memberId}`, textX, avatarY + (opts.groups ? 38 : 22) * SCALE, maxTW);
+
+  // ── valid bar ───────────────────────────────────────────────────────────
+  const barH = 28 * SCALE;
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
+  ctx.fillRect(ox, oy + ch - barH, cw, barH);
+  ctx.fillStyle = "rgba(255,255,255,0.70)";
+  ctx.font = `600 ${9 * SCALE}px system-ui`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText("VALID", ox + 20 * SCALE, oy + ch - barH / 2);
+  ctx.fillStyle = "white";
+  ctx.font = `600 ${10 * SCALE}px monospace`;
+  ctx.textAlign = "right";
+  ctx.fillText(`${opts.validFrom} - ${opts.validTo}`, ox + cw - 20 * SCALE, oy + ch - barH / 2);
+
+  ctx.restore();
+}
+
+function drawBackCard(
+  ctx: CanvasRenderingContext2D,
+  ox: number,
+  oy: number,
+  cw: number,
+  ch: number,
+  opts: {
+    primaryColor: string;
+    secondaryColor: string;
+    orgName: string;
+    orgLogoImg: HTMLImageElement | null;
+    email?: string;
+    phone?: string;
+    website?: string;
+    yearEstablished?: number;
+  },
+) {
+  const r = 16 * SCALE;
+  const { primaryColor, secondaryColor } = opts;
+
+  ctx.save();
+  roundRect(ctx, ox, oy, cw, ch, r);
+  ctx.clip();
+
+  const grad = ctx.createLinearGradient(ox + cw, oy + ch, ox, oy);
+  grad.addColorStop(0, secondaryColor);
+  grad.addColorStop(1, primaryColor);
+  ctx.fillStyle = grad;
+  ctx.fillRect(ox, oy, cw, ch);
+
+  // decorative corner circles (mirrored vs front card)
+  ctx.fillStyle = "rgba(255,255,255,0.10)";
+  ctx.beginPath();
+  ctx.arc(ox + 10 * SCALE, oy - 10 * SCALE, 70 * SCALE, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(ox + cw - 10 * SCALE, oy + ch + 10 * SCALE, 80 * SCALE, 0, Math.PI * 2);
+  ctx.fill();
+
+  // magnetic stripe
+  ctx.fillStyle = "rgba(0,0,0,0.40)";
+  ctx.fillRect(ox, oy + 28 * SCALE, cw, 10 * SCALE);
+
+  // ── centre content ──────────────────────────────────────────────────────
+  const centerX = ox + cw / 2;
+  let curY = oy + 58 * SCALE;
+
+  if (opts.orgLogoImg) {
+    const logoH = 38 * SCALE;
+    const logoW = Math.min(130 * SCALE, logoH * 4);
+    const logoX = centerX - logoW / 2;
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    roundRect(ctx, logoX - 10 * SCALE, curY - 4 * SCALE, logoW + 20 * SCALE, logoH + 8 * SCALE, 8 * SCALE);
+    ctx.fill();
+    ctx.drawImage(opts.orgLogoImg, logoX, curY, logoW, logoH);
+    curY += logoH + 12 * SCALE;
+  } else {
+    const iSize = 40 * SCALE;
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.beginPath();
+    ctx.arc(centerX, curY + iSize / 2, iSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = primaryColor;
+    ctx.font = `700 ${15 * SCALE}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(getInitials(opts.orgName), centerX, curY + iSize / 2);
+    curY += iSize + 12 * SCALE;
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.font = `700 ${12 * SCALE}px system-ui`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText(opts.orgName, centerX, curY, cw - 40 * SCALE);
+  curY += 18 * SCALE;
+
+  if (opts.yearEstablished) {
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = `400 ${9 * SCALE}px system-ui`;
+    ctx.fillText(`Est. ${opts.yearEstablished}`, centerX, curY);
+    curY += 14 * SCALE;
+  }
+
+  curY += 4 * SCALE;
+  ctx.strokeStyle = "rgba(255,255,255,0.25)";
+  ctx.lineWidth = 1 * SCALE;
+  const divW = cw * 0.55;
+  ctx.beginPath();
+  ctx.moveTo(centerX - divW / 2, curY);
+  ctx.lineTo(centerX + divW / 2, curY);
+  ctx.stroke();
+  curY += 10 * SCALE;
+
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.font = `400 ${9 * SCALE}px system-ui`;
+  for (const line of [opts.email, opts.phone, opts.website].filter(Boolean) as string[]) {
+    ctx.fillText(line, centerX, curY, cw - 40 * SCALE);
+    curY += 14 * SCALE;
+  }
+
+  // footer bar
+  const footH = 22 * SCALE;
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
+  ctx.fillRect(ox, oy + ch - footH, cw, footH);
+  ctx.fillStyle = "rgba(255,255,255,0.60)";
+  ctx.font = `400 ${8 * SCALE}px system-ui`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`This card is the property of ${opts.orgName}. If found, please return.`, centerX, oy + ch - footH / 2, cw - 20 * SCALE);
+
+  ctx.restore();
+}
+
+const downloadAsPDF = async (
+  colors: CardColors,
+  orgName: string,
+  orgLogoUrl: string | undefined,
+  memberName: string,
+  memberImgUrl: string | undefined,
+  memberId: string,
+  groups: { _id: string; name: string }[],
+  validFrom: string,
+  validTo: string,
+  organization: any,
+) => {
   try {
-    const { default: html2canvas } = await import("html2canvas");
     const { default: jsPDF } = await import("jspdf");
 
-    // ── build the off-screen print sheet ──────────────────────────────────
-    const sheet = document.createElement("div");
-    sheet.style.cssText = [
-      `position:fixed`,
-      `top:-${SHEET_H + 200}px`,
-      `left:-${SHEET_W + 200}px`,
-      `width:${SHEET_W}px`,
-      `height:${SHEET_H}px`,
-      `background:#f8f9fa`,
-      `display:flex`,
-      `flex-direction:column`,
-      `align-items:center`,
-      `padding:${PADDING}px`,
-      `gap:0`,
-      `box-sizing:border-box`,
-      `z-index:-9999`,
-      `font-family:system-ui,-apple-system,sans-serif`,
-    ].join(";");
+    // load images in parallel
+    const [orgLogoImg, memberImg] = await Promise.all([orgLogoUrl ? loadImage(orgLogoUrl) : Promise.resolve(null), memberImgUrl ? loadImage(memberImgUrl) : Promise.resolve(null)]);
 
-    const makeLabel = (text: string) => {
-      const el = document.createElement("div");
-      el.textContent = text;
-      el.style.cssText = [`width:${CARD_W}px`, `height:${LABEL_H}px`, `display:flex`, `align-items:center`, `justify-content:center`, `font-size:10px`, `font-weight:700`, `letter-spacing:0.15em`, `text-transform:uppercase`, `color:#6b7280`].join(
-        ";",
-      );
-      return el;
+    // ── set up canvas (A4 at SCALE×96dpi) ───────────────────────────────
+    const canvas = document.createElement("canvas");
+    canvas.width = A4_W;
+    canvas.height = A4_H;
+    const ctx = canvas.getContext("2d")!;
+
+    // white A4 background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, A4_W, A4_H);
+
+    // card dimensions in canvas px
+    const cardW = CARD_W * SCALE;
+    const cardH = CARD_H * SCALE;
+
+    // centre cards horizontally; distribute vertically with breathing room
+    const cardX = (A4_W - cardW) / 2;
+    const totalCardsH = cardH * 2 + 60 * SCALE; // two cards + gap between them
+    const startY = (A4_H - totalCardsH) / 2;
+
+    // ── section labels ──────────────────────────────────────────────────
+    const drawLabel = (text: string, y: number) => {
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = `700 ${10 * SCALE}px system-ui`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, A4_W / 2, y);
     };
 
-    const cloneCard = (src: HTMLElement) => {
-      const clone = src.cloneNode(true) as HTMLElement;
-      const card = clone.firstElementChild as HTMLElement | null;
-      if (card) {
-        card.style.boxShadow = "none";
-        card.style.borderRadius = "12px"; // keep radius but shadow is gone
-        card.style.width = `${CARD_W}px`;
-        card.style.height = `${CARD_H}px`;
-        card.style.flexShrink = "0";
-      }
-      return clone;
-    };
+    const labelH = 18 * SCALE;
+    const frontLabelY = startY + labelH / 2;
+    const frontCardY = startY + labelH + 4 * SCALE;
+    const backLabelY = frontCardY + cardH + 24 * SCALE;
+    const backCardY = backLabelY + labelH / 2 + 4 * SCALE;
 
-    const spacer = document.createElement("div");
-    spacer.style.cssText = `width:${CARD_W}px;height:${GAP}px;flex-shrink:0;`;
+    drawLabel("— FRONT —", frontLabelY);
+    drawFrontCard(ctx, cardX, frontCardY, cardW, cardH, {
+      primaryColor: colors.primary,
+      secondaryColor: colors.secondary,
+      orgName,
+      orgLogoImg,
+      memberName,
+      memberImg,
+      memberId,
+      groups: groups.map(g => g.name).join(" · "),
+      validFrom,
+      validTo,
+    });
 
-    sheet.appendChild(makeLabel("— Front —"));
-    sheet.appendChild(cloneCard(frontEl));
-    sheet.appendChild(spacer);
-    sheet.appendChild(makeLabel("— Back —"));
-    sheet.appendChild(cloneCard(backEl));
+    drawLabel("— BACK —", backLabelY);
+    drawBackCard(ctx, cardX, backCardY, cardW, cardH, {
+      primaryColor: colors.primary,
+      secondaryColor: colors.secondary,
+      orgName,
+      orgLogoImg,
+      email: organization?.email,
+      phone: organization?.phone,
+      website: organization?.customUrl,
+      yearEstablished: organization?.yearEstablished,
+    });
 
-    document.body.appendChild(sheet);
-
-    // ── capture ────────────────────────────────────────────────────────────
-    let dataUrl: string;
-    try {
-      const canvas = await html2canvas(sheet, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#f8f9fa",
-        width: SHEET_W,
-        height: SHEET_H,
-        scrollX: 0,
-        scrollY: 0,
-        logging: false,
-      });
-      dataUrl = canvas.toDataURL("image/png");
-    } finally {
-      document.body.removeChild(sheet);
-    }
-
-    // ── write single-page PDF sized to the sheet ───────────────────────────
-    // Convert px → mm at 96 dpi: mm = px × 25.4 / 96
-    const px2mm = (px: number) => (px * 25.4) / 96;
-    const W_mm = px2mm(SHEET_W);
-    const H_mm = px2mm(SHEET_H);
-
-    const pdf = new jsPDF({ unit: "mm", format: [W_mm, H_mm] });
-    pdf.addImage(dataUrl, "PNG", 0, 0, W_mm, H_mm);
+    // ── export to PDF ───────────────────────────────────────────────────
+    const dataUrl = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    pdf.addImage(dataUrl, "PNG", 0, 0, A4_W_MM, A4_H_MM);
     pdf.save(`membership-card-${orgName.replace(/\s+/g, "-").toLowerCase()}-${currentYear}.pdf`);
-  } catch {
+  } catch (err) {
+    console.error("PDF generation failed", err);
     window.print();
   }
 };
@@ -210,14 +509,14 @@ const CardFront = ({ name, memberId, imageUrl, orgName, orgLogo, validFrom, vali
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.3, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</p>
         {groups.length > 0 && <p style={{ fontSize: 10, opacity: 0.75, margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{groups.map(g => g.name).join(" \u00B7 ")}</p>}
-        <p style={{ fontSize: 10, fontFamily: "monospace", opacity: 0.6, letterSpacing: "0.15em", textTransform: "uppercase", margin: "4px 0 0" }}>ID \u00B7 {memberId}</p>
+        <p style={{ fontSize: 10, fontFamily: "monospace", opacity: 0.6, letterSpacing: "0.15em", textTransform: "uppercase", margin: "4px 0 0" }}>ID {memberId}</p>
       </div>
     </div>
 
     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.22)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 20px" }}>
       <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", opacity: 0.7 }}>Valid</span>
       <span style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 600, letterSpacing: "0.05em" }}>
-        {validFrom} \u2013 {validTo}
+        {validFrom} - {validTo}
       </span>
     </div>
   </div>
@@ -283,8 +582,6 @@ const CardBack = ({ orgName, orgLogo, email, phone, website, yearEstablished, co
 
 const MembershipCardTab = () => {
   const { user } = useAppContext();
-  const frontRef = useRef<HTMLDivElement>(null);
-  const backRef = useRef<HTMLDivElement>(null);
   const { organization, logo } = getTenantInfo();
 
   const { data: dues, isLoading } = useQuery("userDues", fetchUserDues);
@@ -334,7 +631,7 @@ const MembershipCardTab = () => {
             <div className="flex flex-col sm:flex-row gap-8 items-start justify-center">
               <div className="flex flex-col items-center gap-2">
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Front</span>
-                <div ref={frontRef}>
+                <div>
                   <CardFront
                     name={user?.name ?? ""}
                     memberId={memberId}
@@ -351,7 +648,7 @@ const MembershipCardTab = () => {
 
               <div className="flex flex-col items-center gap-2">
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Back</span>
-                <div ref={backRef}>
+                <div>
                   <CardBack
                     orgName={organization?.name ?? "Organisation"}
                     orgLogo={logo ?? undefined}
@@ -368,7 +665,7 @@ const MembershipCardTab = () => {
             <div className="flex gap-3 flex-wrap justify-center">
               <button
                 type="button"
-                onClick={() => frontRef.current && backRef.current && downloadAsPDF(frontRef.current, backRef.current, organization?.name ?? "membership")}
+                onClick={() => downloadAsPDF(colors, organization?.name ?? "membership", logo ?? undefined, user?.name ?? "", user?.imageUrl, memberId, userGroups, validFrom, validTo, organization)}
                 className="flex items-center gap-2 px-5 py-2.5 bg-org-primary text-white text-sm rounded-lg hover:bg-opacity-90 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
