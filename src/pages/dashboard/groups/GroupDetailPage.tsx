@@ -9,6 +9,7 @@ import { fetchAllUserEvents } from "../../../api/events/events-api";
 import { fetchUserMeetings } from "../../../api/meetings/api-meetings";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
+import GroupChatTab from "./GroupChatTab";
 import NewsCard from "../../../components/cards/NewsCard";
 import PublicationCard from "../../../components/cards/PublicationCard";
 import GalleryCard from "../../../components/cards/GalleryCard";
@@ -16,7 +17,7 @@ import EventsCard from "../../../components/cards/EventsCard";
 import MeetingCard from "../../../components/cards/MeetingCard";
 import profileImage from "../../../assets/images/dummy.jpg";
 
-type Tab = "info" | "members" | "news" | "publications" | "gallery" | "events" | "meetings";
+type Tab = "info" | "members" | "news" | "publications" | "gallery" | "events" | "meetings" | "chat";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "info", label: "Group Info" },
@@ -70,6 +71,14 @@ const GroupDetailPage = () => {
             {tab.label}
           </button>
         ))}
+        {group.hasChat && (
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === "chat" ? "border-org-primary text-org-primary" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+          >
+            Chat
+          </button>
+        )}
       </div>
 
       <div className="mt-6 max-w-3xl">
@@ -186,6 +195,9 @@ const GroupDetailPage = () => {
           ) : (
             <EmptyState label="meetings" />
           ))}
+
+        {/* CHAT TAB */}
+        {activeTab === "chat" && group.hasChat && <GroupChatTab groupId={id as string} groupName={group.name} />}
       </div>
     </main>
   );

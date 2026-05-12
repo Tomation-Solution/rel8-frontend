@@ -1,82 +1,105 @@
-import apiTenant from '../baseApi';
-import { fetchAllMembers } from '../members/api-members';
+import apiTenant from "../baseApi";
+import { fetchAllMembers } from "../members/api-members";
 
 export const getGroupMessages = async () => {
-    const response = await apiTenant.get('/api/chat/group');
-    // Transform data to match frontend expectations
-    const transformedData = response.data.map((msg: any) => ({
-        user__id: msg.senderId?._id || msg.senderId || null,
-        message: msg.content,
-        full_name: msg.senderId?.name || 'System',
-        time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-    }));
+  const response = await apiTenant.get("/api/chat/group");
+  // Transform data to match frontend expectations
+  const transformedData = response.data.map((msg: any) => ({
+    user__id: msg.senderId?._id || msg.senderId || null,
+    message: msg.content,
+    full_name: msg.senderId?.name || "System",
+    time: new Date(msg.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+  }));
 
-    console.log(transformedData, 'transformed data')
-    return transformedData;
-}
+  console.log(transformedData, "transformed data");
+  return transformedData;
+};
 
 export const getPrivateMessages = async () => {
-    const response = await apiTenant.get('/api/chat/private');
-    // Transform data to match frontend expectations
-    const transformedData = response.data.map((msg: any) => ({
-        user__id: msg.senderId._id,
-        message: msg.content,
-        full_name: msg.senderId.name,
-        time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-    }));
-    return transformedData;
-}
+  const response = await apiTenant.get("/api/chat/private");
+  // Transform data to match frontend expectations
+  const transformedData = response.data.map((msg: any) => ({
+    user__id: msg.senderId._id,
+    message: msg.content,
+    full_name: msg.senderId.name,
+    time: new Date(msg.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+  }));
+  return transformedData;
+};
 
 export const sendGroupMessage = async (content: string, groupId?: string) => {
-    const payload = groupId ? { content, groupId } : { content };
-    const response = await apiTenant.post('/api/chat/group', payload);
-    return response.data;
-}
+  const payload = groupId ? { content, groupId } : { content };
+  const response = await apiTenant.post("/api/chat/group", payload);
+  return response.data;
+};
 
 export const sendPrivateMessage = async (content: string, recipientId: string) => {
-    const response = await apiTenant.post('/api/chat/private', { content, recipientId });
-    return response.data;
-}
+  const response = await apiTenant.post("/api/chat/private", { content, recipientId });
+  return response.data;
+};
 
 export const getChatOverview = async () => {
-  const response = await apiTenant.get('/api/chat/overview');
+  const response = await apiTenant.get("/api/chat/overview");
   return response.data;
-}
+};
 
 export const getGroupChats = async () => {
-  const response = await apiTenant.get('/api/chat/groups');
+  const response = await apiTenant.get("/api/chat/groups");
   return response.data;
-}
+};
 
 export const getGroupMessagesById = async (groupId: string) => {
   const response = await apiTenant.get(`/api/chat/group/${groupId}`);
   // Transform data to match frontend expectations
   const transformedData = response.data.map((msg: any) => ({
-      user__id: msg.senderId?._id || msg.senderId || null,
-      message: msg.content,
-      full_name: msg.senderId?.name || 'System',
-      time: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    user__id: msg.senderId?._id || msg.senderId || null,
+    message: msg.content,
+    full_name: msg.senderId?.name || "System",
+    time: new Date(msg.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
   }));
 
   return transformedData;
-}
+};
+
+export const getPrivateMessagesWith = async (memberId: string) => {
+  const response = await apiTenant.get("/api/chat/private");
+  return (response.data as any[])
+    .filter(msg => {
+      const senderId = msg.senderId?._id ?? msg.senderId;
+      const recipientId = msg.recipientId?._id ?? msg.recipientId;
+      return String(senderId) === String(memberId) || String(recipientId) === String(memberId);
+    })
+    .map(msg => ({
+      user__id: msg.senderId?._id ?? msg.senderId ?? null,
+      message: msg.content,
+      full_name: msg.senderId?.name ?? "Unknown",
+      time: new Date(msg.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+    }));
+};
+
+export const toggleGroupChat = async (groupId: string, isActive: boolean) => {
+  const response = await apiTenant.patch(`/api/chat/groups/${groupId}/toggle`, { isActive });
+  return response.data;
+};
+
+export const clearGroupChat = async (groupId: string) => {
+  const response = await apiTenant.delete(`/api/chat/groups/${groupId}`);
+  return response.data;
+};
 
 // Legacy functions for backward compatibility
 export const getChats = async (roomName: string) => {
-    // For private chats, return private messages
-    return getPrivateMessages();
-}
+  // For private chats, return private messages
+  return getPrivateMessages();
+};
 
 export const getAllChatsUsers = async () => {
-    return fetchAllMembers();
-}
+  return fetchAllMembers();
+};
 
 export const fetchOldGeneralChats = async () => {
-    return getGroupMessages();
-}
-
-
-
+  return getGroupMessages();
+};
 
 // export const FetchName = (member:MemberType):string=>{
 //     const name:any = member.member_info.find(d=>{
@@ -87,7 +110,7 @@ export const fetchOldGeneralChats = async () => {
 //   }
 //    return `Member (${member.id})`
 //   }
-  
+
 //   export const FetchNameByMemberInfo = (member_info:MemberType['member_info']):string=>{
 //     const name:any = member_info.find(d=>{
 //       return d.name.toLocaleLowerCase() == 'name' ||  d.name.toLocaleLowerCase() == 'first' ||d.name.toLocaleLowerCase() == 'first name' || d.name.toLocaleLowerCase() == 'surname'
@@ -97,15 +120,15 @@ export const fetchOldGeneralChats = async () => {
 //   }
 //    return `Member`
 //   }
-  
+
 //   export const FetchMembershipNo = (member:MemberType):string=>{
 //     const name:any = member.member_info.find(d=>{
-//       return d.name == 'MEMBERSHIP_NO' 
+//       return d.name == 'MEMBERSHIP_NO'
 //   })['value']
-  
+
 //   if(typeof name==='string'){
 //     return name
 //   }
-  
+
 //    return `Member (${member.id})`
 //   }
