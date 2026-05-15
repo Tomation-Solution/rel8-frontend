@@ -18,8 +18,28 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const isExco: boolean = user?.exco?.isExco === true;
   const userGroups: { _id: string; name: string }[] = Array.isArray(user?.groups) ? user.groups : [];
 
+  // member type: can be { _id, name } object or a plain id string
+  const userMemberType: { _id: string; name: string } | null = (() => {
+    if (!user?.memberType) return null;
+    if (typeof user.memberType === "object" && user.memberType._id) return user.memberType;
+    return null; // plain id — name unknown until types are loaded
+  })();
+
   useEffect(() => {
-    const environmentsSubMenu: SubMenuItem[] = [{ name: "Members Environment", path: "/members" }];
+    const environmentsSubMenu: SubMenuItem[] = [
+      {
+        name: "Members Environment",
+        path: "/member-types",
+      },
+    ];
+
+    // Add the user's own member type as a quick-link if we have the name
+    if (userMemberType) {
+      environmentsSubMenu.push({
+        name: userMemberType.name,
+        path: `/member-types/${userMemberType._id}`,
+      });
+    }
 
     const committeeGroups: SubMenuItem[] = [];
     const otherGroups: SubMenuItem[] = [];
@@ -44,7 +64,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
     const updated = initialSideBarData.map(item => (item.name === "Environments" ? { ...item, subMenu: environmentsSubMenu } : item));
     setSideBarData(updated);
-  }, [isExco, userGroups.length]);
+  }, [isExco, userGroups.length, userMemberType?._id]);
 
   const handleLogout = () => {
     localStorage.removeItem("rel8User");

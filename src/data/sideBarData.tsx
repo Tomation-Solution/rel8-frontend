@@ -31,7 +31,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiLayers,
     name: "Environments",
     subMenu: [], // populated dynamically in Sidebar.tsx based on user role
-    activeFor: ["/members", "/excos", "/committees", "/groups"],
+    activeFor: ["/members", "/excos", "/committees", "/groups", "/member-types"],
   },
 
   {

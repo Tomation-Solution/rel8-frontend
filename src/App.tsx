@@ -39,6 +39,9 @@ function App() {
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
   const ExcoDetailPage = lazy(() => import("./pages/dashboard/members/ExcoDetailPage"));
+  const MemberProfilePage = lazy(() => import("./pages/dashboard/members/MemberProfilePage"));
+  const MemberTypesPage = lazy(() => import("./pages/dashboard/member-types/MemberTypesPage"));
+  const MemberTypeDetailPage = lazy(() => import("./pages/dashboard/member-types/MemberTypeDetailPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
   const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
   const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
@@ -406,6 +409,39 @@ function App() {
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <MembersPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/members/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberProfilePage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/member-types",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberTypesPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/member-types/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberTypeDetailPage />
           </DashboardLayout>
         </Suspense>
       ),
