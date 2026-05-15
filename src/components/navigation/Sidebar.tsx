@@ -20,13 +20,27 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
   useEffect(() => {
     const environmentsSubMenu: SubMenuItem[] = [{ name: "Members Environment", path: "/members" }];
-    // Excos Environment is now served via groups (isPublic groups) — commented out
-    // if (isExco) {
-    //   environmentsSubMenu.push({ name: "Excos Environment", path: "/excos" });
-    // }
+
+    const committeeGroups: SubMenuItem[] = [];
+    const otherGroups: SubMenuItem[] = [];
+
     userGroups.forEach(group => {
-      environmentsSubMenu.push({ name: group.name, path: `/groups/${group._id}` });
+      const entry: SubMenuItem = { name: group.name, path: `/groups/${group._id}` };
+      if (group.name.toLowerCase().includes("committee")) {
+        committeeGroups.push(entry);
+      } else {
+        otherGroups.push(entry);
+      }
     });
+
+    // If more than one committee group, nest them under a "Committee" parent entry
+    if (committeeGroups.length > 1) {
+      environmentsSubMenu.push({ name: "Committee", path: "", children: committeeGroups });
+    } else {
+      committeeGroups.forEach(g => environmentsSubMenu.push(g));
+    }
+
+    otherGroups.forEach(g => environmentsSubMenu.push(g));
 
     const updated = initialSideBarData.map(item => (item.name === "Environments" ? { ...item, subMenu: environmentsSubMenu } : item));
     setSideBarData(updated);

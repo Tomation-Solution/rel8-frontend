@@ -56,6 +56,7 @@ function App() {
   const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
   const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
   const ServicePaymentSuccess = lazy(() => import("./components/PaymentSuccess/ServicePaymentSuccess"));
+  const PaystackCallbackPage = lazy(() => import("./pages/PaystackCallbackPage"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
   const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
@@ -217,6 +218,15 @@ function App() {
       element: (
         <Suspense fallback={<Loader />}>
           <ServicePaymentSuccess />
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/paystack/callback",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <PaystackCallbackPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,

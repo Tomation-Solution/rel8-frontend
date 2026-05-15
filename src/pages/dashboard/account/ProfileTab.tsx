@@ -11,29 +11,37 @@ const ProfileTab = () => {
 
   // Profile state
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: "",
+    email: "",
+    phone: "",
+    jobTitle: "",
+    bio: "",
+    linkedIn: "",
+    twitter: "",
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [serverProfileImage, setServerProfileImage] = useState<string>('');
+  const [serverProfileImage, setServerProfileImage] = useState<string>("");
   const [previewProfileImage, setPreviewProfileImage] = useState<string | null>(null);
 
   // Profile queries and mutations
   const { data: profile, isLoading: profileLoading } = useQuery("userProfile", fetchUserProfile, {
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data) {
         setProfileData({
-          name: data.name || '',
-          email: data.email || '',
-          phone: data.phone || '',
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          jobTitle: data.jobTitle || "",
+          bio: data.bio || "",
+          linkedIn: data.linkedIn || "",
+          twitter: data.twitter || "",
         });
         // Only update server image if no preview is active
         if (!previewProfileImage) {
-          setServerProfileImage(data.imageUrl || '');
+          setServerProfileImage(data.imageUrl || "");
         }
       }
-    }
+    },
   });
 
   const updateProfileMutation = useMutation(
@@ -41,7 +49,7 @@ const ProfileTab = () => {
       return updateUserProfile(userId, formData);
     },
     {
-      onSuccess: (data) => {
+      onSuccess: data => {
         notifyUser("Profile updated successfully", "success");
         queryClient.invalidateQueries("userProfile");
         // clear selected file and revoke preview (will be refreshed from server)
@@ -58,15 +66,15 @@ const ProfileTab = () => {
       },
       onError: (error: any) => {
         notifyUser(error?.response?.data?.message || "Failed to update profile", "error");
-      }
-    }
+      },
+    },
   );
 
   // Profile handlers
   const handleProfileInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -74,8 +82,7 @@ const ProfileTab = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setProfileImage(file);
-      console.log(file,'file here')
-
+      console.log(file, "file here");
 
       // create a temporary preview and clean up the previous one
       const url = URL.createObjectURL(file);
@@ -90,18 +97,21 @@ const ProfileTab = () => {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append('name', profileData.name);
-    formData.append('email', profileData.email);
-    formData.append('phone', profileData.phone);
+    formData.append("name", profileData.name);
+    formData.append("phone", profileData.phone);
+    if (profileData.jobTitle) formData.append("jobTitle", profileData.jobTitle);
+    if (profileData.bio) formData.append("bio", profileData.bio);
+    if (profileData.linkedIn) formData.append("linkedIn", profileData.linkedIn);
+    if (profileData.twitter) formData.append("twitter", profileData.twitter);
 
     if (profileImage) {
-      formData.append('file', profileImage);
-      console.log('file', profileImage)
+      formData.append("file", profileImage);
+      console.log("file", profileImage);
     }
     // prefer server-provided id, fall back to localStorage (defensive)
-    const userId = profile && (profile._id || profile.id) ? (profile._id || profile.id) : (localStorage.getItem('userId') || '');
+    const userId = profile && (profile._id || profile.id) ? profile._id || profile.id : localStorage.getItem("userId") || "";
     if (!userId) {
-      notifyUser('Unable to determine user id for profile update', 'error');
+      notifyUser("Unable to determine user id for profile update", "error");
       return;
     }
 
@@ -129,12 +139,7 @@ const ProfileTab = () => {
             {/* Profile Image Section */}
             <div className="flex items-center space-x-6">
               <div className="flex-shrink-0">
-
-                <img
-                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                  src={previewProfileImage || serverProfileImage || `https://placehold.co/100x100?text=${getInitials(profileData.name)}`}
-                  alt="Profile"
-                />
+                <img className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" src={previewProfileImage || serverProfileImage || `https://placehold.co/100x100?text=${getInitials(profileData.name)}`} alt="Profile" />
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900">Profile Picture</h3>
@@ -157,40 +162,78 @@ const ProfileTab = () => {
                 <input
                   type="text"
                   value={profileData.name}
-                  onChange={(e) => handleProfileInputChange('name', e.target.value)}
+                  onChange={e => handleProfileInputChange("name", e.target.value)}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
                   placeholder="Enter full name"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  disabled
-                  value={profileData.email}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
-                  placeholder="Enter email"
-                />
+                <input type="email" disabled value={profileData.email} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary" placeholder="Enter email" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone</label>
                 <input
                   type="tel"
                   value={profileData.phone}
-                  onChange={(e) => handleProfileInputChange('phone', e.target.value)}
+                  onChange={e => handleProfileInputChange("phone", e.target.value)}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
                   placeholder="Enter phone number"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Job Title <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={profileData.jobTitle}
+                  onChange={e => handleProfileInputChange("jobTitle", e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
+                  placeholder="e.g. Software Engineer"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Bio <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={profileData.bio}
+                  onChange={e => handleProfileInputChange("bio", e.target.value)}
+                  rows={3}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary resize-none"
+                  placeholder="A short bio about yourself"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  LinkedIn <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={profileData.linkedIn}
+                  onChange={e => handleProfileInputChange("linkedIn", e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
+                  placeholder="https://linkedin.com/in/yourprofile"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Twitter / X <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={profileData.twitter}
+                  onChange={e => handleProfileInputChange("twitter", e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-org-primary focus:border-org-primary"
+                  placeholder="https://twitter.com/yourhandle"
                 />
               </div>
             </div>
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={updateProfileMutation.isLoading}
-                className="px-6 py-2 bg-org-primary text-white rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50"
-              >
+              <button type="submit" disabled={updateProfileMutation.isLoading} className="px-6 py-2 bg-org-primary text-white rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50">
                 {updateProfileMutation.isLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>

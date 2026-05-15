@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { SideBarLinkType } from "../../types/sidebarDataType";
 import { useState } from "react";
-import { FiChevronDown } from "react-icons/fi";
+import { FiChevronDown, FiFolder } from "react-icons/fi";
 
 interface NavItemProps {
   item: SideBarLinkType;
@@ -73,6 +73,12 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
       {isDropdownOpen && item.subMenu && (
         <div className="ml-6 mt-1 mb-1 space-y-1">
           {item.subMenu.map((subItem, index) => {
+            // ── Nested group (e.g. Committee folder) ──────────────────
+            if (subItem.children && subItem.children.length > 0) {
+              return <NestedSubGroup key={index} label={subItem.name} children={subItem.children} onNavigate={path => handleSubMenuClick(path)} />;
+            }
+
+            // ── Regular sub-item ──────────────────────────────────────
             const subIsActive = !subItem.isMessage && (location.pathname === subItem.path || location.pathname.startsWith(subItem.path + "/"));
             return (
               <div
@@ -93,3 +99,46 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
 };
 
 export default NavItem;
+
+// ── Collapsible nested sub-group (e.g. "Committee" folder) ──────────────────
+
+interface NestedSubGroupProps {
+  label: string;
+  children: { name: string; path: string }[];
+  onNavigate: (path: string) => void;
+}
+
+const NestedSubGroup = ({ label, children, onNavigate }: NestedSubGroupProps) => {
+  const location = useLocation();
+  const anyChildActive = children.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + "/"));
+  const [open, setOpen] = useState(anyChildActive);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg mx-4 text-sm text-gray-600 hover:bg-org-secondary hover:text-org-primary"
+        style={{ width: "calc(100% - 2rem)" }}
+      >
+        <span className="flex items-center gap-2">
+          <FiFolder className="w-4 h-4 flex-shrink-0" />
+          {label}
+        </span>
+        <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="ml-4 mt-0.5 space-y-0.5">
+          {children.map((child, i) => {
+            const isActive = location.pathname === child.path || location.pathname.startsWith(child.path + "/");
+            return (
+              <div key={i} onClick={() => onNavigate(child.path)} className={`text-sm px-3 py-2 rounded-lg mx-4 cursor-pointer ${isActive ? "bg-org-primary text-white font-semibold" : "text-gray-600 hover:bg-org-secondary hover:text-org-primary"}`}>
+                {child.name}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};

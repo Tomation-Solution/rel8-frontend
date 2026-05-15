@@ -4,6 +4,8 @@ export interface SubMenuItem {
   name: string;
   path: string;
   isMessage?: boolean;
+  /** Nested children — used to group items (e.g. all Committee groups) */
+  children?: SubMenuItem[];
 }
 
 export interface DropdownLinkType {

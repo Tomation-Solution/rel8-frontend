@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchActiveProjects, createContribution, Project, ProjectContribution } from "../../../api/projects/projects-api";
+import { initializeProjectPayment } from "../../../api/paystack-api";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
@@ -22,6 +23,7 @@ const FundAProjectPage = () => {
   const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showContributionModal, setShowContributionModal] = useState(false);
+  const [paystackLoading, setPaystackLoading] = useState(false);
   const proofOfPaymentRef = useRef<HTMLInputElement | null>(null);
 
   const { data: projects, isLoading, isError } = useQuery("active-projects", fetchActiveProjects);
@@ -61,6 +63,24 @@ const FundAProjectPage = () => {
 
   const onSubmit = async (data: ContributionFormData) => {
     if (!selectedProject) return;
+
+    // Paystack path — no proof needed, redirect to payment
+    if (selectedProject.paymentType === "paystack" && data.contributionType === "cash") {
+      const amount = data.amount ? parseFloat(data.amount) : 0;
+      if (!amount || amount <= 0) {
+        notifyUser("Please enter a valid contribution amount", "error");
+        return;
+      }
+      try {
+        setPaystackLoading(true);
+        const { authorizationUrl } = await initializeProjectPayment(selectedProject._id, amount);
+        window.location.href = authorizationUrl;
+      } catch (err: any) {
+        notifyUser(err?.response?.data?.message || "Failed to initialize payment", "error");
+        setPaystackLoading(false);
+      }
+      return;
+    }
 
     const proofOfPaymentFile = data.proofOfPayment?.[0];
 
@@ -212,15 +232,26 @@ const FundAProjectPage = () => {
                 {contributionType === "cash" && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Amount (Optional)</label>
-                      <input type="number" step="0.01" min="0" {...register("amount")} className="form-control w-full p-2 border border-gray-300 rounded" placeholder="Enter amount" />
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{selectedProject.paymentType === "paystack" ? "Contribution Amount" : "Amount (Optional)"}</label>
+                      <input type="number" step="0.01" min="0" {...register("amount", { required: selectedProject.paymentType === "paystack" })} className="form-control w-full p-2 border border-gray-300 rounded" placeholder="Enter amount" />
+                      {errors.amount && <p className="text-red-500 text-xs mt-1">Amount is required</p>}
                     </div>
 
-                    <div>
-                      {errors.proofOfPayment?.type === "required" && <FormError message="Proof of payment is required" />}
-                      <ServicesFileUploadInput register={register} text="Upload Proof of Payment" name="proofOfPayment" ref={proofOfPaymentRef} onClick={handleProofOfPaymentClick} />
-                      <small className="text-gray-500 text-xs mt-1 block">Upload receipt or proof of payment</small>
-                    </div>
+                    {/* Paystack path — no proof upload */}
+                    {selectedProject.paymentType === "paystack" && (
+                      <div className="p-3 bg-blue-50 rounded">
+                        <p className="text-sm text-blue-800">You will be redirected to Paystack to complete your payment securely.</p>
+                      </div>
+                    )}
+
+                    {/* Non-paystack paths — proof upload */}
+                    {selectedProject.paymentType !== "paystack" && (
+                      <div>
+                        {errors.proofOfPayment?.type === "required" && <FormError message="Proof of payment is required" />}
+                        <ServicesFileUploadInput register={register} text="Upload Proof of Payment" name="proofOfPayment" ref={proofOfPaymentRef} onClick={handleProofOfPaymentClick} />
+                        <small className="text-gray-500 text-xs mt-1 block">Upload receipt or proof of payment</small>
+                      </div>
+                    )}
 
                     {selectedProject.paymentType === "payment_link" && (
                       <div className="p-3 bg-blue-50 rounded">
@@ -258,7 +289,12 @@ const FundAProjectPage = () => {
 
                 <div className="flex gap-3 pt-4">
                   <Button text="Cancel" onClick={closeModal} type="outlined" className="flex-1" />
-                  <Button text={createContributionMutation.isLoading ? "Submitting..." : "Submit Contribution"} onClick={handleSubmit(onSubmit)} isLoading={createContributionMutation.isLoading} className="flex-1" />
+                  <Button
+                    text={paystackLoading ? "Redirecting…" : createContributionMutation.isLoading ? "Submitting..." : selectedProject.paymentType === "paystack" && contributionType === "cash" ? "Contribute via Paystack" : "Submit Contribution"}
+                    onClick={handleSubmit(onSubmit)}
+                    isLoading={paystackLoading || createContributionMutation.isLoading}
+                    className="flex-1"
+                  />
                 </div>
               </form>
             </div>

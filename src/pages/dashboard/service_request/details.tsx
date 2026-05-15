@@ -101,10 +101,7 @@ const ServiceRequestDetail = () => {
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Click the button below to proceed with payment:</p>
-                  <a href={service.paymentDetails} target="_blank" rel="noreferrer" className="inline-block bg-org-primary text-white px-4 py-2 rounded hover:bg-org-primary/90 transition-colors">
-                    Proceed to Payment
-                  </a>
+                  <p className="text-sm text-gray-600">Payment will be completed after submitting your service request.</p>
                 </div>
               )}
             </div>
