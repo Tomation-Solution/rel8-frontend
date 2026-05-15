@@ -8,6 +8,7 @@ const typeRedirectMap: Record<string, { label: string; path: string }> = {
   due: { label: "View My Dues", path: "/dues" },
   project: { label: "View Projects", path: "/fund-a-project" },
   service: { label: "View Service Requests", path: "/service-requests" },
+  event: { label: "My Registrations", path: "/events/my-registrations" },
 };
 
 const PaystackCallbackPage = () => {

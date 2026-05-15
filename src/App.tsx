@@ -26,6 +26,7 @@ function App() {
   // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
   const EventsPage = lazy(() => import("./pages/dashboard/events/EventsPage"));
   const EventDetailPage = lazy(() => import("./pages/dashboard/events/EventDetailPage"));
+  const MyRegistrationsPage = lazy(() => import("./pages/dashboard/events/MyRegistrationsPage"));
   const GalleryPage = lazy(() => import("./pages/dashboard/gallery/GalleryPage"));
   const GalleryDetailPage = lazy(() => import("./pages/dashboard/gallery/GalleryDetailPage"));
   const AccountPage = lazy(() => import("./pages/dashboard/account/AccountPage"));
@@ -178,6 +179,17 @@ function App() {
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <EventsPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/events/my-registrations",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MyRegistrationsPage />
           </DashboardLayout>
         </Suspense>
       ),

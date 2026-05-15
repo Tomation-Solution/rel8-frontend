@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { Link } from "react-router-dom";
 import { fetchAllUserEvents } from "../../../api/events/events-api";
 import SeeAll from "../../../components/SeeAll";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
@@ -19,7 +20,12 @@ const EventsPage = () => {
   return (
     <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,_1fr)_280px] gap-7">
       <div className="min-w-0 overflow-hidden md:px-0 px-5">
-        <BreadCrumb title="Events" />
+        <div className="flex items-center justify-between">
+          <BreadCrumb title="Events" />
+          <Link to="/events/my-registrations" className="text-sm text-org-primary font-medium hover:underline whitespace-nowrap">
+            My Registrations →
+          </Link>
+        </div>
 
         <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
           {isLoading && <CircleLoader />}
