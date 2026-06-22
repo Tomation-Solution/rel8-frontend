@@ -12,9 +12,10 @@ export const fetchEventById = async (eventId: string): Promise<any> => {
 };
 
 // New registration endpoints
-export const registerForEvent = async (eventId: string): Promise<{ authorizationUrl?: string; reference?: string; registration?: any }> => {
-  const response = await apiTenant.post(`/api/events/${eventId}/register`);
-  return response.data;
+export const registerForEvent = async (eventId: string, callbackUrl?: string): Promise<{ status: number; data: { authorizationUrl?: string; reference?: string; registration?: any; [key: string]: any } }> => {
+  const body = callbackUrl ? { callbackUrl } : {};
+  const response = await apiTenant.post(`/api/events/${eventId}/register`, body);
+  return { status: response.status, data: response.data };
 };
 
 export const unregisterFromEvent = async (eventId: string): Promise<any> => {

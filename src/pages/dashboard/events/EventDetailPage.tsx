@@ -105,21 +105,33 @@ const EventDetailPage = () => {
   const event = allEvents?.find((item: any) => (item._id || item.id)?.toString() === eventId);
   const isPaidEvent = !!(event?.isPaid && event?.price > 0);
 
-  const registerMutation = useMutation(() => registerForEvent(eventId!), {
-    onSuccess: (data: any) => {
+  const callbackUrl = `${window.location.origin}/paystack/callback?type=event`;
+
+  const registerMutation = useMutation(() => registerForEvent(eventId!, callbackUrl), {
+    onSuccess: ({ status, data }: { status: number; data: any }) => {
       const authUrl = data.authorizationUrl || data.authorization_url;
       if (authUrl) {
         window.location.href = authUrl;
       } else if (isPaidEvent) {
         // Paid event but no payment URL returned — don't silently register
         notifyUser("Payment could not be initialised. Please try again.", "error");
+      } else if (status === 200) {
+        notifyUser("Registration restored.", "success");
+        queryClient.invalidateQueries("myEventRegistrations");
       } else {
         notifyUser("Successfully registered for this event!", "success");
         queryClient.invalidateQueries("myEventRegistrations");
       }
     },
     onError: (err: any) => {
-      notifyUser(err?.response?.data?.message || "Failed to register for event", "error");
+      const httpStatus = err?.response?.status;
+      if (httpStatus === 409) {
+        notifyUser("You're already registered for this event.", "error");
+      } else if (httpStatus === 400) {
+        notifyUser(err?.response?.data?.message || "Payments are not set up for this organization yet.", "error");
+      } else {
+        notifyUser(err?.response?.data?.message || "Failed to register for event", "error");
+      }
     },
   });
 

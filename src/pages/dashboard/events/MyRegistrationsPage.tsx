@@ -1,9 +1,9 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
-import { fetchMyRegistrations } from "../../../api/events/events-api";
+import { fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
 import dummyImage from "../../../assets/images/dummy.jpg";
 
 const statusColors: Record<string, string> = {
@@ -22,11 +22,22 @@ const paymentColors: Record<string, string> = {
 const MyRegistrationsPage = () => {
   const navigate = useNavigate();
   const { notifyUser } = Toast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery("myEventRegistrations", fetchMyRegistrations, {
     retry: 1,
     staleTime: 30_000,
     onError: () => notifyUser("Failed to load your registrations", "error"),
+  });
+
+  const cancelMutation = useMutation((evtId: string) => unregisterFromEvent(evtId), {
+    onSuccess: () => {
+      notifyUser("Registration cancelled.", "success");
+      queryClient.invalidateQueries("myEventRegistrations");
+    },
+    onError: (err: any) => {
+      notifyUser(err?.response?.data?.message || "Failed to cancel registration", "error");
+    },
   });
 
   if (isLoading) return <CircleLoader />;
@@ -59,6 +70,10 @@ const MyRegistrationsPage = () => {
             const statusLabel = reg.status ?? "registered";
             const paymentLabel = reg.paymentStatus ?? "free";
 
+            const canCancel = statusLabel === "registered" && paymentLabel !== "paid";
+            const isPaidRegistration = statusLabel === "registered" && paymentLabel === "paid";
+            const isCancellingThis = cancelMutation.isLoading && cancelMutation.variables === eventId;
+
             return (
               <div key={i} className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col sm:flex-row hover:shadow-md transition-shadow">
                 {/* Banner thumbnail */}
@@ -82,11 +97,19 @@ const MyRegistrationsPage = () => {
                     </div>
                   </div>
 
-                  {eventId && (
-                    <button onClick={() => navigate(`/event/${eventId}`)} className="mt-3 self-start text-sm text-org-primary font-medium hover:underline">
-                      View Event →
-                    </button>
-                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {eventId && (
+                      <button onClick={() => navigate(`/event/${eventId}`)} className="self-start text-sm text-org-primary font-medium hover:underline">
+                        View Event →
+                      </button>
+                    )}
+                    {canCancel && (
+                      <button onClick={() => cancelMutation.mutate(eventId)} disabled={isCancellingThis} className="self-start text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50">
+                        {isCancellingThis ? "Cancelling…" : "Unregister"}
+                      </button>
+                    )}
+                    {isPaidRegistration && <p className="text-xs text-gray-400 italic">Paid registrations cannot be cancelled. Contact your admin.</p>}
+                  </div>
                 </div>
               </div>
             );
