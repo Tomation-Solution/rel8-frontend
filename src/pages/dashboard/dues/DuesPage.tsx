@@ -6,7 +6,6 @@ import { fetchOrganizationSettings } from "../../../api/organization/organizatio
 import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-// @ts-ignore
 import Table from "../../../components/Table/Table";
 import useDynamicPaymentApi from "../../../api/payment";
 import apiTenant from "../../../api/baseApi";
