@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MemberInfoType, Organization } from '../types/myTypes';
-import { useQuery } from 'react-query';
-import { fetchUserProfile } from '../api/profile/profile-api';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { MemberInfoType, Organization } from "../types/myTypes";
+import { useQuery } from "react-query";
+import { fetchUserProfile } from "../api/profile/profile-api";
 
 interface AppContextType {
   user: any | null;
@@ -13,10 +13,10 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const useAppContext = () => {  
+export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
 };
@@ -27,22 +27,22 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<MemberInfoType | null>(null);
-  const [userFullName, setUserFullName] = useState<string>('');
-  const [organization,setOrganization] = useState<any>({});
+  const [userFullName, setUserFullName] = useState<string>("");
+  const [organization, setOrganization] = useState<any>({});
   const [userProfileData, setUserProfileData] = useState<any[]>([]);
 
   useEffect(() => {
-    const storedUserData = localStorage.getItem('rel8User');
-    const tennantInfo = localStorage.getItem('tenant-info')
-    if(tennantInfo){
-      setOrganization(JSON.parse(tennantInfo)?.organization || {})
+    const storedUserData = localStorage.getItem("rel8User");
+    const tennantInfo = localStorage.getItem("tenant-info");
+    if (tennantInfo) {
+      setOrganization(JSON.parse(tennantInfo)?.organization || {});
     }
     if (storedUserData) {
       setUser(JSON.parse(storedUserData));
     }
   }, []);
 
-  const userProfile = useQuery('userProfile', fetchUserProfile, {
+  const userProfile = useQuery("userProfile", fetchUserProfile, {
     retry: 1,
     staleTime: 10 * 60 * 1000,
   });
@@ -50,8 +50,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     if (userProfile.data) {
       const profileData: any = userProfile.data;
-            setUserProfileData(profileData);
-      setUser(userProfile.data)
+      setUserProfileData(profileData);
+      setUser(userProfile.data);
 
       setUserFullName(userProfile.data.name as string);
     }
@@ -60,16 +60,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const setRel8LoginUserData = (data: MemberInfoType) => {
     try {
       setUser(data);
-      localStorage.setItem('rel8User', JSON.stringify(data));
+      localStorage.setItem("rel8User", JSON.stringify(data));
     } catch (error) {
       console.log(error);
     }
   };
 
-  return (
-    // @ts-ignore
-    <AppContext.Provider value={{ organization, user, setRel8LoginUserData, userFullName, userProfileData }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ organization, user, setRel8LoginUserData, userFullName, userProfileData }}>{children}</AppContext.Provider>;
 };

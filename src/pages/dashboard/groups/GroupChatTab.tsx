@@ -57,6 +57,7 @@ const GroupChatTab = ({ groupId, groupName }: Props) => {
   // ── Badge-tracking socket: private namespace ─────────────────────
   useEffect(() => {
     if (!myId) return;
+
     const token: string | undefined = (() => {
       try {
         return JSON.parse(localStorage.getItem("rel8User") ?? "")?.token;
@@ -64,19 +65,30 @@ const GroupChatTab = ({ groupId, groupName }: Props) => {
         return undefined;
       }
     })();
-    const socket = io(`${ENDPOINT_URL}/private`, { auth: { token }, transports: ["websocket", "polling"] });
+
+    const socket = io(`${ENDPOINT_URL}/private`, {
+      auth: { token },
+      transports: ["websocket", "polling"],
+    });
+
     socket.on("privateMessage", (msg: any) => {
       const recipientId = String(msg.recipientId?._id ?? msg.recipientId ?? "");
       const senderId = String(msg.senderId?._id ?? msg.senderId ?? "");
-      // Only count inbound messages (where we're the recipient)
+
       if (recipientId !== myId) return;
+
       const sel = selectedRef.current;
-      // Don't badge the currently open thread
       if (sel.kind === "private" && sel.member._id === senderId) return;
-      setUnreadCounts(prev => ({ ...prev, [senderId]: (prev[senderId] ?? 0) + 1 }));
+
+      setUnreadCounts(prev => ({
+        ...prev,
+        [senderId]: (prev[senderId] ?? 0) + 1,
+      }));
     });
-    return () => socket.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      socket.disconnect();
+    };
   }, [myId]);
 
   // ── Room selection (clears unread + invalidates cached history so

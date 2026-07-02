@@ -60,13 +60,9 @@ export async function registerForPaidEvent(eventId: any, amount: number): Promis
 }
 
 export const postEventPaymentSuccess = async (data: any): Promise<any> => {
-  try {
-    const response = await apiTenant.post(`/api/events/save/payment/`, data);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await apiTenant.post("/api/events/save/payment/", data);
+  console.log(response.data);
+  return response.data;
 };
 
 export async function requestReschedule(data: any): Promise<any> {
