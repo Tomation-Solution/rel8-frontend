@@ -253,6 +253,8 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
   const { data: history, isLoading } = useQuery(["privateChat", member._id], () => getPrivateMessagesWith(member._id), HISTORY_QUERY_OPTS);
 
   // Socket.IO /private namespace
+  const myId = String(user?._id ?? user?.id ?? "");
+
   useEffect(() => {
     setLiveMessages([]);
     setChatError(null);
@@ -265,17 +267,17 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
       }
     })();
 
-    // Connect to the /private namespace as documented
+    // Connect to the /private namespace
     const socket = io(`${ENDPOINT_URL}/private`, {
       auth: { token },
       transports: ["websocket", "polling"],
     });
+
     socketRef.current = socket;
 
     socket.on("privateMessage", (msg: any) => {
       const senderId = String(msg.senderId?._id ?? msg.senderId ?? "");
       const recipientId = String(msg.recipientId?._id ?? msg.recipientId ?? "");
-      const myId = String(user?._id ?? user?.id ?? "");
       const theirId = String(member._id);
 
       // Only append messages that belong to this specific thread
@@ -289,15 +291,23 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
           user__id: senderId,
           message: msg.content,
           full_name: msg.senderId?.name ?? "Unknown",
-          time: new Date(msg.timestamp ?? Date.now()).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+          time: new Date(msg.timestamp ?? Date.now()).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          }),
         },
       ]);
     });
 
-    socket.on("chatError", ({ message }: { message: string }) => setChatError(message));
+    socket.on("chatError", ({ message }: { message: string }) => {
+      setChatError(message);
+    });
 
-    return () => socket.disconnect();
-  }, [member._id]);
+    return () => {
+      socket.disconnect();
+    };
+  }, [member._id, myId]);
 
   // Auto-scroll
   useEffect(() => {
@@ -316,7 +326,6 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
   };
 
   const allMessages: Message[] = [...(history ?? []), ...liveMessages];
-  const myId = String(user?._id ?? user?.id ?? "");
 
   return (
     <div className="flex flex-col h-full">
