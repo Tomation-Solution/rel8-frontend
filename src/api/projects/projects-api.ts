@@ -4,7 +4,7 @@ export interface Project {
   _id: string;
   name: string;
   description: string;
-  paymentType: "bank_transfer" | "payment_link";
+  paymentType: "bank_transfer" | "payment_link" | "paystack";
   paymentDetails: string;
   banner?: string;
   banners?: string[];

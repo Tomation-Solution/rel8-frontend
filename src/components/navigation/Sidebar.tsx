@@ -1,107 +1,104 @@
 import { sideBarData as initialSideBarData } from "../../data/sideBarData";
 import NavItem from "./NavItem";
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import { fetchAllCommittees } from '../../api/committee/committee';
-import { useEffect, useState } from 'react';
-import { SubMenuItem, SideBarLinkType } from '../../types/sidebarDataType';
-
-interface Committee {
-    id: string;
-    name: string;
-}
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { SubMenuItem, SideBarLinkType } from "../../types/sidebarDataType";
+import { useAppContext } from "../../context/authContext";
 
 interface Props {
-    isMobileSidebarOpen: boolean;
-    setIsMobileSidebarOpen: (value: boolean) => void;
+  isMobileSidebarOpen: boolean;
+  setIsMobileSidebarOpen: (value: boolean) => void;
 }
 
 const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
-    const navigate = useNavigate();
-    const [committees, setCommittees] = useState<SubMenuItem[]>([]); // Updated type
-    const [sideBarData, setSideBarData] = useState<SideBarLinkType[]>(initialSideBarData);
+  const navigate = useNavigate();
+  const { user } = useAppContext();
+  const [sideBarData, setSideBarData] = useState<SideBarLinkType[]>(initialSideBarData);
 
-    const { data } = useQuery('committees', fetchAllCommittees);
+  const isExco: boolean = user?.exco?.isExco === true;
+  const userGroups: { _id: string; name: string }[] = Array.isArray(user?.groups) ? user.groups : [];
 
-    useEffect(() => {
-        if (data && data.data) {
-            if (data.data.length === 0) {
-                const messageItem: SubMenuItem = {
-                    name: "You are not part of any committee",
-                    path: "#",
-                    isMessage: true
-                };
-                setCommittees([messageItem]);
-            } else {
-                const committeeItems: SubMenuItem[] = data.data.map((committee: Committee) => ({
-                    name: committee.name,
-                    path: `/committees/${committee.id}`,
-                    isMessage: false
-                }));
-                setCommittees(committeeItems);
-            }
-        }
-    }, [data]);
+  // member type: can be { _id, name } object or a plain id string
+  const userMemberType: { _id: string; name: string } | null = (() => {
+    if (!user?.memberType) return null;
+    if (typeof user.memberType === "object" && user.memberType._id) return user.memberType;
+    return null; // plain id — name unknown until types are loaded
+  })();
 
-    useEffect(() => {
-        const updatedSideBarData = initialSideBarData.map(item => {
-            if (item.name === 'Committee Environment') {
-                return { ...item, subMenu: committees };
-            }
-            return item;
-        });
-        setSideBarData(updatedSideBarData);
-    }, [committees]);
+  useEffect(() => {
+    const environmentsSubMenu: SubMenuItem[] = [
+      {
+        name: "Members Environment",
+        path: "/member-types",
+      },
+    ];
 
-    const handleLogout = () => {
-        localStorage.removeItem('rel8User');
-        localStorage.removeItem('userRel8RegistrationData');
-        navigate('/login');
-    };
+    // Add the user's own member type as a quick-link if we have the name
+    if (userMemberType) {
+      environmentsSubMenu.push({
+        name: userMemberType.name,
+        path: `/member-types/${userMemberType._id}`,
+      });
+    }
 
-    return (
-        <>
-            {/* Desktop Navbar */}
-            {/* <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 !bg-[#FAFAFB] fixed h-full shadow-md py-5"> */}
-            <nav className="hidden lg:block lg:w-80 z-10 !bg-[#FAFAFB] h-screen shadow-md py-5 sticky top-0 overflow-y-auto">
-                {sideBarData.map((item, index) => (
-                    <NavItem
-                        key={index}
-                        item={item}
-                        isMobileSidebarOpen={isMobileSidebarOpen}
-                        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
-                        onLogout={item.name === 'Logout' ? handleLogout : undefined}
-                    />
-                ))}
-            </nav>
+    const committeeGroups: SubMenuItem[] = [];
+    const otherGroups: SubMenuItem[] = [];
 
-            {/* Mobile Navbar */}
-            <div
-                onClick={() => setIsMobileSidebarOpen(false)}
-                className={`lg:hidden fixed left-0 right-0 bottom-0 top-[70px] bg-black/60 z-40 transition-opacity duration-200 ${
-                    isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                }`}
-            >
-                <nav
-                    className={`fixed left-0 bottom-0 top-[70px] w-[80%] max-w-[320px] bg-white px-3 py-6 overflow-y-auto transform transition-transform duration-200 ${
-                        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label="Mobile navigation"
-                >
-                    {sideBarData.map((item, index) => (
-                        <NavItem
-                            key={index}
-                            item={item}
-                            isMobileSidebarOpen={isMobileSidebarOpen}
-                            setIsMobileSidebarOpen={setIsMobileSidebarOpen}
-                            onLogout={item.name === 'Logout' ? handleLogout : undefined}
-                        />
-                    ))}
-                </nav>
-            </div>
-        </>
-    );
+    userGroups.forEach(group => {
+      const entry: SubMenuItem = { name: group.name, path: `/groups/${group._id}` };
+      if (group.name.toLowerCase().includes("committee")) {
+        committeeGroups.push(entry);
+      } else {
+        otherGroups.push(entry);
+      }
+    });
+
+    // If more than one committee group, nest them under a "Committee" parent entry
+    if (committeeGroups.length > 1) {
+      environmentsSubMenu.push({ name: "Committee", path: "", children: committeeGroups });
+    } else {
+      committeeGroups.forEach(g => environmentsSubMenu.push(g));
+    }
+
+    otherGroups.forEach(g => environmentsSubMenu.push(g));
+
+    const updated = initialSideBarData.map(item => (item.name === "Environments" ? { ...item, subMenu: environmentsSubMenu } : item));
+    setSideBarData(updated);
+  }, [isExco, userGroups.length, userMemberType?._id]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("rel8User");
+    localStorage.removeItem("userRel8RegistrationData");
+    navigate("/login");
+  };
+
+  return (
+    <>
+      {/* Desktop Navbar */}
+      {/* <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 !bg-[#FAFAFB] fixed h-full shadow-md py-5"> */}
+      <nav className="hidden lg:block lg:w-80 z-10 !bg-[#FAFAFB] h-screen shadow-md py-5 sticky top-0 overflow-y-auto">
+        {sideBarData.map((item, index) => (
+          <NavItem key={index} item={item} isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} onLogout={item.name === "Logout" ? handleLogout : undefined} />
+        ))}
+      </nav>
+
+      {/* Mobile Navbar */}
+      <div
+        onClick={() => setIsMobileSidebarOpen(false)}
+        className={`lg:hidden fixed left-0 right-0 bottom-0 top-[70px] bg-black/60 z-40 transition-opacity duration-200 ${isMobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      >
+        <nav
+          className={`fixed left-0 bottom-0 top-[70px] w-[80%] max-w-[320px] bg-white px-3 py-6 overflow-y-auto transform transition-transform duration-200 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          onClick={e => e.stopPropagation()}
+          aria-label="Mobile navigation"
+        >
+          {sideBarData.map((item, index) => (
+            <NavItem key={index} item={item} isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} onLogout={item.name === "Logout" ? handleLogout : undefined} />
+          ))}
+        </nav>
+      </div>
+    </>
+  );
 };
 
 export default Sidebar;

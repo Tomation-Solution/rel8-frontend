@@ -9,160 +9,75 @@ import ErrorPage from "./pages/ErrorPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
-  const ServiceRequestSubmission = lazy(
-    () => import("./pages/dashboard/service_request/serviceSubbmission"),
-  );
-  const ServiceRequest = lazy(
-    () => import("./pages/dashboard/service_request"),
-  );
-  const ServiceRequestDetail = lazy(
-    () => import("./pages/dashboard/service_request/details"),
-  );
+  const ServiceRequestSubmission = lazy(() => import("./pages/dashboard/service_request/serviceSubbmission"));
+  const ServiceRequest = lazy(() => import("./pages/dashboard/service_request"));
+  const ServiceRequestDetail = lazy(() => import("./pages/dashboard/service_request/details"));
   const VerifyMemberPage = lazy(() => import("./pages/auth/VerifyMemberPage"));
   const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
   const RegistrationPage = lazy(() => import("./pages/auth/RegistrationPage"));
-  const ForgotPasswordPage = lazy(
-    () => import("./pages/auth/forgot-password/ForgotPasswordPage"),
-  );
-  const EnterCodePage = lazy(
-    () => import("./pages/auth/forgot-password/EnterCodePage"),
-  );
-  const SetupNewPasswordPage = lazy(
-    () => import("./pages/auth/forgot-password/SetupNewPasswordPage"),
-  );
+  const ForgotPasswordPage = lazy(() => import("./pages/auth/forgot-password/ForgotPasswordPage"));
+  const EnterCodePage = lazy(() => import("./pages/auth/forgot-password/EnterCodePage"));
+  const SetupNewPasswordPage = lazy(() => import("./pages/auth/forgot-password/SetupNewPasswordPage"));
   const PayupPage = lazy(() => import("./pages/auth/PayupPage"));
-  const AuthenticationPage = lazy(
-    () => import("./pages/auth/AuthenticationPage"),
-  );
+  const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
 
   const ChatPage = lazy(() => import("./pages/chat/ChatPage"));
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
   // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
   const EventsPage = lazy(() => import("./pages/dashboard/events/EventsPage"));
-  const EventDetailPage = lazy(
-    () => import("./pages/dashboard/events/EventDetailPage"),
-  );
-  const GalleryPage = lazy(
-    () => import("./pages/dashboard/gallery/GalleryPage"),
-  );
-  const GalleryDetailPage = lazy(
-    () => import("./pages/dashboard/gallery/GalleryDetailPage"),
-  );
-  const AccountPage = lazy(
-    () => import("./pages/dashboard/account/AccountPage"),
-  );
-  const NotificationsPage = lazy(
-    () => import("./pages/dashboard/notifications/NotificationsPage"),
-  );
-  const PublicationsPage = lazy(
-    () => import("./pages/dashboard/publications/PublicationsPage"),
-  );
-  const PublicationsDetailPage = lazy(
-    () => import("./pages/dashboard/publications/PublicationsDetailPage"),
-  );
+  const EventDetailPage = lazy(() => import("./pages/dashboard/events/EventDetailPage"));
+  const MyRegistrationsPage = lazy(() => import("./pages/dashboard/events/MyRegistrationsPage"));
+  const GalleryPage = lazy(() => import("./pages/dashboard/gallery/GalleryPage"));
+  const GalleryDetailPage = lazy(() => import("./pages/dashboard/gallery/GalleryDetailPage"));
+  const AccountPage = lazy(() => import("./pages/dashboard/account/AccountPage"));
+  const NotificationsPage = lazy(() => import("./pages/dashboard/notifications/NotificationsPage"));
+  const PublicationsPage = lazy(() => import("./pages/dashboard/publications/PublicationsPage"));
+  const PublicationsDetailPage = lazy(() => import("./pages/dashboard/publications/PublicationsDetailPage"));
 
   const NewsPage = lazy(() => import("./pages/dashboard/news/index"));
-  const NewsDetailPage = lazy(
-    () => import("./pages/dashboard/news/NewsDetailPage"),
-  );
+  const NewsDetailPage = lazy(() => import("./pages/dashboard/news/NewsDetailPage"));
 
-  const MembersPage = lazy(
-    () => import("./pages/dashboard/members/MembersPage"),
-  );
+  const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
-  const ExcoDetailPage = lazy(
-    () => import("./pages/dashboard/members/ExcoDetailPage"),
-  );
-  const MeetingPage = lazy(
-    () => import("./pages/dashboard/meetings/MeetingPage"),
-  );
-  const MeetingDetailsPage = lazy(
-    () => import("./pages/dashboard/meetings/MeetingDetailsPage"),
-  );
-  const ElectionsPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionsPage"),
-  );
-  const ElectionsContestantDetailPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionContestantDetailPage"),
-  );
+  const ExcoDetailPage = lazy(() => import("./pages/dashboard/members/ExcoDetailPage"));
+  const MemberProfilePage = lazy(() => import("./pages/dashboard/members/MemberProfilePage"));
+  const MemberTypesPage = lazy(() => import("./pages/dashboard/member-types/MemberTypesPage"));
+  const MemberTypeDetailPage = lazy(() => import("./pages/dashboard/member-types/MemberTypeDetailPage"));
+  const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
+  const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
+  const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
+  const ElectionsContestantDetailPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantDetailPage"));
 
-  const ElectionAllVotesPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionAllVotes"),
-  );
-  const ElectionStepPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionStepsPage"),
-  );
-  const ElectionCreateAspirantPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionCreateAspirantPage"),
-  );
-  const ElectionDetailsPage = lazy(
-    () => import("./pages/dashboard/elections/ElectionDetailsPage"),
-  );
-  const FundAProjectPage = lazy(
-    () => import("./pages/dashboard/projects/FundAProjectPage"),
-  );
-  const FundAProjectDetailPage = lazy(
-    () => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"),
-  );
-  const SupportInKindPage = lazy(
-    () => import("./pages/dashboard/fund-a-project/SuportInKindPage"),
-  );
-  const SupportInCashPage = lazy(
-    () => import("./pages/dashboard/fund-a-project/SupportInCashPage"),
-  );
-  const PaymentSuccessPage = lazy(
-    () => import("./components/PaymentSuccess/paymentSuccess"),
-  ); //FundAProject-PaymentSuccessPage
-  const ThankYouSuccessPage = lazy(
-    () => import("./components/PaymentSuccess/ThankYou"),
-  );
-  const EventPaymentSuccess = lazy(
-    () => import("./components/PaymentSuccess/EventPaymentSuccess"),
-  );
-  const ServicePaymentSuccess = lazy(
-    () => import("./components/PaymentSuccess/ServicePaymentSuccess"),
-  );
-  const ServicesPage = lazy(
-    () => import("./pages/dashboard/services/ServicesPage"),
-  );
-  const LossOfCertificatePage = lazy(
-    () => import("./pages/dashboard/services/LossOfCertificatePage"),
-  );
-  const ReIssuanceFormPage = lazy(
-    () => import("./pages/dashboard/services/ReIssuanceFormPage"),
-  );
-  const DeactivationOfMembershipPage = lazy(
-    () => import("./pages/dashboard/services/DeactivationOfMembershipPage"),
-  );
-  const ReIssuanceOfCertificatePage = lazy(
-    () => import("./pages/dashboard/services/ReIssuanceOfCertificatePage"),
-  );
-  const FactoryLocationUpdatePage = lazy(
-    () => import("./pages/dashboard/services/FactoryLocationUpdatePage"),
-  );
-  const ChangeOfNamePage = lazy(
-    () => import("./pages/dashboard/services/ChangeOfNamePage"),
-  );
-  const MergerOfCompaniesPage = lazy(
-    () => import("./pages/dashboard/services/MergerOfCompaniesPage"),
-  );
-  const ProductManufacturingUpdatePage = lazy(
-    () => import("./pages/dashboard/services/ProductManufacturingUpdatePage"),
-  );
-  const SupportPage = lazy(
-    () => import("./pages/dashboard/support/SupportPage"),
-  );
+  const ElectionAllVotesPage = lazy(() => import("./pages/dashboard/elections/ElectionAllVotes"));
+  const ElectionStepPage = lazy(() => import("./pages/dashboard/elections/ElectionStepsPage"));
+  const ElectionCreateAspirantPage = lazy(() => import("./pages/dashboard/elections/ElectionCreateAspirantPage"));
+  const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
+  const FundAProjectPage = lazy(() => import("./pages/dashboard/projects/FundAProjectPage"));
+  const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
+  const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
+  const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
+  const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
+  const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
+  const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
+  const ServicePaymentSuccess = lazy(() => import("./components/PaymentSuccess/ServicePaymentSuccess"));
+  const PaystackCallbackPage = lazy(() => import("./pages/PaystackCallbackPage"));
+  const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
+  const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
+  const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
+  const DeactivationOfMembershipPage = lazy(() => import("./pages/dashboard/services/DeactivationOfMembershipPage"));
+  const ReIssuanceOfCertificatePage = lazy(() => import("./pages/dashboard/services/ReIssuanceOfCertificatePage"));
+  const FactoryLocationUpdatePage = lazy(() => import("./pages/dashboard/services/FactoryLocationUpdatePage"));
+  const ChangeOfNamePage = lazy(() => import("./pages/dashboard/services/ChangeOfNamePage"));
+  const MergerOfCompaniesPage = lazy(() => import("./pages/dashboard/services/MergerOfCompaniesPage"));
+  const ProductManufacturingUpdatePage = lazy(() => import("./pages/dashboard/services/ProductManufacturingUpdatePage"));
+  const SupportPage = lazy(() => import("./pages/dashboard/support/SupportPage"));
   const FAQPage = lazy(() => import("./pages/dashboard/support/FAQPage"));
-  const TechnicalSupportPage = lazy(
-    () => import("./pages/dashboard/support/TechnicalSupportPage"),
-  );
-  const AdminSupportPage = lazy(
-    () => import("./pages/dashboard/support/AdminSupportPage"),
-  );
+  const TechnicalSupportPage = lazy(() => import("./pages/dashboard/support/TechnicalSupportPage"));
+  const AdminSupportPage = lazy(() => import("./pages/dashboard/support/AdminSupportPage"));
 
-  const CommitteeDetails = lazy(
-    () => import("./pages/dashboard/committees/CommitteesDetails"),
-  );
+  const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
+  const CommitteesPage = lazy(() => import("./pages/dashboard/committees/CommitteesPage"));
+  const GroupDetailPage = lazy(() => import("./pages/dashboard/groups/GroupDetailPage"));
   const router = createBrowserRouter([
     {
       path: "/verify-membership",
@@ -270,6 +185,17 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
+      path: "/events/my-registrations",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MyRegistrationsPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
       path: "/service-requests",
       element: (
         <Suspense fallback={<Loader />}>
@@ -307,6 +233,15 @@ function App() {
       element: (
         <Suspense fallback={<Loader />}>
           <ServicePaymentSuccess />
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/paystack/callback",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <PaystackCallbackPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -446,34 +381,79 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
+    // Excos Environment page replaced by groups-based pages — kept for reference
+    // {
+    //   path: "/excos",
+    //   element: (
+    //     <Suspense fallback={<Loader />}>
+    //       <DashboardLayout>
+    //         <ExcosPage />
+    //       </DashboardLayout>
+    //     </Suspense>
+    //   ),
+    //   errorElement: <ErrorPage />,
+    // },
     {
-      path: "/excos",
+      path: "/committees",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
-            <ExcosPage />
+            <CommitteesPage />
           </DashboardLayout>
         </Suspense>
       ),
       errorElement: <ErrorPage />,
     },
-    {
-      path: "/excos/:id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ExcoDetailPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
+    // {
+    //   path: "/excos/:id",
+    //   element: (
+    //     <Suspense fallback={<Loader />}>
+    //       <DashboardLayout>
+    //         <ExcoDetailPage />
+    //       </DashboardLayout>
+    //     </Suspense>
+    //   ),
+    //   errorElement: <ErrorPage />,
+    // },
     {
       path: "/members",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <MembersPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/members/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberProfilePage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/member-types",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberTypesPage />
+          </DashboardLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/member-types/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <MemberTypeDetailPage />
           </DashboardLayout>
         </Suspense>
       ),
@@ -790,6 +770,16 @@ function App() {
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <CommitteeDetails />
+          </DashboardLayout>
+        </Suspense>
+      ),
+    },
+    {
+      path: "/groups/:id",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <DashboardLayout>
+            <GroupDetailPage />
           </DashboardLayout>
         </Suspense>
       ),

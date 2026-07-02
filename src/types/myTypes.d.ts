@@ -26,7 +26,6 @@ export interface UserDataType {
   profile_image: string;
 }
 
-
 export interface MemberInfoType {
   id: number;
   name: string;
@@ -46,7 +45,6 @@ export interface MemberInfoType {
   };
   token: string;
 }
-
 
 //  ---------------------------------------- Types of data-----------------------
 type NewsParagraphItem = {
@@ -92,8 +90,8 @@ export type EventsResponseType = {
 // -------------------------------------------- NewsComments-------------------------------
 export type NewsCommentProps = {
   newsId: string;
-  comments: any
-}
+  comments: any;
+};
 
 // Define types for comments
 export type Comment = {
@@ -102,7 +100,7 @@ export type Comment = {
   memberId: string;
   createdAt: string;
   updatedAt?: string;
-}
+};
 
 export interface NewsCommentDetails {
   _id: string;
@@ -127,8 +125,6 @@ export interface NewsCommentDetails {
   dislikes?: number;
 }
 
-
-
 // -------------------------------------------- Events-------------------------------
 
 export interface EventDataType {
@@ -146,6 +142,10 @@ export interface EventDataType {
   orgId: string;
   createdAt: string;
   updatedAt: string;
+  // Registration fields
+  requiresRegistration?: boolean;
+  registrationCapacity?: number;
+  registrationDeadline?: string;
   // Legacy fields for backward compatibility
   id: string;
   image: string;
@@ -172,7 +172,6 @@ export interface EventDataType {
   organiserImage: string | null;
   is_special: boolean;
 }
-
 
 //----------------------------- Table Type
 export interface TableDataType {
@@ -262,8 +261,7 @@ export interface ElectionPositionDataType {
   election_startTime: string | null;
 }
 
-
-// User Profile Types 
+// User Profile Types
 
 interface MoreInfoAboutProfileDataType {
   value: string | number | boolean;
@@ -279,9 +277,7 @@ export interface UserProfileDataType {
   more_info: MoreInfoAboutProfileDataType[];
 }
 
-
-//  Fund a Project 
-
+//  Fund a Project
 
 interface FundAProjectDataType {
   heading: string;
@@ -291,14 +287,12 @@ interface FundAProjectDataType {
   what_project_needs: string[];
 }
 
-
-// chat user type 
+// chat user type
 
 export interface ChatUserDataType {
   id: number;
   email: string;
   name: string;
-
 }
 
 export interface ChatMessageDataType {
@@ -332,33 +326,33 @@ export interface SupportData {
   message: string;
 }
 
-export interface Organization{
-    colorTheme: {
-      primary: string;
-      secondary: string;
-    };
-    settings: {
-      customDomain: string | null;
-      isCustomDomainVerified: boolean;
-      preferCustomDomain: boolean;
-      show_dues_blocker: boolean;
-      magic_link: boolean;
-    };
-    _id: string;
-    name: string;
-    shortName: string;
-    logo: string;
-    numberOfMembers: number;
-    yearEstablished: number;
-    about: string;
-    vision: string;
-    mission: string;
-    email: string;
-    phone: string;
-    isVerified: boolean;
-    isActive: boolean;
-    customUrl: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
+export interface Organization {
+  colorTheme: {
+    primary: string;
+    secondary: string;
   };
+  settings: {
+    customDomain: string | null;
+    isCustomDomainVerified: boolean;
+    preferCustomDomain: boolean;
+    show_dues_blocker: boolean;
+    magic_link: boolean;
+  };
+  _id: string;
+  name: string;
+  shortName: string;
+  logo: string;
+  numberOfMembers: number;
+  yearEstablished: number;
+  about: string;
+  vision: string;
+  mission: string;
+  email: string;
+  phone: string;
+  isVerified: boolean;
+  isActive: boolean;
+  customUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}

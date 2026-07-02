@@ -1,18 +1,8 @@
-import {
-  FiGrid,
-  FiImage,
-  FiCalendar,
-  FiUser,
-  FiBell,
-  FiHelpCircle,
-  FiLogOut,
-  FiBriefcase,
-} from "react-icons/fi";
-import { HiOutlineUserGroup } from "react-icons/hi2";
+import { FiGrid, FiImage, FiCalendar, FiUser, FiBell, FiHelpCircle, FiLogOut, FiBriefcase, FiLayers } from "react-icons/fi";
 import { PiChatTeardropText } from "react-icons/pi";
 import { CgWebsite } from "react-icons/cg";
-import { MdBallot, MdOutlineAdminPanelSettings } from "react-icons/md";
-import { SideBarLinkType } from '../types/sidebarDataType'
+import { MdBallot } from "react-icons/md";
+import { SideBarLinkType } from "../types/sidebarDataType";
 
 export const sideBarData: SideBarLinkType[] = [
   {
@@ -38,27 +28,17 @@ export const sideBarData: SideBarLinkType[] = [
   //   notActiveLinkIcon:'',
   // },
   {
-    mainIcon: HiOutlineUserGroup,
-    name: "Members Enviroment",
-    path: "/members",
+    mainIcon: FiLayers,
+    name: "Environments",
+    subMenu: [], // populated dynamically in Sidebar.tsx based on user role
+    activeFor: ["/members", "/excos", "/committees", "/groups", "/member-types"],
   },
-  {
-    mainIcon: MdOutlineAdminPanelSettings,
-    name: "Excos Enviroment",
-    path: "/excos",
-  },
-  // {
-  //   mainIcon: comiteeEnviromentIcon,
-  //   name: "Committee Environment",
-  //   activeLinkIcon: togglerIcon,
-  //   notActiveLinkIcon: togglerIcon,
-  //   subMenu: [] // This will be filled with committee data fetched from the backend
-  // },
 
   {
     mainIcon: FiCalendar,
     name: "Events",
     path: "/events",
+    activeFor: ["/event"],
   },
   {
     mainIcon: FiCalendar,
@@ -74,6 +54,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: CgWebsite,
     name: "Publication",
     path: "/publications",
+    activeFor: ["/publication"],
   },
   {
     mainIcon: CgWebsite,
@@ -95,6 +76,7 @@ export const sideBarData: SideBarLinkType[] = [
     // mainIcon: electionIcon,
     name: "Election",
     path: "/election",
+    activeFor: ["/elections-contestant", "/election-steps", "/all-votes", "/create-aspirant"],
   },
   {
     mainIcon: FiUser,
@@ -110,11 +92,13 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiUser,
     name: "Fund a Project",
     path: "/fund-a-project",
+    activeFor: ["/support-in-kind", "/support-in-cash"],
   },
   {
     mainIcon: FiBriefcase,
     name: "Service Requests",
     path: "/service-requests",
+    activeFor: ["/service-requests-submission"],
   },
   // {
   //   mainIcon: subscribeIcon,
@@ -125,6 +109,7 @@ export const sideBarData: SideBarLinkType[] = [
     mainIcon: FiHelpCircle,
     name: "Support",
     path: "/support",
+    activeFor: ["/faq", "/technical-support", "/admin-support"],
   },
   {
     mainIcon: FiLogOut,

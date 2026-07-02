@@ -1,66 +1,92 @@
-import {  EventsResponseType } from "../../types/myTypes";
+import { EventsResponseType } from "../../types/myTypes";
 import apiTenant, { apiTenantAxiosForm } from "../baseApi";
 
 export const fetchAllUserEvents = async (): Promise<any> => {
-    const response = await apiTenant.get(`/api/events/eventview/get_events/`);
-    return response.data
-}
+  const response = await apiTenant.get(`/api/events/eventview/get_events/`);
+  return response.data;
+};
+
+export const fetchEventById = async (eventId: string): Promise<any> => {
+  const response = await apiTenant.get(`/api/events/${eventId}`);
+  return response.data.event || response.data;
+};
+
+// New registration endpoints
+export const registerForEvent = async (eventId: string, callbackUrl?: string): Promise<{ status: number; data: { authorizationUrl?: string; reference?: string; registration?: any; [key: string]: any } }> => {
+  const body = callbackUrl ? { callbackUrl } : {};
+  const response = await apiTenant.post(`/api/events/${eventId}/register`, body);
+  return { status: response.status, data: response.data };
+};
+
+export const unregisterFromEvent = async (eventId: string): Promise<any> => {
+  const response = await apiTenant.delete(`/api/events/${eventId}/register`);
+  return response.data;
+};
+
+export const fetchMyRegistrations = async (): Promise<any> => {
+  const response = await apiTenant.get(`/api/events/my-registrations`);
+  return response.data.registrations || response.data || [];
+};
 
 export const registerForFreeEvent = async (data: any) => {
-    // console.log(data,'----->testing')
-    const response = await apiTenantAxiosForm.post("/api/events/eventview/register_for_free_event/", data);
-    return response.data;
-}
+  // console.log(data,'----->testing')
+  const response = await apiTenantAxiosForm.post("/api/events/eventview/register_for_free_event/", data);
+  return response.data;
+};
 
 export async function getEventRegisteredMembers(eventId: string): Promise<any> {
-    // const token = await retrieveAppData("token");
-    const response = await apiTenant.post("/api/events/eventview/list_of_register_members/", {
-        eventId: eventId
-    });
-    return response.data;
+  // const token = await retrieveAppData("token");
+  const response = await apiTenant.post("/api/events/eventview/list_of_register_members/", {
+    eventId: eventId,
+  });
+  return response.data;
 }
 
 export async function getEventAttendees(eventId: string): Promise<any> {
-    const response = await apiTenant.post("/api/events/eventview/view_attendies/", {
-        eventId: eventId
-    });
-    return response.data;
+  const response = await apiTenant.post("/api/events/eventview/view_attendies/", {
+    eventId: eventId,
+  });
+  return response.data;
 }
 
 export async function registerForPaidEvent(eventId: any, amount: number): Promise<any> {
-    const data = {
-      amount: amount,
-      project_id: eventId,
-      callback_url: `${window.location.origin}/event/success/${eventId}?project_id=${eventId}&amount=${amount}`, // Your callback URL
-    };
-    const response = await apiTenant.post(`/api/events/payment/`, data);
-    return response.data;
-  }
+  const data = {
+    amount: amount,
+    project_id: eventId,
+    callback_url: `${window.location.origin}/event/success/${eventId}?project_id=${eventId}&amount=${amount}`, // Your callback URL
+  };
+  const response = await apiTenant.post(`/api/events/payment/`, data);
+  return response.data;
+}
 
 export const postEventPaymentSuccess = async (data: any): Promise<any> => {
-    try {
-        const response = await apiTenant.post(`/api/events/save/payment/`, data);
-        console.log(response.data)
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+  try {
+    const response = await apiTenant.post(`/api/events/save/payment/`, data);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export async function requestReschedule(data: any): Promise<any> {
-    const response = await apiTenant.post("/api/events/eventview/request-reschedule/", { ...data.data }, {
-        params: {
-            ...data.params
-        }
-    })
-    return response.data;
+  const response = await apiTenant.post(
+    "/api/events/eventview/request-reschedule/",
+    { ...data.data },
+    {
+      params: {
+        ...data.params,
+      },
+    },
+  );
+  return response.data;
 }
 
 export async function getReschedule(eventId: string): Promise<any> {
-    const response = await apiTenant.get("/api/events/eventview/request-reschedule/", {
-        params: {
-            event_id: eventId
-        }
-    })
-    return response.data;
+  const response = await apiTenant.get("/api/events/eventview/request-reschedule/", {
+    params: {
+      event_id: eventId,
+    },
+  });
+  return response.data;
 }

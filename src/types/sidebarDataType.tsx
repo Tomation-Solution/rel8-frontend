@@ -1,9 +1,11 @@
-import React from 'react';
+import React from "react";
 
 export interface SubMenuItem {
   name: string;
   path: string;
   isMessage?: boolean;
+  /** Nested children — used to group items (e.g. all Committee groups) */
+  children?: SubMenuItem[];
 }
 
 export interface DropdownLinkType {
@@ -18,5 +20,8 @@ export interface SideBarLinkType {
   mainIcon?: React.ElementType;
   activeLinkIcon?: string;
   notActiveLinkIcon?: string;
-  subMenu?: SubMenuItem[]; // Updated to use SubMenuItem interface
+  subMenu?: SubMenuItem[];
+  requiresExco?: boolean;
+  requiresCommittee?: boolean;
+  activeFor?: string[];
 }

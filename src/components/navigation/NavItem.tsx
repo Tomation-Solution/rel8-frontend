@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { SideBarLinkType } from "../../types/sidebarDataType";
 import { useState } from "react";
+import { FiChevronDown, FiFolder } from "react-icons/fi";
 
 interface NavItemProps {
   item: SideBarLinkType;
@@ -13,14 +14,17 @@ interface NavItemProps {
 const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }: NavItemProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
 
-  const handleClick = () => {
+  const isSubMenuActive = item.subMenu?.some(sub => location.pathname === sub.path || location.pathname.startsWith(sub.path + "/")) ?? false;
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(isSubMenuActive);
+
+  const handleClick = (e?: React.MouseEvent) => {
     if (item.name === "Logout" && onLogout) {
       onLogout();
     } else if (item.subMenu) {
-      setIsDropdownOpen(!isDropdownOpen);
+      e?.preventDefault();
+      setIsDropdownOpen(prev => !prev);
     } else {
       navigate(item.path || "");
       if (isMobileSidebarOpen) {
@@ -30,39 +34,64 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
   };
 
   const handleSubMenuClick = (path: string, isMessage?: boolean) => {
-    if (isMessage) return; // Don't navigate if it's just a message
-
-    setActiveSubMenu(path);
+    if (isMessage) return;
     navigate(path);
     setIsMobileSidebarOpen(false);
   };
 
-  const isActive = item.path ? (item.path === "/" ? location.pathname === "/" : location.pathname === item.path || location.pathname.startsWith(item.path + "/")) : false;
+  const isActive = item.path
+    ? item.path === "/"
+      ? location.pathname === "/"
+      : location.pathname === item.path || location.pathname.startsWith(item.path + "/") || (item.activeFor?.some(p => location.pathname === p || location.pathname.startsWith(p + "/")) ?? false)
+    : isSubMenuActive || (item.activeFor?.some(p => location.pathname === p || location.pathname.startsWith(p + "/")) ?? false);
+
+  const itemContent = (
+    <div className={`flex my-1 items-center justify-between gap-3 text-[15px] p-3 mx-4 rounded-lg text-gray-500 ${isActive ? "bg-org-primary text-white font-bold" : "hover:bg-org-secondary hover:text-org-primary"}`}>
+      <div className="flex items-center gap-2">
+        {item.mainIcon && React.createElement(item.mainIcon, { className: "w-5 h-5" })}
+        <span className="text-sm md:text-[15px]">{item.name}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        {(item.activeLinkIcon || item.notActiveLinkIcon) && <img className="w-fit h-6 object-fit" src={isActive ? item.activeLinkIcon : item.notActiveLinkIcon} alt="" />}
+        {item.subMenu && <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""} ${isActive ? "text-white" : "text-gray-400"}`} />}
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <NavLink to={item.path ? item.path : ""} style={{ textDecoration: "none" }} onClick={handleClick} className="">
-        <div className={`flex my-1 items-center justify-between gap-3 group text-[15px] font-[0.875rem]  p-3 mx-4 rounded-lg group text-gray-500 ${isActive ? "bg-org-primary text-white font-bold" : "hover:bg-org-secondary hover:text-org-primary"}`}>
-          <div className="flex items-center gap-2">
-            {item.mainIcon && React.createElement(item.mainIcon, { className: "w-5 h-5" })}
-            <span className="text-sm md:text-[15px]">{item.name}</span>
-          </div>
-          {(item.activeLinkIcon || item.notActiveLinkIcon) && <img className="w-fit h-6 object-fit" src={isActive ? item.activeLinkIcon : item.notActiveLinkIcon} alt="" />}
-        </div>
-      </NavLink>
+      {item.subMenu ? (
+        <button type="button" onClick={e => handleClick(e)} className="w-full text-left">
+          {itemContent}
+        </button>
+      ) : (
+        <NavLink to={item.path ?? ""} style={{ textDecoration: "none" }} onClick={() => handleClick()}>
+          {itemContent}
+        </NavLink>
+      )}
+
       {isDropdownOpen && item.subMenu && (
-        <div className="ml-6 mt-2 space-y-2">
-          {item.subMenu.map((subItem, index) => (
-            <div
-              key={index}
-              onClick={() => handleSubMenuClick(subItem.path, subItem.isMessage)}
-              className={`block text-sm p-2 rounded-lg ${
-                subItem.isMessage ? "text-gray-500 itali cursor-default" : `cursor-pointer ${activeSubMenu === subItem.path ? "text-white bg-org-primary" : "text-gray-600 hover:text-white hover:bg-gray-700"}`
-              }`}
-            >
-              {subItem.name}
-            </div>
-          ))}
+        <div className="ml-6 mt-1 mb-1 space-y-1">
+          {item.subMenu.map((subItem, index) => {
+            // ── Nested group (e.g. Committee folder) ──────────────────
+            if (subItem.children && subItem.children.length > 0) {
+              return <NestedSubGroup key={index} label={subItem.name} children={subItem.children} onNavigate={path => handleSubMenuClick(path)} />;
+            }
+
+            // ── Regular sub-item ──────────────────────────────────────
+            const subIsActive = !subItem.isMessage && (location.pathname === subItem.path || location.pathname.startsWith(subItem.path + "/"));
+            return (
+              <div
+                key={index}
+                onClick={() => handleSubMenuClick(subItem.path, subItem.isMessage)}
+                className={`text-sm px-3 py-2 rounded-lg mx-4 ${
+                  subItem.isMessage ? "text-gray-400 italic cursor-default" : `cursor-pointer ${subIsActive ? "bg-org-primary text-white font-semibold" : "text-gray-600 hover:bg-org-secondary hover:text-org-primary"}`
+                }`}
+              >
+                {subItem.name}
+              </div>
+            );
+          })}
         </div>
       )}
     </>
@@ -70,3 +99,46 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
 };
 
 export default NavItem;
+
+// ── Collapsible nested sub-group (e.g. "Committee" folder) ──────────────────
+
+interface NestedSubGroupProps {
+  label: string;
+  children: { name: string; path: string }[];
+  onNavigate: (path: string) => void;
+}
+
+const NestedSubGroup = ({ label, children, onNavigate }: NestedSubGroupProps) => {
+  const location = useLocation();
+  const anyChildActive = children.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + "/"));
+  const [open, setOpen] = useState(anyChildActive);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg mx-4 text-sm text-gray-600 hover:bg-org-secondary hover:text-org-primary"
+        style={{ width: "calc(100% - 2rem)" }}
+      >
+        <span className="flex items-center gap-2">
+          <FiFolder className="w-4 h-4 flex-shrink-0" />
+          {label}
+        </span>
+        <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="ml-4 mt-0.5 space-y-0.5">
+          {children.map((child, i) => {
+            const isActive = location.pathname === child.path || location.pathname.startsWith(child.path + "/");
+            return (
+              <div key={i} onClick={() => onNavigate(child.path)} className={`text-sm px-3 py-2 rounded-lg mx-4 cursor-pointer ${isActive ? "bg-org-primary text-white font-semibold" : "text-gray-600 hover:bg-org-secondary hover:text-org-primary"}`}>
+                {child.name}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
