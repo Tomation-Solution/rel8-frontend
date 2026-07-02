@@ -324,7 +324,7 @@ const ServiceSubmission = () => {
                 text={loadingPay || creatingRequest || uploadingProof ? "Submitting..." : service?.paymentType === "paystack" && createdRequestId ? "Request Submitted" : "Submit Request"}
                 className="flex-1"
                 isLoading={loadingPay || creatingRequest || uploadingProof}
-                disabled={service?.paymentType === "paystack" && !!createdRequestId}
+                // disabled={service?.paymentType === "paystack" && !!createdRequestId}
                 onClick={handleSubmit(handleSubmitRequest)}
               />
             </div>
