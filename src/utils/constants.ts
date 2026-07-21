@@ -6,9 +6,9 @@ import bukaalogo from "../assets/cover-images/bukaalogo.png";
 import { getSubdomain } from "./extra_functions";
 import { apiPublic } from "../api/baseApi";
 
-// export const ENDPOINT_URL = "https://testnode.rel8.watchdoglogisticsng.com";
+export const ENDPOINT_URL = "https://testnode.rel8.watchdoglogisticsng.com";
 // export const ENDPOINT_URL = "http://localhost:8080";
-export const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL ?? "http://localhost:8080";
+// export const ENDPOINT_URL = import.meta.env.VITE_ENDPOINT_URL ?? "http://localhost:8080";
 export const TENANT = getSubdomain() || "aani";
 export const WSS = `ws://rel8.watchdoglogisticsng.com/ws/chat/${TENANT}/`;
 export const sitename = "rel8.watchdoglogisticsng.com";
