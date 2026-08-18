@@ -92,12 +92,11 @@ const ServiceRequestDetail = () => {
           {service && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Payment Information:</p>
-              {service.paymentType === "bank_transfer" ? (
+              {/* X-7: account details arrive with a payment reference once a request
+                  exists, so the transfer can be matched — they are not shown up front. */}
+              {service.paymentConfig?.methods?.includes("bank_transfer") && !service.paymentConfig?.methods?.includes("paystack") ? (
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Please transfer the payment to the following bank account:</p>
-                  <div className="bg-white p-3 rounded border border-gray-200">
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{service.paymentDetails}</p>
-                  </div>
+                  <p className="text-sm text-gray-600">Pay by bank transfer. You'll get the account details and a reference to quote when you submit a request.</p>
                 </div>
               ) : (
                 <div>
@@ -154,12 +153,12 @@ const ServiceRequestDetail = () => {
                   )}
 
                   <div className="flex gap-2">
-                    {request.paymentProof && (
-                      <a href={request.paymentProof} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
+                    {request.paymentId?.proofUrl && (
+                      <a href={request.paymentId?.proofUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
                         View Payment Proof
                       </a>
                     )}
-                    {(!request.paymentProof || request.paymentStatus === "rejected") && (
+                    {(!request.paymentId?.proofUrl || request.paymentStatus === "rejected") && (
                       <>
                         <input
                           type="file"

@@ -6,17 +6,43 @@ import Toast from "../../../components/toast/Toast";
 import { fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
 import dummyImage from "../../../assets/images/dummy.jpg";
 
+// X-3/BE-14: `pending_payment` is a real registration state now — a place held while
+// checkout is in flight. It does NOT count toward the event's capacity.
 const statusColors: Record<string, string> = {
   registered: "bg-green-100 text-green-700",
+  pending_payment: "bg-orange-100 text-orange-700",
   cancelled: "bg-gray-100 text-gray-500",
   pending: "bg-yellow-100 text-yellow-700",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  registered: "Registered",
+  pending_payment: "Not confirmed",
+  cancelled: "Cancelled",
+  pending: "Pending",
+};
+
+// X-7: the unified payment vocabulary.
 const paymentColors: Record<string, string> = {
   free: "bg-blue-50 text-blue-600",
   paid: "bg-green-100 text-green-700",
   pending: "bg-yellow-100 text-yellow-700",
+  awaiting_verification: "bg-orange-100 text-orange-700",
+  rejected: "bg-red-100 text-red-500",
+  failed: "bg-red-100 text-red-500",
+  cancelled: "bg-gray-100 text-gray-500",
   unpaid: "bg-red-100 text-red-500",
+};
+
+const PAYMENT_LABEL: Record<string, string> = {
+  free: "Free",
+  paid: "Paid",
+  pending: "Awaiting payment",
+  awaiting_verification: "Awaiting confirmation",
+  rejected: "Not accepted",
+  failed: "Payment failed",
+  cancelled: "Cancelled",
+  unpaid: "Not paid",
 };
 
 const MyRegistrationsPage = () => {
@@ -70,7 +96,7 @@ const MyRegistrationsPage = () => {
             const statusLabel = reg.status ?? "registered";
             const paymentLabel = reg.paymentStatus ?? "free";
 
-            const canCancel = statusLabel === "registered" && paymentLabel !== "paid";
+            const canCancel = statusLabel === "registered" && paymentLabel !== "paid" && paymentLabel !== "awaiting_verification";
             const isPaidRegistration = statusLabel === "registered" && paymentLabel === "paid";
             const isCancellingThis = cancelMutation.isLoading && cancelMutation.variables === eventId;
 
@@ -84,8 +110,8 @@ const MyRegistrationsPage = () => {
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="font-semibold text-gray-800 text-base leading-tight">{title}</h3>
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>{statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)}</span>
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${paymentColors[paymentLabel] ?? "bg-gray-100 text-gray-600"}`}>{paymentLabel.charAt(0).toUpperCase() + paymentLabel.slice(1)}</span>
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>{STATUS_LABEL[statusLabel] ?? statusLabel}</span>
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${paymentColors[paymentLabel] ?? "bg-gray-100 text-gray-600"}`}>{PAYMENT_LABEL[paymentLabel] ?? paymentLabel}</span>
                     </div>
 
                     <div className="text-xs text-gray-500 space-y-0.5 mt-2">

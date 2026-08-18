@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "react-query";
-import { payDue } from "../../api/dues/api-dues";
+import { startDuePayment } from "../../api/paystack-api";
 import { fetchOrganizationSettings } from "../../api/organization/organization-api";
 import Toast from "../toast/Toast";
 
@@ -33,22 +33,18 @@ const PayUpForASingleDue = ({due__Name,amount,dueId}:Props) => {
     const currentCurrency = orgSettings?.settings?.currency || 'USD';
     const currencySymbol = currencySymbols[currentCurrency] || '$';
 
-    const {mutate} = useMutation(()=>payDue(dueId), {
+    // X-7: dues start at POST /api/dues/pay/:dueId and return a unified `checkout`.
+    // This screen only handles the Paystack path; bank transfer needs the account
+    // details + reference UI, which lives on the Dues page.
+    const {mutate} = useMutation(()=>startDuePayment(String(dueId), "paystack"), {
         onSuccess: (data) => {
-          // Redirect the user to the authentication URL
-          // const authenticationUrl = data?.authentication_url;
-          // if (authenticationUrl) {
-          //   window.location.href = authenticationUrl;
-          // }
-          // console.log('paid for event on paystack o data',data?.data?.data?.authorization_url)
-         
-            const authorizationURL = data?.data?.data?.authorization_url
-           
+            const authorizationURL = data?.checkout?.authorizationUrl;
+
             if (authorizationURL) {
               window.location.href = authorizationURL;
+            } else {
+              notifyUser('This due cannot be paid by card. Please pay it from the Dues page.','error');
             }
-          
-  
         },
         onError: (error:any) => {
           // Handle error, notify user, etc.

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import SeeAll from "../../../components/SeeAll";
 import eventsIcon from "../../../assets/icons/calendar.png";
 import clockIcon from "../../../assets/icons/clock.png";
@@ -6,7 +7,9 @@ import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { fetchAllUserEvents, fetchMyRegistrations, registerForEvent, unregisterFromEvent } from "../../../api/events/events-api";
+import { fetchAllUserEvents, fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
+import { declareEventPayment, isFree, startEventRegistration, type PaymentCheckout } from "../../../api/paystack-api";
+import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import DownloadFileButton from "../../../components/button/DownloadFileButton";
@@ -37,8 +40,9 @@ const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, regis
   const alreadyPaid = myReg?.paymentStatus === "paid";
   const isFull = event.registrationCapacity != null && event.registrationCapacity <= 0;
   const pastDeadline = deadlinePassed(event.registrationDeadline);
-  const isPaidEvent = event.isPaid || event.is_paid_event;
-  const price = event.price || parseFloat(event.amount || "0");
+  // X-4: pricing lives in `pricing`; members get `memberAmount` when set.
+  const price = event.pricing?.memberAmount != null ? event.pricing.memberAmount : (event.pricing?.amount ?? 0);
+  const isPaidEvent = Array.isArray(event.paymentConfig?.methods) && event.paymentConfig.methods.length > 0 && price > 0;
 
   return (
     <div className="mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
@@ -103,30 +107,50 @@ const EventDetailPage = () => {
   });
 
   const event = allEvents?.find((item: any) => (item._id || item.id)?.toString() === eventId);
-  const isPaidEvent = !!(event?.isPaid && event?.price > 0);
+  // X-4: `isPaid`/`price` are gone. A member pays `pricing.memberAmount` when the
+  // admin set a member discount, otherwise `pricing.amount`.
+  const memberPrice = event?.pricing?.memberAmount != null ? event.pricing.memberAmount : (event?.pricing?.amount ?? 0);
+  const isPaidEvent = !isFree(event?.paymentConfig) && memberPrice > 0;
 
-  const callbackUrl = `${window.location.origin}/paystack/callback?type=event`;
+  // X-1/X-7: registration now returns a unified `checkout` — a Paystack URL, or the
+  // association's bank details plus a reference to quote. Free events return neither.
+  const [checkout, setCheckout] = useState<PaymentCheckout | null>(null);
+  const [pendingRegistrationId, setPendingRegistrationId] = useState<string | null>(null);
+  const [declaring, setDeclaring] = useState(false);
+  const [declared, setDeclared] = useState(false);
+  const [declareError, setDeclareError] = useState("");
 
-  const registerMutation = useMutation(() => registerForEvent(eventId!, callbackUrl), {
-    onSuccess: ({ status, data }: { status: number; data: any }) => {
-      const authUrl = data.authorizationUrl || data.authorization_url;
-      if (authUrl) {
-        window.location.href = authUrl;
-      } else if (isPaidEvent) {
-        // Paid event but no payment URL returned — don't silently register
-        notifyUser("Payment could not be initialised. Please try again.", "error");
-      } else if (status === 200) {
-        notifyUser("Registration restored.", "success");
-        queryClient.invalidateQueries("myEventRegistrations");
-      } else {
-        notifyUser("Successfully registered for this event!", "success");
-        queryClient.invalidateQueries("myEventRegistrations");
+  const registerMutation = useMutation(() => startEventRegistration(eventId!), {
+    onSuccess: (result: any) => {
+      const co = result?.checkout;
+
+      if (co?.method === "paystack" && co.authorizationUrl) {
+        window.location.href = co.authorizationUrl;
+        return;
       }
+
+      if (co?.method === "bank_transfer") {
+        setCheckout(co);
+        setPendingRegistrationId(result.registration?._id ?? null);
+        setDeclared(false);
+        setDeclareError("");
+        queryClient.invalidateQueries("myEventRegistrations");
+        return;
+      }
+
+      if (isPaidEvent) {
+        // Paid event that produced no checkout — do not pretend they are registered.
+        notifyUser("Payment could not be initialised. Please try again.", "error");
+        return;
+      }
+
+      notifyUser(result?.message || "Successfully registered for this event!", "success");
+      queryClient.invalidateQueries("myEventRegistrations");
     },
     onError: (err: any) => {
       const httpStatus = err?.response?.status;
       if (httpStatus === 409) {
-        notifyUser("You're already registered for this event.", "error");
+        notifyUser(err?.response?.data?.message || "You're already registered for this event.", "error");
       } else if (httpStatus === 400) {
         notifyUser(err?.response?.data?.message || "Payments are not set up for this organization yet.", "error");
       } else {
@@ -134,6 +158,22 @@ const EventDetailPage = () => {
       }
     },
   });
+
+  /** Member states they have made the transfer. Proof optional unless configured. */
+  const handleDeclareTransfer = async ({ proof, note }: { proof?: File | null; note?: string }) => {
+    if (!pendingRegistrationId) return;
+    setDeclaring(true);
+    setDeclareError("");
+    try {
+      await declareEventPayment(pendingRegistrationId, { proof, note });
+      setDeclared(true);
+      queryClient.invalidateQueries("myEventRegistrations");
+    } catch (err: any) {
+      setDeclareError(err?.response?.data?.message || "Could not submit. Please try again.");
+    } finally {
+      setDeclaring(false);
+    }
+  };
 
   const cancelMutation = useMutation(() => unregisterFromEvent(eventId!), {
     onSuccess: () => {
@@ -212,8 +252,29 @@ const EventDetailPage = () => {
           </p>
         )}
 
-        {/* Registration panel */}
-        <RegistrationPanel event={event} myRegistrations={myRegistrations} onRegister={() => registerMutation.mutate()} onCancel={() => cancelMutation.mutate()} registerLoading={registerMutation.isLoading} cancelLoading={cancelMutation.isLoading} />
+        {/* Registration panel — hidden while a bank transfer is being completed, so the
+            member has one clear next action. */}
+        {!checkout && (
+          <RegistrationPanel event={event} myRegistrations={myRegistrations} onRegister={() => registerMutation.mutate()} onCancel={() => cancelMutation.mutate()} registerLoading={registerMutation.isLoading} cancelLoading={cancelMutation.isLoading} />
+        )}
+
+        {/* X-7: bank details + reference, after registration reserves the place */}
+        {checkout && (
+          <div className="mt-6">
+            <BankTransferPanel
+              checkout={checkout}
+              onDeclare={handleDeclareTransfer}
+              declaring={declaring}
+              declared={declared}
+              error={declareError}
+              requireProof={Boolean(event?.paymentConfig?.bankTransfer?.requireProof)}
+              title="Complete your payment to confirm your place"
+            />
+            <button type="button" onClick={() => setCheckout(null)} className="mt-3 text-sm text-gray-500 underline">
+              Back to event
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="md:col-span-1 col-span-3">

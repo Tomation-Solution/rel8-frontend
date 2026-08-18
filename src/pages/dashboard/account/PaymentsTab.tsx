@@ -1,4 +1,5 @@
 import accountWallet from "../../../assets/icons/account-wallet.png";
+import { startDuePayment } from "../../../api/paystack-api";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
@@ -49,7 +50,10 @@ const PaymentsTab = () => {
       if (proofFile) {
         formData.append("proof", proofFile);
       }
-      const response = await apiTenant.post(`/api/dues/pay/${dueId}`, formData, {
+      // X-7: POST /api/dues/pay/:dueId now STARTS a payment (and returns the bank
+      // details + reference). Declaring a completed transfer is /declare.
+      await startDuePayment(dueId, "bank_transfer");
+      const response = await apiTenant.post(`/api/dues/pay/${dueId}/declare`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -62,7 +66,7 @@ const PaymentsTab = () => {
         queryClient.setQueryData("userDues", (oldData: any) => {
           return oldData?.map((due: TableDataType) => {
             if (due._id === dueId) {
-              return { ...due, status: "awaiting-confirmation" };
+              return { ...due, status: "awaiting_verification" };
             }
             return due;
           });
@@ -154,31 +158,21 @@ const PaymentsTab = () => {
       Cell: ({ row }) => {
         const status = row.original.status; // || (row.original.confirmed ? "confirmed" : "pending");
 
-        const statusConfig = {
-          approved: {
-            bgColor: "bg-green-100",
-            textColor: "text-green-800",
-            label: "Confirmed",
-          },
-          pending: {
-            bgColor: "bg-yellow-100",
-            textColor: "text-yellow-800",
-            label: "Pending",
-          },
-
-          "awaiting-confirmation": {
-            bgColor: "bg-yellow-100",
-            textColor: "text-yellow-800",
-            label: "Awaiting confirmation",
-          },
-          rejected: {
-            bgColor: "bg-red-100",
-            textColor: "text-red-800",
-            label: "Rejected",
-          },
+        // X-7: one status vocabulary across every payable thing. Legacy values are
+        // kept so rows that predate the migration still render.
+        const statusConfig: Record<string, { bgColor: string; textColor: string; label: string }> = {
+          paid: { bgColor: "bg-green-100", textColor: "text-green-800", label: "Paid" },
+          approved: { bgColor: "bg-green-100", textColor: "text-green-800", label: "Paid" },
+          unpaid: { bgColor: "bg-gray-100", textColor: "text-gray-700", label: "Not paid" },
+          pending: { bgColor: "bg-yellow-100", textColor: "text-yellow-800", label: "Awaiting payment" },
+          awaiting_verification: { bgColor: "bg-orange-100", textColor: "text-orange-800", label: "Awaiting confirmation" },
+          "awaiting-confirmation": { bgColor: "bg-orange-100", textColor: "text-orange-800", label: "Awaiting confirmation" },
+          rejected: { bgColor: "bg-red-100", textColor: "text-red-800", label: "Not accepted" },
+          failed: { bgColor: "bg-red-100", textColor: "text-red-800", label: "Payment failed" },
+          cancelled: { bgColor: "bg-gray-100", textColor: "text-gray-600", label: "Cancelled" },
         };
 
-        const config = statusConfig[status] || statusConfig.pending;
+        const config = statusConfig[status] || { bgColor: "bg-gray-100", textColor: "text-gray-700", label: status };
 
         return <span className={`px-2 py-1 ${config.bgColor} ${config.textColor} rounded-full text-sm inline-block`}>{config.label}</span>;
       },

@@ -297,6 +297,14 @@ const ElectionDetailsPage = () => {
   const handleVote = async (candidateId: string) => {
     if (votedCandidates.has(candidateId)) return;
 
+    // BE-2: the rule is one vote per POSITION, not per candidate. Guard here as well
+    // as on the card so a stale render cannot produce a 409.
+    const positionOfCandidate = electionData?.positions?.find((p: any) => p.candidates?.some((c: any) => c.id === candidateId));
+    if (positionOfCandidate?.candidates?.some((c: any) => votedCandidates.has(c.id))) {
+      notifyUser("You have already voted for this position.", "error");
+      return;
+    }
+
     // Check for outstanding dues first
     const hasDues = await checkOutstandingDues();
     if (hasDues) {
@@ -317,6 +325,19 @@ const ElectionDetailsPage = () => {
       setElectionData(data);
     } catch (error: any) {
       setVotingStates((prev) => ({ ...prev, [candidateId]: "error" }));
+
+      // 409 means the server already has a vote from us for this position — most
+      // likely another tab or a retry. Sync the UI rather than leaving it clickable.
+      if (error?.response?.status === 409) {
+        setVotedCandidates((prev) => new Set([...prev, candidateId]));
+        try {
+          const refreshed = await fetchElectionDetails(id!);
+          setElectionData(refreshed);
+        } catch {
+          /* leave the current view in place */
+        }
+      }
+
       notifyUser(
         error.response?.data?.message || "Failed to cast vote",
         "error",

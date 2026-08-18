@@ -1,11 +1,13 @@
 import apiTenant from "../baseApi";
+import type { PaymentConfig, UnifiedPayment } from "../paystack-api";
 
 export interface Project {
   _id: string;
   name: string;
   description: string;
-  paymentType: "bank_transfer" | "payment_link" | "paystack";
-  paymentDetails: string;
+  // X-7: replaced paymentType (bank_transfer|payment_link|paystack) + paymentDetails.
+  // "payment_link" is gone — an external URL cannot be reconciled.
+  paymentConfig?: PaymentConfig;
   banner?: string;
   banners?: string[];
   order: number;
@@ -29,9 +31,12 @@ export interface ProjectContribution {
     phone?: string;
   };
   contributionType: "cash" | "in_kind";
-  proofOfPayment?: string;
+  // X-7: cash contributions carry their money on the Payment record.
+  paymentId?: UnifiedPayment | null;
+  paymentStatus?: string;
   inKindDescription?: string;
   amount?: number;
+  /** In-kind verification only. Cash contributions are governed by paymentStatus. */
   status: "pending" | "verified" | "rejected";
   adminNotes?: string;
   createdAt: string;

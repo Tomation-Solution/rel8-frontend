@@ -1,12 +1,13 @@
 import apiTenant from "./baseApi";
+import type { PaymentConfig, UnifiedPayment } from "./paystack-api";
 
 export type ServiceType = {
   _id: string;
   name: string;
   description: string;
   price: number;
-  paymentType: "bank_transfer" | "payment_link" | "paystack";
-  paymentDetails: string;
+  // X-7: replaced paymentType (bank_transfer|payment_link|paystack) + paymentDetails.
+  paymentConfig?: PaymentConfig;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -37,12 +38,12 @@ export type ServiceRequestType = {
     membershipId: string;
   };
   deliveryAddress: DeliveryAddress;
-  paymentProof: string | null;
-  paymentReference?: string | null;
-  paymentStatus: "pending" | "confirmed" | "rejected";
+  // X-7: proof, reference and confirmation time live on the Payment record now.
+  paymentId?: UnifiedPayment | null;
+  // "confirmed" may still appear on rows that predate the migration.
+  paymentStatus: "pending" | "awaiting_verification" | "paid" | "failed" | "rejected" | "cancelled" | "confirmed";
   requestStatus: "pending" | "confirmed" | "dispatched" | "completed" | "cancelled";
   adminNotes: string | null;
-  paymentConfirmedAt: string | null;
   requestConfirmedAt: string | null;
   dispatchedAt: string | null;
   completedAt: string | null;

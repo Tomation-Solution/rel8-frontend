@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchActiveProjects, createContribution, Project, ProjectContribution } from "../../../api/projects/projects-api";
-import { initializeProjectPayment } from "../../../api/paystack-api";
+import { declareProjectContribution, isFree, startProjectContribution, supportsMethod, type PaymentCheckout } from "../../../api/paystack-api";
+import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
@@ -24,6 +25,13 @@ const FundAProjectPage = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [paystackLoading, setPaystackLoading] = useState(false);
+  // X-7: bank transfer is a two-step flow — start the contribution to get a
+  // reference and the account details, then declare the transfer.
+  const [transferCheckout, setTransferCheckout] = useState<PaymentCheckout | null>(null);
+  const [transferContributionId, setTransferContributionId] = useState<string | null>(null);
+  const [declaring, setDeclaring] = useState(false);
+  const [declared, setDeclared] = useState(false);
+  const [declareError, setDeclareError] = useState("");
   const proofOfPaymentRef = useRef<HTMLInputElement | null>(null);
 
   const { data: projects, isLoading, isError } = useQuery("active-projects", fetchActiveProjects);
@@ -61,48 +69,101 @@ const FundAProjectPage = () => {
     },
   });
 
+  /**
+   * Submit a contribution (X-7).
+   *
+   * in_kind  -> no payment; straight into the admin verification queue.
+   * cash     -> creates a Payment and returns either a Paystack checkout URL or the
+   *             association's bank details plus a reference to quote.
+   */
   const onSubmit = async (data: ContributionFormData) => {
     if (!selectedProject) return;
 
-    // Paystack path — no proof needed, redirect to payment
-    if (selectedProject.paymentType === "paystack" && data.contributionType === "cash") {
-      const amount = data.amount ? parseFloat(data.amount) : 0;
-      if (!amount || amount <= 0) {
-        notifyUser("Please enter a valid contribution amount", "error");
+    if (data.contributionType === "in_kind") {
+      if (!data.inKindDescription) {
+        notifyUser("Please describe your in-kind contribution", "error");
         return;
       }
       try {
         setPaystackLoading(true);
-        const { authorizationUrl } = await initializeProjectPayment(selectedProject._id, amount);
-        window.location.href = authorizationUrl;
+        await startProjectContribution({
+          projectId: selectedProject._id,
+          contributionType: "in_kind",
+          inKindDescription: data.inKindDescription,
+        });
+        notifyUser("Contribution submitted successfully!", "success");
+        setShowContributionModal(false);
+        reset();
+        queryClient.invalidateQueries("my-contributions");
       } catch (err: any) {
-        notifyUser(err?.response?.data?.message || "Failed to initialize payment", "error");
+        notifyUser(err?.response?.data?.message || "Failed to submit contribution", "error");
+      } finally {
         setPaystackLoading(false);
       }
       return;
     }
 
-    const proofOfPaymentFile = data.proofOfPayment?.[0];
-
-    if (data.contributionType === "cash" && !proofOfPaymentFile) {
-      notifyUser("Proof of payment is required for cash contributions", "error");
+    // ---- cash ---------------------------------------------------------------
+    const amount = data.amount ? parseFloat(data.amount) : 0;
+    if (!amount || amount <= 0) {
+      notifyUser("Please enter a valid contribution amount", "error");
       return;
     }
 
-    if (data.contributionType === "in_kind" && !data.inKindDescription) {
-      notifyUser("Please describe your in-kind contribution", "error");
+    const config = selectedProject.paymentConfig;
+    if (isFree(config)) {
+      notifyUser("This project has no payment method configured", "error");
       return;
     }
 
-    createContributionMutation.mutate(
-      {
+    // Prefer Paystack when offered — it reconciles itself.
+    const method = supportsMethod(config, "paystack") ? "paystack" : "bank_transfer";
+
+    try {
+      setPaystackLoading(true);
+      setDeclared(false);
+      setDeclareError("");
+
+      const result = await startProjectContribution({
         projectId: selectedProject._id,
-        contributionType: data.contributionType,
-        inKindDescription: data.inKindDescription,
-        amount: data.amount ? parseFloat(data.amount) : undefined,
-      },
-      proofOfPaymentFile as any,
-    );
+        contributionType: "cash",
+        amount,
+        method,
+      });
+
+      const checkout = result.checkout;
+
+      if (checkout?.method === "paystack" && checkout.authorizationUrl) {
+        window.location.href = checkout.authorizationUrl;
+        return;
+      }
+
+      if (checkout?.method === "bank_transfer") {
+        setTransferCheckout(checkout);
+        setTransferContributionId(result.contribution?._id ?? null);
+        queryClient.invalidateQueries("my-contributions");
+      }
+    } catch (err: any) {
+      notifyUser(err?.response?.data?.message || "Failed to submit contribution", "error");
+    } finally {
+      setPaystackLoading(false);
+    }
+  };
+
+  /** Member states they have made the transfer. Proof optional. */
+  const handleDeclareTransfer = async ({ proof, note }: { proof?: File | null; note?: string }) => {
+    if (!transferContributionId) return;
+    setDeclaring(true);
+    setDeclareError("");
+    try {
+      await declareProjectContribution(transferContributionId, { proof, note });
+      setDeclared(true);
+      queryClient.invalidateQueries("my-contributions");
+    } catch (err: any) {
+      setDeclareError(err?.response?.data?.message || "Could not submit. Please try again.");
+    } finally {
+      setDeclaring(false);
+    }
   };
 
   const openContributionModal = (project: Project) => {
@@ -114,6 +175,10 @@ const FundAProjectPage = () => {
   const closeModal = () => {
     setShowContributionModal(false);
     setSelectedProject(null);
+    setTransferCheckout(null);
+    setTransferContributionId(null);
+    setDeclared(false);
+    setDeclareError("");
     reset();
   };
 
@@ -121,13 +186,31 @@ const FundAProjectPage = () => {
     const contribution = myContributions?.find((c: ProjectContribution) => c.projectId._id === projectId);
     if (!contribution) return null;
 
-    const statusColors = {
+    // X-7: cash contributions are governed by the unified paymentStatus; in-kind
+    // contributions are not payments and keep their own `status`.
+    const effective = contribution.contributionType === "cash" ? contribution.paymentStatus || "pending" : contribution.status;
+
+    const statusColors: Record<string, string> = {
       pending: "bg-yellow-100 text-yellow-800",
+      awaiting_verification: "bg-orange-100 text-orange-800",
+      paid: "bg-green-100 text-green-800",
       verified: "bg-green-100 text-green-800",
       rejected: "bg-red-100 text-red-800",
+      failed: "bg-red-100 text-red-800",
+      cancelled: "bg-gray-100 text-gray-600",
     };
 
-    return <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[contribution.status]}`}>{contribution.status.charAt(0).toUpperCase() + contribution.status.slice(1)}</span>;
+    const labels: Record<string, string> = {
+      pending: "Awaiting payment",
+      awaiting_verification: "Awaiting confirmation",
+      paid: "Paid",
+      verified: "Verified",
+      rejected: "Not accepted",
+      failed: "Payment failed",
+      cancelled: "Cancelled",
+    };
+
+    return <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[effective] ?? "bg-gray-100 text-gray-700"}`}>{labels[effective] ?? effective}</span>;
   };
 
   if (isError) {
@@ -177,19 +260,17 @@ const FundAProjectPage = () => {
 
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">{truncateDescription(project.description)}</p>
 
-                    {project.paymentType === "payment_link" && (
-                      <div className="mb-4">
-                        <a href={project.paymentDetails} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
-                          View Payment Link →
-                        </a>
-                      </div>
-                    )}
-
-                    {project.paymentType === "bank_transfer" && (
-                      <div className="mb-4 p-3 bg-gray-50 rounded text-sm">
-                        <p className="font-semibold text-gray-700 mb-1">Account Information:</p>
-                        <p className="text-gray-600 whitespace-pre-wrap">{project.paymentDetails}</p>
-                      </div>
+                    {/* X-7: account details are no longer shown up front — they come
+                        with a payment reference once a contribution is started, so the
+                        transfer can actually be matched to the member. */}
+                    {!isFree(project.paymentConfig) && (
+                      <p className="mb-4 text-xs text-gray-500">
+                        {supportsMethod(project.paymentConfig, "paystack") && supportsMethod(project.paymentConfig, "bank_transfer")
+                          ? "Pay by card or bank transfer"
+                          : supportsMethod(project.paymentConfig, "paystack")
+                            ? "Pay by card or transfer via Paystack"
+                            : "Pay by bank transfer"}
+                      </p>
                     )}
 
                     <Button text="Contribute" onClick={() => openContributionModal(project)} className="w-full" />
@@ -229,50 +310,45 @@ const FundAProjectPage = () => {
                 </div>
 
                 {/* Cash Contribution Fields */}
-                {contributionType === "cash" && (
+                {contributionType === "cash" && !transferCheckout && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{selectedProject.paymentType === "paystack" ? "Contribution Amount" : "Amount (Optional)"}</label>
-                      <input type="number" step="0.01" min="0" {...register("amount", { required: selectedProject.paymentType === "paystack" })} className="form-control w-full p-2 border border-gray-300 rounded" placeholder="Enter amount" />
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Contribution Amount</label>
+                      <input type="number" step="0.01" min="0" {...register("amount", { required: true })} className="form-control w-full p-2 border border-gray-300 rounded" placeholder="Enter amount" />
                       {errors.amount && <p className="text-red-500 text-xs mt-1">Amount is required</p>}
                     </div>
 
-                    {/* Paystack path — no proof upload */}
-                    {selectedProject.paymentType === "paystack" && (
+                    {isFree(selectedProject.paymentConfig) ? (
+                      <div className="p-3 bg-yellow-50 rounded">
+                        <p className="text-sm text-yellow-800">This project has no payment method configured. Please contact the organisation.</p>
+                      </div>
+                    ) : supportsMethod(selectedProject.paymentConfig, "paystack") ? (
                       <div className="p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">You will be redirected to Paystack to complete your payment securely.</p>
+                        <p className="text-sm text-blue-800">You'll be taken to Paystack to pay by card or bank transfer. Your contribution confirms automatically.</p>
                       </div>
-                    )}
-
-                    {/* Non-paystack paths — proof upload */}
-                    {selectedProject.paymentType !== "paystack" && (
-                      <div>
-                        {errors.proofOfPayment?.type === "required" && <FormError message="Proof of payment is required" />}
-                        <ServicesFileUploadInput register={register} text="Upload Proof of Payment" name="proofOfPayment" ref={proofOfPaymentRef} onClick={handleProofOfPaymentClick} />
-                        <small className="text-gray-500 text-xs mt-1 block">Upload receipt or proof of payment</small>
-                      </div>
-                    )}
-
-                    {selectedProject.paymentType === "payment_link" && (
-                      <div className="p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800 mb-2">Make your payment using the link below, then upload proof:</p>
-                        <a href={selectedProject.paymentDetails} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
-                          {selectedProject.paymentDetails}
-                        </a>
-                      </div>
-                    )}
-
-                    {selectedProject.paymentType === "bank_transfer" && (
+                    ) : (
                       <div className="p-3 bg-gray-50 rounded">
-                        <p className="text-sm font-semibold text-gray-700 mb-1">Account Information:</p>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedProject.paymentDetails}</p>
+                        <p className="text-sm text-gray-700">You'll be shown the account details and a reference to quote on your transfer.</p>
                       </div>
                     )}
                   </>
                 )}
 
+                {/* X-7: bank details + reference, after the contribution is started */}
+                {contributionType === "cash" && transferCheckout && (
+                  <BankTransferPanel
+                    checkout={transferCheckout}
+                    onDeclare={handleDeclareTransfer}
+                    declaring={declaring}
+                    declared={declared}
+                    error={declareError}
+                    requireProof={Boolean(selectedProject.paymentConfig?.bankTransfer?.requireProof)}
+                    title="Transfer to the account below"
+                  />
+                )}
+
                 {/* In-Kind Contribution Fields */}
-                {contributionType === "in_kind" && (
+                {contributionType === "in_kind" && !transferCheckout && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Describe Your In-Kind Contribution</label>
                     {errors.inKindDescription?.type === "required" && <FormError message="Description is required" />}
@@ -288,13 +364,15 @@ const FundAProjectPage = () => {
                 )}
 
                 <div className="flex gap-3 pt-4">
-                  <Button text="Cancel" onClick={closeModal} type="outlined" className="flex-1" />
-                  <Button
-                    text={paystackLoading ? "Redirecting…" : createContributionMutation.isLoading ? "Submitting..." : selectedProject.paymentType === "paystack" && contributionType === "cash" ? "Contribute via Paystack" : "Submit Contribution"}
-                    onClick={handleSubmit(onSubmit)}
-                    isLoading={paystackLoading || createContributionMutation.isLoading}
-                    className="flex-1"
-                  />
+                  <Button text={transferCheckout ? "Close" : "Cancel"} onClick={closeModal} type="outlined" className="flex-1" />
+                  {!transferCheckout && (
+                    <Button
+                      text={paystackLoading ? "Please wait…" : supportsMethod(selectedProject.paymentConfig, "paystack") && contributionType === "cash" ? "Contribute via Paystack" : "Submit Contribution"}
+                      onClick={handleSubmit(onSubmit)}
+                      isLoading={paystackLoading}
+                      className="flex-1"
+                    />
+                  )}
                 </div>
               </form>
             </div>
