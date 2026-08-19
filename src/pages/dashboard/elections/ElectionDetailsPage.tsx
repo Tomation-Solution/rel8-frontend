@@ -258,16 +258,17 @@ const ElectionDetailsPage = () => {
     { value: "results", label: "Results" },
   ];
 
-  const isElectionOngoing = () => {
-    if (!electionData) return true;
-    const now = new Date();
-    const endDateTime = new Date(electionData.endDate);
-    if (electionData.endTime) {
-      const [hours, minutes] = electionData.endTime.split(":");
-      endDateTime.setHours(parseInt(hours), parseInt(minutes));
-    }
-    return now < endDateTime;
-  };
+  /**
+   * MP-5: the voting window is decided by the server, not here.
+   *
+   * This used to recompute it in the browser with `setHours`, which resolved the
+   * election's wall-clock end time against the *viewer's* timezone — the same bug BE-6
+   * fixed on the backend. It also ignored an admin closing the election early (FE-14).
+   *
+   * `status` comes from getElectionDetails and is authoritative.
+   */
+  const electionStatus: "Upcoming" | "Ongoing" | "Ended" = electionData?.status ?? "Upcoming";
+  const isElectionOngoing = () => electionStatus === "Ongoing";
 
   const handleViewManifesto = (candidate: Candidate) => {
     setSelectedCandidate(candidate);
@@ -427,7 +428,19 @@ const ElectionDetailsPage = () => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              {electionData.theme}
+              {electionData.theme}{" "}
+              {/* MP-5: members had no indication of whether voting was open. */}
+              <span
+                className={`ml-2 align-middle rounded-full px-3 py-1 text-xs font-semibold ${
+                  electionStatus === "Ongoing"
+                    ? "bg-green-100 text-green-800"
+                    : electionStatus === "Ended"
+                      ? "bg-gray-200 text-gray-700"
+                      : "bg-blue-100 text-blue-800"
+                }`}
+              >
+                {electionStatus === "Ongoing" ? "Voting open" : electionStatus === "Ended" ? "Voting closed" : "Not yet open"}
+              </span>
             </h1>
             <p className="text-sm text-gray-500">
               {new Date(electionData.startDate).toLocaleDateString()} -{" "}
@@ -572,9 +585,15 @@ const ElectionDetailsPage = () => {
                   Elections are Ongoing
                 </h3>
                 <p className="text-gray-600">
-                  The election results will be available once the voting period
-                  ends on {new Date(electionData.endDate).toLocaleDateString()}{" "}
-                  {electionData.endTime && `at ${electionData.endTime}`}.
+                  Results will be available once voting closes
+                  {electionData.endDate && (
+                    <>
+                      {" "}
+                      — scheduled for {new Date(electionData.endDate).toLocaleDateString()}
+                      {electionData.endTime && ` at ${electionData.endTime}`}
+                    </>
+                  )}
+                  .
                 </p>
               </div>
             ) : (

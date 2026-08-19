@@ -56,10 +56,7 @@ function App() {
   const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
   const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
   const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
-  const PaymentSuccessPage = lazy(() => import("./components/PaymentSuccess/paymentSuccess")); //FundAProject-PaymentSuccessPage
   const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
-  const EventPaymentSuccess = lazy(() => import("./components/PaymentSuccess/EventPaymentSuccess"));
-  const ServicePaymentSuccess = lazy(() => import("./components/PaymentSuccess/ServicePaymentSuccess"));
   const PaystackCallbackPage = lazy(() => import("./pages/PaystackCallbackPage"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
@@ -229,15 +226,6 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/service-requests/success/:serviceId",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <ServicePaymentSuccess />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
       path: "/paystack/callback",
       element: (
         <Suspense fallback={<Loader />}>
@@ -254,17 +242,6 @@ function App() {
           <DashboardLayout>
             <EventDetailPage />
           </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/event/success/:eventId",
-      element: (
-        <Suspense fallback={<Loader />}>
-          {/* <DashboardLayout > */}
-          <EventPaymentSuccess />
-          {/* </DashboardLayout> */}
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -585,17 +562,6 @@ function App() {
           <DashboardLayout>
             <SupportInCashPage />
           </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/fund-a-project/success",
-      element: (
-        <Suspense fallback={<Loader />}>
-          {/* <DashboardLayout > */}
-          <PaymentSuccessPage />
-          {/* </DashboardLayout> */}
         </Suspense>
       ),
       errorElement: <ErrorPage />,

@@ -22,8 +22,3 @@ export const supportInCash = async (projectId: string | number, data: any) => {
   return response.data;
 };
 
-export const postPaymentSuccess = async (data: any) => {
-  const response = await apiTenant.post(`/extras/member_support_project_cash/support_in_cash/`, data);
-
-  return response.data;
-};

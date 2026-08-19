@@ -131,23 +131,56 @@ Legend: `[ ]` open · `[x]` done. IDs shared with the sibling repos (`MP-*` = po
   404. **RESOLVED (2026-08-18):** Removed; `PayUpForASingleDue` now uses
   `startDuePayment`.
 
-- [ ] **MP-2 · `events-api.ts` is full of dead endpoints.**
+- [x] **MP-2 · `events-api.ts` is full of dead endpoints.**
   `registerForFreeEvent`, `registerForPaidEvent`, `postEventPaymentSuccess`,
   `getEventRegisteredMembers`, `getEventAttendees`, `requestReschedule`, `getReschedule`
   all call `/api/events/eventview/...`, `/api/events/payment/` or `/api/events/save/payment/`
   — **none of which exist on this backend**. Pre-existing, not caused by the payment work.
   Verify against `src/routes/event.routes.js` and delete what is dead.
+  **RESOLVED (2026-08-18):** All eight removed after checking each against
+  `src/routes/event.routes.js` — only `/eventview/get_events/` exists.
 
-- [ ] **MP-3 · `PayUpForASingleDue` only handles the Paystack path.**
+- [x] **MP-3 · `PayUpForASingleDue` only handles the Paystack path.**
   If a due offers bank transfer only, it now tells the member to use the Dues page rather
   than silently failing. Better: render `BankTransferPanel` there too.
+  **RESOLVED (2026-08-18):** It now renders `BankTransferPanel` in place, so a
+  transfer-only due is completed on the same screen instead of redirecting the member to
+  the Dues page.
 
-- [ ] **MP-4 · `useDynamicPaymentApi` (`src/api/payment.ts`) may now be dead.**
+- [x] **MP-4 · `useDynamicPaymentApi` (`src/api/payment.ts`) was dead.**
   It drove the old external payment-link flow, which no longer exists as a configured
   method. Check remaining callers and remove.
+  **RESOLVED (2026-08-18):** Removed. It posted to `/dues/process_payment/...` (no `/api`
+  prefix, no such handler) and `pay()` had no callers left — only `loadingPay`, which was
+  permanently false, was still destructured in `DuesPage` and `PaymentsTab`.
 
-- [ ] **MP-5 · Election results view does not use the results endpoint.**
+- [x] **MP-6 · Three unreachable payment-success pages removed.**
+  `/event/success/:eventId`, the FundAProject success page and the service success page
+  were all routed but unreachable — every payment now returns to `/paystack/callback`, and
+  the only thing that linked to `/event/success` was `registerForPaidEvent`, itself dead.
+  Two of the three also posted to endpoints that do not exist. Their API callers
+  (`postEventPaymentSuccess`, `postPaymentSuccess`, `postServicePaymentSuccess`) went too,
+  and the backend's now-orphaned `POST /api/services/payment-success` with them.
+
+- [x] **MP-7 · Nine unreferenced modules removed.**
+  `accordion/Accordion`, `cards/ElectionPositionCard`, `grid/PublicationGrid`,
+  `tables/CompletedPaymentTable`, `tables/PendingPaymentTable`, `data/notificationData`,
+  `elections/ElectionContestantsPage`, `support/ContactUsPage`.
+
+  **Note for future sweeps:** `components/TenantProvider.tsx` looks unreferenced to a
+  naive grep because `main.tsx` imports it under a different name *and* with an explicit
+  extension — `import TenantGate from "./components/TenantProvider.tsx"`. It is load-bearing.
+  Always confirm with a build, not a grep.
+
+- [x] **MP-5 · Election results view does not use the results endpoint.**
   The admin app got a rebuilt results view (`FE-4`); this app still renders from
   `fetchElectionDetails`. `fetchElectionResults` exists in `api-elections.ts` and is
   unused. The backend now returns per-position `isTie`/`winners[]` and a
   timezone-correct `status` — worth surfacing "voting open/closed" to members.
+
+  **RESOLVED (2026-08-18):** The page now reads the server's `status` instead of
+  recomputing the voting window in the browser. The old `isElectionOngoing()` used
+  `setHours`, resolving the election's wall-clock end time against the **viewer's**
+  timezone — the same bug `BE-6` fixed on the backend — and it ignored an admin closing the
+  election early (`FE-14`). Members also now see an explicit "Voting open / closed / not
+  yet open" badge.

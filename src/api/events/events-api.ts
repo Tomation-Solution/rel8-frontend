@@ -1,5 +1,17 @@
-import { EventsResponseType } from "../../types/myTypes";
-import apiTenant, { apiTenantAxiosForm } from "../baseApi";
+
+/**
+ * Event API.
+ *
+ * MP-2: eight functions were removed from this file because the endpoints they called
+ * do not exist on this backend — `/api/events/eventview/register_for_free_event/`,
+ * `/api/events/eventview/list_of_register_members/`, `/api/events/eventview/view_attendies/`,
+ * `/api/events/eventview/request-reschedule/`, `/api/events/payment/` and
+ * `/api/events/save/payment/`. They could only ever have 404'd.
+ *
+ * `registerForEvent` also went: registration now starts at `startEventRegistration` in
+ * `api/paystack-api.ts`, which returns the unified `checkout` (X-1/X-7).
+ */
+import apiTenant from "../baseApi";
 
 export const fetchAllUserEvents = async (): Promise<any> => {
   const response = await apiTenant.get(`/api/events/eventview/get_events/`);
@@ -12,11 +24,6 @@ export const fetchEventById = async (eventId: string): Promise<any> => {
 };
 
 // New registration endpoints
-export const registerForEvent = async (eventId: string, callbackUrl?: string): Promise<{ status: number; data: { authorizationUrl?: string; reference?: string; registration?: any; [key: string]: any } }> => {
-  const body = callbackUrl ? { callbackUrl } : {};
-  const response = await apiTenant.post(`/api/events/${eventId}/register`, body);
-  return { status: response.status, data: response.data };
-};
 
 export const unregisterFromEvent = async (eventId: string): Promise<any> => {
   const response = await apiTenant.delete(`/api/events/${eventId}/register`);
@@ -28,61 +35,9 @@ export const fetchMyRegistrations = async (): Promise<any> => {
   return response.data.registrations || response.data || [];
 };
 
-export const registerForFreeEvent = async (data: any) => {
-  // console.log(data,'----->testing')
-  const response = await apiTenantAxiosForm.post("/api/events/eventview/register_for_free_event/", data);
-  return response.data;
-};
 
-export async function getEventRegisteredMembers(eventId: string): Promise<any> {
-  // const token = await retrieveAppData("token");
-  const response = await apiTenant.post("/api/events/eventview/list_of_register_members/", {
-    eventId: eventId,
-  });
-  return response.data;
-}
 
-export async function getEventAttendees(eventId: string): Promise<any> {
-  const response = await apiTenant.post("/api/events/eventview/view_attendies/", {
-    eventId: eventId,
-  });
-  return response.data;
-}
 
-export async function registerForPaidEvent(eventId: any, amount: number): Promise<any> {
-  const data = {
-    amount: amount,
-    project_id: eventId,
-    callback_url: `${window.location.origin}/event/success/${eventId}?project_id=${eventId}&amount=${amount}`, // Your callback URL
-  };
-  const response = await apiTenant.post(`/api/events/payment/`, data);
-  return response.data;
-}
 
-export const postEventPaymentSuccess = async (data: any): Promise<any> => {
-  const response = await apiTenant.post("/api/events/save/payment/", data);
-  console.log(response.data);
-  return response.data;
-};
 
-export async function requestReschedule(data: any): Promise<any> {
-  const response = await apiTenant.post(
-    "/api/events/eventview/request-reschedule/",
-    { ...data.data },
-    {
-      params: {
-        ...data.params,
-      },
-    },
-  );
-  return response.data;
-}
 
-export async function getReschedule(eventId: string): Promise<any> {
-  const response = await apiTenant.get("/api/events/eventview/request-reschedule/", {
-    params: {
-      event_id: eventId,
-    },
-  });
-  return response.data;
-}

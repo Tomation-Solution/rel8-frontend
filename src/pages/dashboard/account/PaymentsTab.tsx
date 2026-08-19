@@ -8,7 +8,6 @@ import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Table from "../../../components/Table/Table";
-import useDynamicPaymentApi from "../../../api/payment";
 import apiTenant from "../../../api/baseApi";
 import { FaExternalLinkAlt } from "react-icons/fa";
 
@@ -17,7 +16,6 @@ const PaymentsTab = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDueId, setSelectedDueId] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
-  const { pay, loadingPay } = useDynamicPaymentApi();
   const queryClient = useQueryClient();
   const { notifyUser } = Toast();
 
@@ -235,7 +233,7 @@ const PaymentsTab = () => {
 
   return (
     <>
-      {(loadingPay || requestConfirmationMutation.isLoading) && <CircleLoader />}
+      {(requestConfirmationMutation.isLoading) && <CircleLoader />}
       <div className="flex items-center gap-x-9">
         <div className="flex items-center">
           <img className="w-[100px] h-[100px] object-contain" src={accountWallet} alt="" />

@@ -7,7 +7,6 @@ import { TableDataType } from "../../../types/myTypes";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Table from "../../../components/Table/Table";
-import useDynamicPaymentApi from "../../../api/payment";
 import apiTenant from "../../../api/baseApi";
 import { FaExternalLinkAlt, FaDownload } from "react-icons/fa";
 import jsPDF from "jspdf";
@@ -26,7 +25,6 @@ const DuesPage = () => {
   const [declaring, setDeclaring] = useState(false);
   const [declared, setDeclared] = useState(false);
   const [declareError, setDeclareError] = useState("");
-  const { pay, loadingPay } = useDynamicPaymentApi();
   const queryClient = useQueryClient();
   const { notifyUser } = Toast();
 
@@ -446,7 +444,7 @@ const DuesPage = () => {
 
   return (
     <>
-      {loadingPay && <CircleLoader />}
+      
       <div className="flex items-center gap-x-9">
         <div className="flex items-center">
           <img className="w-[100px] h-[100px] object-contain" src={accountWallet} alt="" />

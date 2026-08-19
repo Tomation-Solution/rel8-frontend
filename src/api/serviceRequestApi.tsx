@@ -94,10 +94,6 @@ export const getServiceRequestDetail = async ({ requestId }: { requestId: string
 };
 
 // Handle service payment success callback
-export const postServicePaymentSuccess = async (data: { serviceId: string; amount: number; paystack_key: string; deliveryAddress: DeliveryAddress }): Promise<any> => {
-  const resp = await apiTenant.post(`/api/services/payment-success`, data);
-  return resp.data;
-};
 
 // Upload/replace payment proof for an existing service request
 export const uploadServiceRequestPaymentProof = async (data: { requestId: string; paymentProof: File }): Promise<ServiceRequestType> => {
