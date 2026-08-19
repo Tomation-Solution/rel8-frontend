@@ -38,6 +38,27 @@ export const PAYMENT_STATUS_LABEL: Record<string, string> = {
   not_applicable: "—",
 };
 
+/**
+ * Whether a due/registration/request still owes money.
+ *
+ * X-7 replaced the old Django value `"approved"` with `"paid"`, but six call sites kept
+ * comparing against `"approved"` — a value this backend never returns. Every one of them
+ * read a fully paid item as outstanding. The most visible symptom was the "Outstanding
+ * Dues" modal nagging members who owed nothing, with a total equal to the sum of *all*
+ * their dues.
+ *
+ * `awaiting_verification` is deliberately NOT outstanding: the member has declared a bank
+ * transfer and is waiting on an admin. Nagging them there invites a double payment.
+ * `cancelled` is not owed either. `pending` (a checkout started but never finished) is.
+ */
+export const SETTLED_STATUSES = ["paid", "awaiting_verification", "cancelled", "free", "not_applicable"];
+
+export const isOutstanding = (status?: string | null): boolean =>
+  !SETTLED_STATUSES.includes(String(status ?? "unpaid"));
+
+/** Fully settled — money received and confirmed. Excludes `awaiting_verification`. */
+export const isSettled = (status?: string | null): boolean => String(status ?? "") === "paid";
+
 export interface BankTransferDetails {
   accountName?: string | null;
   accountNumber?: string | null;
@@ -60,6 +81,13 @@ export interface PaymentCheckout {
   /** bank_transfer only */
   amount?: number;
   bankTransfer?: BankTransferDetails | null;
+  /**
+   * Set when the payer asked to pay online but the Paystack checkout could not be
+   * created, so the server downgraded them to a bank transfer. Without surfacing this,
+   * choosing "Pay online" and landing on a transfer screen just looks broken.
+   */
+  fallbackFrom?: PaymentMethod;
+  fallbackReason?: string;
 }
 
 export interface UnifiedPayment {
@@ -173,8 +201,10 @@ export const declareServicePayment = async (requestId: string, opts?: { proof?: 
 // ---------------------------------------------------------------------------
 
 /** POST /api/events/:eventId/register — free events return no checkout. */
-export const startEventRegistration = async (eventId: string): Promise<StartPaymentResult> => {
-  const response = await apiTenant.post(`/api/events/${eventId}/register`, {});
+export const startEventRegistration = async (eventId: string, method?: PaymentMethod): Promise<StartPaymentResult> => {
+  // The method used to be omitted entirely, so the server always resolved to Paystack
+  // for an event configured for both — bank transfer was unreachable.
+  const response = await apiTenant.post(`/api/events/${eventId}/register`, method ? { method } : {});
   return response.data;
 };
 

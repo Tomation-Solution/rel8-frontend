@@ -10,7 +10,7 @@ import Table from "../../../components/Table/Table";
 import apiTenant from "../../../api/baseApi";
 import { FaExternalLinkAlt, FaDownload } from "react-icons/fa";
 import jsPDF from "jspdf";
-import { declareDuePayment, isFree, PAYMENT_STATUS_LABEL, startDuePayment, supportsMethod, type PaymentCheckout } from "../../../api/paystack-api";
+import { declareDuePayment, isFree, isOutstanding, isSettled, PAYMENT_STATUS_LABEL, startDuePayment, supportsMethod, type PaymentCheckout } from "../../../api/paystack-api";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 
 const DuesPage = () => {
@@ -193,7 +193,7 @@ const DuesPage = () => {
     ctx.fillStyle = "#111111";
     ctx.font = `${mm(4.5)}px sans-serif`;
     ctx.fillText(due.purpose ?? "Due Payment", colDesc + mm(3), y + mm(7));
-    const statusLabel = due.status === "approved" ? "Confirmed" : (due.status ?? "");
+    const statusLabel = PAYMENT_STATUS_LABEL[due.status] ?? (due.status ?? "");
     ctx.fillStyle = "#16a34a";
     ctx.fillText(statusLabel, colQty, y + mm(7));
     const amtText = `${currencySymbol}${parseFloat(due.amount).toFixed(2)}`;
@@ -301,7 +301,7 @@ const DuesPage = () => {
   };
 
   const totalPendingAmount = data
-    ?.filter((dues: TableDataType) => dues.status != "approved")
+    ?.filter((dues: TableDataType) => isOutstanding(dues.status))
     ?.reduce((total: number, dues: TableDataType) => {
       return total + parseFloat(dues.amount);
     }, 0);
@@ -376,7 +376,7 @@ const DuesPage = () => {
       Cell: ({ row }) => {
         const due = row.original as any;
         const status = due.status || "unpaid";
-        const settled = status === "paid" || status === "approved";
+        const settled = isSettled(status);
         const awaiting = status === "awaiting_verification" || status === "awaiting-confirmation";
         const owes = !settled && !awaiting;
 

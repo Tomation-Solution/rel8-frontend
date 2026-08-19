@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchActiveProjects, createContribution, Project, ProjectContribution } from "../../../api/projects/projects-api";
-import { declareProjectContribution, isFree, startProjectContribution, supportsMethod, type PaymentCheckout } from "../../../api/paystack-api";
+import { declareProjectContribution, isFree, startProjectContribution, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
+import PaymentMethodChoice, { defaultMethod } from "../../../components/payments/PaymentMethodChoice";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
@@ -27,6 +28,9 @@ const FundAProjectPage = () => {
   const [paystackLoading, setPaystackLoading] = useState(false);
   // X-7: bank transfer is a two-step flow — start the contribution to get a
   // reference and the account details, then declare the transfer.
+  // The payer's chosen method. Seeded from the project when the modal opens; only
+  // actually offered as a choice when the project configures more than one.
+  const [payMethod, setPayMethod] = useState<PaymentMethod>("bank_transfer");
   const [transferCheckout, setTransferCheckout] = useState<PaymentCheckout | null>(null);
   const [transferContributionId, setTransferContributionId] = useState<string | null>(null);
   const [declaring, setDeclaring] = useState(false);
@@ -116,8 +120,9 @@ const FundAProjectPage = () => {
       return;
     }
 
-    // Prefer Paystack when offered — it reconciles itself.
-    const method = supportsMethod(config, "paystack") ? "paystack" : "bank_transfer";
+    // The payer chose this when the project offers both; otherwise it is the only
+    // configured method. It used to be decided here, ignoring the admin's second option.
+    const method = supportsMethod(config, payMethod) ? payMethod : defaultMethod(config);
 
     try {
       setPaystackLoading(true);
@@ -169,6 +174,9 @@ const FundAProjectPage = () => {
   const openContributionModal = (project: Project) => {
     setSelectedProject(project);
     setShowContributionModal(true);
+    // Seed the choice from this project, so a project offering only one method still
+    // starts on that method rather than on a stale selection from the previous one.
+    setPayMethod(defaultMethod(project.paymentConfig));
     reset({ contributionType: "cash" });
   };
 
@@ -322,14 +330,20 @@ const FundAProjectPage = () => {
                       <div className="p-3 bg-yellow-50 rounded">
                         <p className="text-sm text-yellow-800">This project has no payment method configured. Please contact the organisation.</p>
                       </div>
-                    ) : supportsMethod(selectedProject.paymentConfig, "paystack") ? (
-                      <div className="p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">You'll be taken to Paystack to pay by card or bank transfer. Your contribution confirms automatically.</p>
-                      </div>
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded">
-                        <p className="text-sm text-gray-700">You'll be shown the account details and a reference to quote on your transfer.</p>
-                      </div>
+                      <>
+                        <PaymentMethodChoice config={selectedProject.paymentConfig} value={payMethod} onChange={setPayMethod} disabled={paystackLoading} />
+
+                        {payMethod === "paystack" ? (
+                          <div className="p-3 bg-blue-50 rounded">
+                            <p className="text-sm text-blue-800">You'll be taken to Paystack to pay by card or bank transfer. Your contribution confirms automatically.</p>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded">
+                            <p className="text-sm text-gray-700">You'll be shown the account details and a reference to quote on your transfer.</p>
+                          </div>
+                        )}
+                      </>
                     )}
                   </>
                 )}

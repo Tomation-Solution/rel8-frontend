@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ENDPOINT_URL, TENANT } from "../utils/constants";
+import { ENDPOINT_URL } from "../utils/constants";
 
 // Public auth routes that don't require authentication
 const PUBLIC_AUTH_ROUTES = [
@@ -98,12 +98,21 @@ apiTenant.interceptors.request.use(
   }
 );
 
-// Form data API instance
+// Form data API instance — used by the `declare*` payment calls, which upload a proof file.
+//
+// This instance was still configured for the old Django API and every request through it
+// 404'd: the base was `/tenant/<slug>/tenant`, which the Node backend does not mount, so
+// `POST /api/dues/pay/:id/declare` went out as
+// `/tenant/aani/tenant/api/dues/pay/:id/declare`. Two further mismatches were hidden
+// behind that 404 and would have surfaced as a 401 the moment the path was corrected:
+// the header was `Token <t>` where the backend does `authHeader.replace("Bearer ", "")`,
+// and `orgId` was never appended, which every tenant-scoped route requires.
+//
+// It now matches `apiTenant` exactly, differing only in that it carries FormData.
+// Content-Type is deliberately NOT set: axios strips it for a FormData body so the
+// browser can supply the multipart boundary. Setting it by hand cannot work here.
 export const apiTenantAxiosForm = axios.create({
-  baseURL: `${ENDPOINT_URL}/tenant/${TENANT}/tenant`,
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
+  baseURL: `${ENDPOINT_URL}/`,
 });
 
 apiTenantAxiosForm.interceptors.request.use(
@@ -113,13 +122,18 @@ apiTenantAxiosForm.interceptors.request.use(
     // Only add auth headers if NOT on a public route
     if (!isPublicRoute(currentPath)) {
       try {
-        const userString = localStorage.getItem('rel8User');
+        const user = JSON.parse(localStorage.getItem('rel8User') || "null");
         
-        if (userString) {
-          const user = JSON.parse(userString);
+        if (user && user.token) {
+          config.headers['Authorization'] = `Bearer ${user.token}`;
           
-          if (user && user.token) {
-            config.headers['Authorization'] = `Token ${user.token}`;
+          const orgId = user.orgId;
+          if (orgId) {
+            if (!config.params) {
+              config.params = { orgId };
+            } else {
+              config.params.orgId = orgId;
+            }
           }
         }
       } catch (error) {

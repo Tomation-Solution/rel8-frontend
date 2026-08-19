@@ -9,6 +9,7 @@ import { useQuery } from "react-query";
 import { fetchUserDues } from "../api/account/account-api";
 import { fetchOrganizationSettings } from "../api/organization/organization-api";
 import { TableDataType } from "../types/myTypes";
+import { isOutstanding } from "../api/paystack-api";
 
 interface DashboardLayoutInterfaceProps {
   children: ReactNode;
@@ -46,10 +47,12 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
   // Check if current page is account page
   const isAccountPage = location.pathname === "/account" || location.pathname.startsWith("/dashboard/account") || location.pathname.includes("election") || location.pathname.includes("dues");
 
-  // Calculate total outstanding amount from dues data
+  // Calculate total outstanding amount from dues data.
+  // This used to filter on `status !== "approved"`, a value the backend has not returned
+  // since X-7 — so every due counted as outstanding and the modal showed permanently.
   const totalOutstandingAmount =
     userDues
-      ?.filter((dues: TableDataType) => dues.status !== "approved")
+      ?.filter((dues: TableDataType) => isOutstanding(dues.status))
       ?.reduce((total: number, dues: TableDataType) => {
         return total + parseFloat(dues.amount || "0");
       }, 0) || 0;

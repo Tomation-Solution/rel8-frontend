@@ -9,13 +9,9 @@ import EventGrid from "../../../components/grid/EventGrid";
 import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
-import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-import {
-  fetchUserMeetingById,
-  registerForMeeting,
-} from "../../../api/meetings/api-meetings";
+import { fetchUserMeetingById } from "../../../api/meetings/api-meetings";
 import Button from "../../../components/button/Button";
 import styled from "styled-components";
 
@@ -85,37 +81,6 @@ const MeetingDetailsPage = () => {
   // Meeting detail
   const meetingItem = data;
   console.log(meetingItem, "meeting item");
-  // Form handling
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: { full_name: "", email: "" },
-  });
-
-  // Registration mutation
-  const { mutate, isLoading: isSubmitting } = useMutation(registerForMeeting, {
-    onSuccess: () => {
-      notifyUser("Registration successful!", "success");
-      queryClient.invalidateQueries(["meetingDetails", id]);
-    },
-    onError: (error: any) => {
-      const errorMessage =
-        error?.response?.data?.message?.error || "An error occurred.";
-      console.error(errorMessage); // For debugging
-      notifyUser(errorMessage, "error");
-    },
-  });
-
-  const onSubmit = (formData: any) => {
-    const payload = {
-      meeting: id,
-      proxy_participants: [formData],
-    };
-    mutate(payload);
-  };
-
   if (isLoading) return <CircleLoader />;
   if (isError || !meetingItem) {
     console.log("error", error);

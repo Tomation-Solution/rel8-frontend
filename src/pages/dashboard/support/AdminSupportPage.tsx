@@ -17,8 +17,8 @@ export type AdminSupportFormFields = {
 };
 
 interface AdminSupportPayload {
-    sender_name: string;
-    sender_email: string;
+    name: string;
+    email: string;
     message: string;
 }
 
@@ -35,13 +35,12 @@ const AdminSupportPage = () => {
 
     const onSubmit = (formData: AdminSupportFormFields) => {
         const payload: AdminSupportPayload = {
-            sender_name: formData.name,
-            sender_email: formData.email,
+            name: formData.name,
+            email: formData.email,
             message: formData.message,
         };
 
-        console.log("Payload being sent:", payload); // Debugging line
-        mutate(payload as any); // Cast as any if needed to bypass type check.
+        mutate(payload);
         setHasNotified(false); // Reset notification status on new submission
     };
 

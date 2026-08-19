@@ -5,6 +5,7 @@ import { useAppContext } from "../../../context/authContext";
 import { getTenantInfo } from "../../../utils/constants";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { getInitials } from "../../../utils/strings";
+import { isSettled } from "../../../api/paystack-api";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -590,7 +591,9 @@ const MembershipCardTab = () => {
 
   const currentYearDues: any[] = Array.isArray(dues) ? dues.filter((d: any) => isCurrentYear(d.startDate ?? d.createdAt)) : [];
 
-  const allApproved = currentYearDues.length > 0 && currentYearDues.every((d: any) => d.status === "approved" || d.confirmed === true);
+  // `confirmed` is set by the backend to `status === "paid"`, so this kept working after
+  // X-7 while the `"approved"` half of the test silently never matched. Stated directly now.
+  const allApproved = currentYearDues.length > 0 && currentYearDues.every((d: any) => isSettled(d.status) || d.confirmed === true);
 
   const memberId: string = user?._id?.toString().slice(-8).toUpperCase() ?? user?.id?.toString().slice(-8).toUpperCase() ?? "--------";
 

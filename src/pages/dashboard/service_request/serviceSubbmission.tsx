@@ -6,7 +6,8 @@ import { useState } from "react";
 import Toast from "../../../components/toast/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { getServiceDetail, DeliveryAddress } from "../../../api/serviceRequestApi";
-import { declareServicePayment, isFree, startServiceRequest, supportsMethod, type PaymentCheckout } from "../../../api/paystack-api";
+import { declareServicePayment, isFree, startServiceRequest, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
+import PaymentMethodChoice, { defaultMethod } from "../../../components/payments/PaymentMethodChoice";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import InputWithLabel from "../../../components/form/InputWithLabel";
@@ -37,6 +38,7 @@ const ServiceSubmission = () => {
   const { notifyUser } = Toast();
 
   const [submitting, setSubmitting] = useState(false);
+  const [payMethod, setPayMethod] = useState<PaymentMethod | null>(null);
   const [checkout, setCheckout] = useState<PaymentCheckout | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [declaring, setDeclaring] = useState(false);
@@ -56,6 +58,9 @@ const ServiceSubmission = () => {
 
   const config = service?.paymentConfig;
   const hasPaystack = supportsMethod(config, "paystack");
+  // `payMethod` is null until the payer touches the control — the service loads async, so
+  // there is nothing to seed from on first render. Fall back to the default until then.
+  const effectiveMethod: PaymentMethod = payMethod && supportsMethod(config, payMethod) ? payMethod : defaultMethod(config);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-NG", {
@@ -89,7 +94,7 @@ const ServiceSubmission = () => {
       const result = await startServiceRequest({
         serviceId,
         deliveryAddress,
-        method: hasPaystack ? "paystack" : "bank_transfer",
+        method: effectiveMethod,
       });
 
       const co = result.checkout;
@@ -154,10 +159,16 @@ const ServiceSubmission = () => {
               <p className="text-sm font-medium text-gray-700 mb-2">Payment</p>
               {isFree(config) ? (
                 <p className="text-sm text-yellow-700">No payment method is configured for this service. Please contact the organisation.</p>
-              ) : hasPaystack ? (
-                <p className="text-sm text-gray-600">You'll be taken to Paystack to pay by card or bank transfer. Your request confirms automatically once payment succeeds.</p>
               ) : (
-                <p className="text-sm text-gray-600">You'll be shown the account details and a reference to quote on your transfer, then an admin confirms it.</p>
+                <>
+                  <PaymentMethodChoice config={config} value={effectiveMethod} onChange={setPayMethod} disabled={submitting} />
+
+                  <p className="mt-2 text-sm text-gray-600">
+                    {effectiveMethod === "paystack"
+                      ? "You'll be taken to Paystack to pay by card or bank transfer. Your request confirms automatically once payment succeeds."
+                      : "You'll be shown the account details and a reference to quote on your transfer, then an admin confirms it."}
+                  </p>
+                </>
               )}
             </div>
           )}

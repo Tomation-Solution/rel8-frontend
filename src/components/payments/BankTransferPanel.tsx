@@ -34,6 +34,9 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
   const [localError, setLocalError] = useState("");
 
   const bt = checkout.bankTransfer;
+  // An account number alone is what a payer actually needs; name and bank are supporting
+  // detail. Without it there is nothing actionable on this screen.
+  const hasAccountDetails = Boolean(bt?.accountNumber);
 
   const copy = async (label: string, value: string) => {
     try {
@@ -73,8 +76,31 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4">
+      {checkout.fallbackFrom === "paystack" && (
+        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <p className="text-sm font-semibold text-amber-900">Online payment isn't available right now</p>
+          <p className="mt-1 text-xs text-amber-800">
+            We couldn't start your online payment, so we've set up a bank transfer instead. You can pay to the account below — nothing has been charged.
+          </p>
+        </div>
+      )}
+
       <p className="text-sm font-semibold text-gray-900">{title}</p>
       <p className="mt-1 text-xs text-gray-500">Transfer the amount below and quote your reference so the payment can be matched to you.</p>
+
+      {/* Items migrated from the pre-X-7 schema can offer bank transfer with no structured
+          account details — the old free-text blob was preserved but never parsed. Showing
+          the usual "transfer to the account below" with no account is worse than saying so:
+          the payer either gives up or sends money somewhere wrong. */}
+      {!hasAccountDetails && (
+        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm font-semibold text-red-900">Account details are missing</p>
+          <p className="mt-1 text-xs text-red-800">
+            The organisation hasn't finished setting up bank transfer for this item, so there's no account to pay into yet. Please contact them before
+            sending anything{bt?.instructions ? " — the note below is all they have provided." : "."}
+          </p>
+        </div>
+      )}
 
       <div className="mt-3 space-y-2 rounded-md bg-gray-50 p-3">
         {bt?.accountName && <Row label="Account name" value={bt.accountName} onCopy={copy} copied={copied} />}
@@ -85,7 +111,7 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
         {bt?.instructions && <p className="border-t border-gray-200 pt-2 text-xs text-gray-600">{bt.instructions}</p>}
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className={`mt-4 space-y-3 ${hasAccountDetails ? "" : "opacity-50 pointer-events-none"}`} aria-disabled={!hasAccountDetails}>
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-700">
             Proof of payment {requireProof ? <span className="text-red-500">*</span> : <span className="text-gray-400">(optional)</span>}

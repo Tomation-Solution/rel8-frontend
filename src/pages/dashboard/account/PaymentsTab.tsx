@@ -1,5 +1,5 @@
 import accountWallet from "../../../assets/icons/account-wallet.png";
-import { startDuePayment } from "../../../api/paystack-api";
+import { isFree, isOutstanding, isSettled, startDuePayment, supportsMethod } from "../../../api/paystack-api";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
@@ -83,8 +83,30 @@ const PaymentsTab = () => {
   const paidDues = data?.filter((dues: TableDataType) => dues.is_paid === true && dues.is_overdue === false);
   const pendingDues = data?.filter((dues: TableDataType) => true);
 
-  const openCheckoutLink = (link: string) => {
-    window.open(link, "_blank");
+  /**
+   * Start a Paystack checkout and go there.
+   *
+   * This used to be `window.open(row.original.paymentLink)`. X-7 deleted `paymentLink`
+   * from the Due model, so that value was always undefined and the button opened a
+   * blank tab. Payment now starts server-side and returns an authorization URL.
+   */
+  const [paystackLoadingId, setPaystackLoadingId] = useState<string | null>(null);
+
+  const beginPaystack = async (dueId: string) => {
+    setPaystackLoadingId(dueId);
+    try {
+      const result = await startDuePayment(dueId, "paystack");
+      const url = result?.checkout?.authorizationUrl;
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      notifyUser("Could not start the payment. Please try again.", "error");
+    } catch (error: any) {
+      notifyUser(error?.response?.data?.message || "Could not start the payment", "error");
+    } finally {
+      setPaystackLoadingId(null);
+    }
   };
 
   const handleRequestConfirmation = (dueId: string) => {
@@ -107,7 +129,7 @@ const PaymentsTab = () => {
   };
 
   const totalPendingAmount = data
-    ?.filter((dues: TableDataType) => dues.status != "approved")
+    ?.filter((dues: TableDataType) => isOutstanding(dues.status))
     ?.reduce((total: number, dues: TableDataType) => {
       return total + parseFloat(dues.amount);
     }, 0);
@@ -180,26 +202,39 @@ const PaymentsTab = () => {
       accessor: "paymentLink",
       Cell: ({ row }) => {
         const status = row.original.status || "pending";
-        const isApproved = status === "approved";
         const isPending = status === "pending";
         const isRejected = status === "rejected";
         const isPaid = row.original.is_paid;
 
+        // X-7: what the member may do comes from the due's own paymentConfig. Both
+        // actions used to render regardless — a Paystack-only due still offered
+        // "Request Confirmation", and a transfer-only due still offered a "Pay" button
+        // that went nowhere.
+        const config = row.original.paymentConfig;
+        const hasPaystack = supportsMethod(config, "paystack");
+        const hasTransfer = supportsMethod(config, "bank_transfer");
+        const owes = !isPaid && (isPending || isRejected);
+        const loadingRow = paystackLoadingId === row.original._id;
+
         return (
           <div className="flex justify-end gap-x-2">
-            {isPending && !isPaid && (
+            {owes && isFree(config) && <span className="px-4 py-2 text-sm text-gray-500">No payment method set</span>}
+
+            {owes && hasPaystack && (
               <button
-                className="text-white flex items-center gap-3 bg-org-primary px-4 py-2 rounded-md hover:bg-opacity-90 transition-all"
+                disabled={!!paystackLoadingId}
+                className="text-white flex items-center gap-3 bg-org-primary px-4 py-2 rounded-md hover:bg-opacity-90 transition-all disabled:opacity-50"
                 onClick={e => {
-                  openCheckoutLink(row.original.paymentLink);
                   e.stopPropagation();
+                  beginPaystack(row.original._id);
                 }}
               >
-                <span>Pay</span>
+                <span>{loadingRow ? "Redirecting…" : "Pay"}</span>
                 <FaExternalLinkAlt />
               </button>
             )}
-            {!isPaid && isPending && (
+
+            {owes && hasTransfer && (
               <button
                 className="text-org-primary bg-org-secondary px-4 py-2 rounded-md hover:bg-opacity-90 transition-all min-w-[140px]"
                 onClick={e => {
@@ -207,18 +242,7 @@ const PaymentsTab = () => {
                   handleRequestConfirmation(row.original._id);
                 }}
               >
-                Request Confirmation
-              </button>
-            )}
-            {!isPaid && isRejected && (
-              <button
-                className="text-org-primary bg-org-secondary px-4 py-2 rounded-md hover:bg-opacity-90 transition-all min-w-[140px]"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleRequestConfirmation(row.original._id);
-                }}
-              >
-                Request Again
+                {isRejected ? "Request Again" : "Request Confirmation"}
               </button>
             )}
           </div>

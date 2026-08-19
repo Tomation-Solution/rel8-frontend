@@ -8,7 +8,8 @@ import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { fetchAllUserEvents, fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
-import { declareEventPayment, isFree, startEventRegistration, type PaymentCheckout } from "../../../api/paystack-api";
+import { declareEventPayment, isFree, startEventRegistration, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
+import PaymentMethodChoice, { defaultMethod } from "../../../components/payments/PaymentMethodChoice";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
@@ -25,13 +26,16 @@ const deadlinePassed = (deadline?: string) => !!deadline && new Date(deadline) <
 interface RegistrationPanelProps {
   event: any;
   myRegistrations: any[];
-  onRegister: () => void;
+  onRegister: (method?: PaymentMethod) => void;
   onCancel: () => void;
   registerLoading: boolean;
   cancelLoading: boolean;
 }
 
 const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, registerLoading, cancelLoading }: RegistrationPanelProps) => {
+  // Hooks must run before any early return.
+  const [payMethod, setPayMethod] = useState<PaymentMethod | null>(null);
+
   if (!event.requiresRegistration) return null;
 
   const myReg = myRegistrations.find((r: any) => (r.eventId?._id || r.eventId) === (event._id || event.id));
@@ -43,6 +47,7 @@ const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, regis
   // X-4: pricing lives in `pricing`; members get `memberAmount` when set.
   const price = event.pricing?.memberAmount != null ? event.pricing.memberAmount : (event.pricing?.amount ?? 0);
   const isPaidEvent = Array.isArray(event.paymentConfig?.methods) && event.paymentConfig.methods.length > 0 && price > 0;
+  const effectiveMethod: PaymentMethod = payMethod && supportsMethod(event.paymentConfig, payMethod) ? payMethod : defaultMethod(event.paymentConfig);
 
   return (
     <div className="mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
@@ -65,6 +70,12 @@ const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, regis
         {isRegistered && <span className="text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">✓ Registered</span>}
       </div>
 
+      {!isRegistered && isPaidEvent && (
+        <div className="mb-4">
+          <PaymentMethodChoice config={event.paymentConfig} value={effectiveMethod} onChange={setPayMethod} disabled={registerLoading} />
+        </div>
+      )}
+
       {isRegistered ? (
         !alreadyPaid && (
           <button onClick={onCancel} disabled={cancelLoading} className="px-5 py-2 rounded-lg border border-red-400 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
@@ -73,7 +84,7 @@ const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, regis
         )
       ) : (
         <button
-          onClick={onRegister}
+          onClick={() => onRegister(isPaidEvent ? effectiveMethod : undefined)}
           disabled={registerLoading || pastDeadline || isFull}
           className="px-6 py-2 rounded-lg bg-org-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -120,7 +131,7 @@ const EventDetailPage = () => {
   const [declared, setDeclared] = useState(false);
   const [declareError, setDeclareError] = useState("");
 
-  const registerMutation = useMutation(() => startEventRegistration(eventId!), {
+  const registerMutation = useMutation((method?: PaymentMethod) => startEventRegistration(eventId!, method), {
     onSuccess: (result: any) => {
       const co = result?.checkout;
 
@@ -255,7 +266,7 @@ const EventDetailPage = () => {
         {/* Registration panel — hidden while a bank transfer is being completed, so the
             member has one clear next action. */}
         {!checkout && (
-          <RegistrationPanel event={event} myRegistrations={myRegistrations} onRegister={() => registerMutation.mutate()} onCancel={() => cancelMutation.mutate()} registerLoading={registerMutation.isLoading} cancelLoading={cancelMutation.isLoading} />
+          <RegistrationPanel event={event} myRegistrations={myRegistrations} onRegister={method => registerMutation.mutate(method)} onCancel={() => cancelMutation.mutate()} registerLoading={registerMutation.isLoading} cancelLoading={cancelMutation.isLoading} />
         )}
 
         {/* X-7: bank details + reference, after registration reserves the place */}

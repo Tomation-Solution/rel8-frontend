@@ -152,7 +152,9 @@ const PublicationsDetailPage = () => {
                 />
               </div>
             )}
-            <div>{/* <PublicationComment newsId={publicationId} /> */}</div>
+            <div>
+              <PublicationComment newsId={publicationId} />
+            </div>
           </div>
           <div className="md:col-span-1 col-span-3">
             <SeeAll title="Others" />

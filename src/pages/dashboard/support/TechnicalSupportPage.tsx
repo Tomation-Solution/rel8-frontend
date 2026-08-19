@@ -22,14 +22,13 @@ const TechnicalSupport = () => {
     const [hasNotified, setHasNotified] = useState(false); // State to track notification
 
     const onSubmit = (formData: TechnicalSupportFormFields) => {
-        const payload = {
-            sender_name: formData.name,
-            sender_email: formData.email,
+        // The Django-era `sender_name`/`sender_email` names went to an endpoint that no
+        // longer exists; the ticket API takes the plain fields.
+        mutate({
+            name: formData.name,
+            email: formData.email,
             message: formData.message,
-        };
-
-        console.log("Payload being sent:", payload); // Debugging line
-        mutate(payload as any); // Cast as any if needed to bypass type check.
+        });
         setHasNotified(false); // Reset notification status on new submission
     };
 
