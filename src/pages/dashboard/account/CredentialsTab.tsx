@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FiCreditCard, FiAward, FiEye, FiArrowLeft } from "react-icons/fi";
 
-import { Card, Button, EmptyState } from "../../../components/ui";
+import { Card, Button } from "../../../components/ui";
 import MembershipCardTab from "./MembershipCardTab";
+import CertificateView from "./CertificateView";
 
 /**
  * "Credentials" — `Credentials.png`.
@@ -11,17 +12,19 @@ import MembershipCardTab from "./MembershipCardTab";
  *
  * - **Membership ID Card** works: it is rendered in the browser from the member's own
  *   profile, which is why `MembershipCardTab` exists and needs no new endpoint.
- * - **Certificate** does not. `credential.template.routes.js` is `requireOrgAdmin` on
- *   *every* route, and it serves *templates* — there is no issued-credential model and no
- *   member-scoped endpoint to fetch "my certificate". `Certificate.png` and
- *   `certificate.jpg` show a fully rendered certificate with a member name, QR code and
- *   issue date; none of that is reachable from this app today.
+ * - **Certificate** now works too. `GET /api/credentials/my?category=certificate` returns
+ *   the organization's published design plus this member's values, and `CredentialCanvas`
+ *   renders it. There is deliberately no issued-credential record: the template's
+ *   `variable` elements are resolved on request, so a re-brand reaches every member with
+ *   no reissue step.
  *
- * So the certificate card states the position instead of opening a viewer that could only
- * 403. "Verify Certificate" (also in the mockup) has no endpoint either — REDESIGN.md §5.
+ * "Verify Certificate" from the mockup is still absent — there is no verification endpoint,
+ * and an inert Verify button is worse than none. REDESIGN.md §5.
  */
 const CredentialsTab = () => {
-  const [view, setView] = useState<"index" | "card">("index");
+  const [view, setView] = useState<"index" | "card" | "certificate">("index");
+
+  if (view === "certificate") return <CertificateView onBack={() => setView("index")} />;
 
   if (view === "card") {
     return (
@@ -54,19 +57,14 @@ const CredentialsTab = () => {
         <div className="min-w-0">
           <h3 className="text-[17px] font-semibold text-ink">Certificate</h3>
           <p className="text-sm text-muted mt-1">Browse and view all your issued certificates</p>
-          <Button className="mt-5" variant="muted" disabled icon={FiEye}>
+          <Button className="mt-5" icon={FiEye} onClick={() => setView("certificate")}>
             View Certificate
           </Button>
-          <p className="text-xs text-muted mt-3">Certificates aren&rsquo;t available in the portal yet. Your association can send you one directly.</p>
         </div>
         <span className="w-14 h-14 rounded-full bg-org-tint grid place-items-center flex-shrink-0">
           <FiAward className="w-6 h-6 text-org-primary" />
         </span>
       </Card>
-
-      <div className="lg:col-span-2">
-        <EmptyState icon={FiAward} title="Nothing else here yet" description="Any other credentials your association issues will show up on this page." />
-      </div>
     </div>
   );
 };

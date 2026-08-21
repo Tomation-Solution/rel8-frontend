@@ -897,10 +897,11 @@ Recorded so they don't get re-litigated. Each is a UI affordance with no backend
 | Position "Date Started" / "Time Spent" / "Past Holder" | the Position model is `{ name, orgId, currentHolder }` + timestamps. No position-history collection exists to derive any of them |
 | Password change form (`My Account-1.png`) | no authenticated change-password route — only invite-token, forgot-password and reset-token. The tab sends a reset link instead |
 | Service bank details shown before a request exists (`Service Request-1.png`) | the anti-pattern X-7 removed: an account number with no reference produces unattributable transfers. Details arrive with the reference after submission |
-| Certificate viewer + "Verify Certificate" | `credential.template.routes.js` is `requireOrgAdmin` on every route and serves *templates* — there is no issued-credential model and no member-scoped endpoint. Deferred, not dropped; the Membership ID card is unaffected (rendered client-side) |
+| ~~Certificate viewer~~ | **Built.** `GET /api/credentials/my` returns the org's published design plus the member's values, rendered by `CredentialCanvas`. No issued-credential record needed — the template's `variable` elements resolve on request |
+| "Verify Certificate" | still no verification endpoint. The button is omitted rather than shipped inert |
 | Applicant dashboard (`New Applicant dashboard.png`) | `applications.routes.js` is `requireOrgAdmin` end to end — no applicant-scoped endpoint exists. Deferred until the backend adds one, not dropped |
 | Environment / audience toggle | retired 2026-08-21; the client-side `audience.includes(env)` filter was a guess the API should own. See §0 |
-| Per-type notification preference toggles | the Member model has no preferences field and `PUT /members/profile` accepts nothing of the sort; the tab shows the true state (all on), disabled, with the reason |
+| ~~Per-type notification preference toggles~~ | **Built.** `Notification` gained a `type`, `Member.notificationPreferences` holds a flag per type, and the feed filters on them. `general` has no flag and is always delivered |
 | ~~News/publication like + comment counts on cards~~ | **Wrong — built in M6.** `getNews` populates `comments.userId` and returns `likes[]`; `getPublications` the same. Both counts are on the list response, so the cards show them |
 | Threaded comment replies, and a like per comment (`News-1.png`) | `News.comments` / `Publication.comments` are flat subdocuments — `{ _id, userId, content, createdAt }`. No `parentId`, no like field. Replies have nowhere to point, so the composer posts top-level comments only |
 

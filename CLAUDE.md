@@ -128,6 +128,23 @@ in old call sites and only ever worked because `name` is undefined. Accessors li
 empty ⇒ free. A registration can now be `pending_payment` — a place held while checkout is
 in flight, which does **not** count toward capacity.
 
+## Notifications
+
+`Notification` carries a **`type`** (`event|meeting|due|election|news|publication|general`)
+and a `refId`. Any new producer must set both — the type drives what members can mute
+(`Member.notificationPreferences`, filtered server-side in `notification.controller.js`) and
+`refId` is what lets a row link to the thing it is about.
+
+`general` is the fallback for anything unclassified and is deliberately not mutable.
+
+## Credentials
+
+A member's certificate or ID card is a **published `CredentialTemplate` plus their values**,
+resolved on request by `GET /api/credentials/my?category=…`. There is no issued-credential
+collection by design: the template's `variable` elements are substituted at render time, so
+a re-brand reaches every member with no reissue step. Rendering lives in
+`components/credentials/CredentialCanvas.tsx`.
+
 ## Password recovery
 
 `POST /api/members/forgot-password` sends a link whose destination depends on

@@ -1,50 +1,85 @@
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { FiBell } from "react-icons/fi";
 
+import { fetchNotificationPreferences, updateNotificationPreferences, type NotificationPreferences } from "../../../api/notifications/preferences-api";
 import { Card, Toggle } from "../../../components/ui";
+import CircleLoader from "../../../components/loaders/CircleLoader";
+import Toast from "../../../components/toast/Toast";
 
 /**
- * "Notification Preference".
+ * "Notification Preference" — `My Account-2.png`.
  *
- * `My Account-2.png` draws per-type toggles. **The Member model has no preferences field
- * and there is no endpoint to save one** — `PUT /api/members/profile` accepts name, phone,
- * jobTitle, bio, socials and an image, nothing else. Wiring live toggles here would give
- * the member a switch that flips, appears to save, and silently does nothing after a
- * reload.
+ * These toggles are live. Each one maps to a `Notification.type`, and the feed endpoints
+ * filter on them, so switching one off genuinely stops those notifications arriving.
  *
- * So the toggles render in their real state — on, because every member currently receives
- * every notification — and are disabled with the reason stated. See REDESIGN.md §5.
+ * They render read-only until the current values load, so a toggle can never show a state
+ * the server does not hold.
  */
-const CHANNELS = [
-  { key: "events", label: "Events", hint: "New events, and reminders for ones you registered for." },
-  { key: "meetings", label: "Meetings", hint: "Meetings scheduled for you, and reminders you set." },
-  { key: "dues", label: "Dues", hint: "New dues, deadlines, and payment confirmations." },
-  { key: "elections", label: "Elections", hint: "Voting windows opening and results." },
-  { key: "news", label: "News & Publications", hint: "Anything your association publishes." },
+const CHANNELS: { key: keyof NotificationPreferences; label: string; hint: string }[] = [
+  { key: "event", label: "Events", hint: "New events published by your association." },
+  { key: "meeting", label: "Meetings", hint: "Meetings scheduled, and reminders you asked for." },
+  { key: "due", label: "Dues", hint: "New dues and payment deadlines." },
+  { key: "election", label: "Elections", hint: "Voting opening and closing, and results." },
+  { key: "news", label: "News", hint: "News your association posts." },
+  { key: "publication", label: "Publications", hint: "New publications shared with members." },
 ];
 
-const NotificationPreferenceTab = () => (
-  <div className="max-w-2xl">
-    <Card accent className="p-6">
-      <div className="flex items-start gap-4 mb-6">
-        <span className="w-11 h-11 rounded-full bg-org-tint grid place-items-center flex-shrink-0">
-          <FiBell className="w-5 h-5 text-org-primary" />
-        </span>
-        <div className="min-w-0">
-          <h3 className="text-[17px] font-semibold text-ink">Notification Preference</h3>
-          <p className="text-sm text-muted mt-1">You currently receive every notification your association sends. Choosing which ones to receive isn&rsquo;t available yet — these are shown so you know what you&rsquo;re subscribed to.</p>
-        </div>
-      </div>
+const NotificationPreferenceTab = () => {
+  const queryClient = useQueryClient();
+  const { notifyUser } = Toast();
 
-      <ul className="flex flex-col divide-y divide-hairline">
-        {CHANNELS.map(channel => (
-          <li key={channel.key}>
-            {/* Toggle renders its own label/description block. */}
-            <Toggle checked disabled label={channel.label} description={channel.hint} />
-          </li>
-        ))}
-      </ul>
-    </Card>
-  </div>
-);
+  const { data: preferences, isLoading } = useQuery("notificationPreferences", fetchNotificationPreferences);
+
+  const mutation = useMutation(updateNotificationPreferences, {
+    /*
+     * Optimistic, with a rollback. A toggle that waits for a round trip before moving feels
+     * broken; one that moves and silently fails is worse. The previous value is captured so
+     * a failed save puts the switch back where it was.
+     */
+    onMutate: async partial => {
+      await queryClient.cancelQueries("notificationPreferences");
+      const previous = queryClient.getQueryData<NotificationPreferences>("notificationPreferences");
+      if (previous) queryClient.setQueryData("notificationPreferences", { ...previous, ...partial });
+      return { previous };
+    },
+    onError: (_error, _partial, context: any) => {
+      if (context?.previous) queryClient.setQueryData("notificationPreferences", context.previous);
+      notifyUser("Could not save that preference. Please try again.", "error");
+    },
+    onSuccess: fresh => {
+      queryClient.setQueryData("notificationPreferences", fresh);
+      // The feed depends on these, so anything showing notifications is now stale.
+      queryClient.invalidateQueries("notifications");
+    },
+  });
+
+  return (
+    <div className="max-w-2xl">
+      <Card accent className="p-6">
+        <div className="flex items-start gap-4 mb-6">
+          <span className="w-11 h-11 rounded-full bg-org-tint grid place-items-center flex-shrink-0">
+            <FiBell className="w-5 h-5 text-org-primary" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-[17px] font-semibold text-ink">Notification Preference</h3>
+            <p className="text-sm text-muted mt-1">Choose what you hear about. Switching one off stops those notifications appearing in your feed. General announcements from your association always come through.</p>
+          </div>
+        </div>
+
+        {isLoading || !preferences ? (
+          <CircleLoader />
+        ) : (
+          <ul className="flex flex-col divide-y divide-hairline">
+            {CHANNELS.map(channel => (
+              <li key={channel.key}>
+                <Toggle checked={preferences[channel.key]} disabled={mutation.isLoading} onChange={next => mutation.mutate({ [channel.key]: next })} label={channel.label} description={channel.hint} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+};
 
 export default NotificationPreferenceTab;
