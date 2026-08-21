@@ -7,7 +7,7 @@ Served at `app.rel8.ng` (or whatever `FRONTEND_URL` is on the backend).
 > touching any UI.** It carries the design tokens, the shared primitives in
 > `src/components/ui/`, the module-by-module plan and a "Resume here" section with the
 > current state. Currently: M0–M13 done — everything except Auth (M14) and the dead-code
-> sweep (M15). Nothing committed.
+> sweep (M15). The applicant portal (M1's deferred shell) is now built too. Nothing committed.
 > This file still governs stack rules, payment architecture and status vocabulary —
 > none of which the redesign changes.
 
@@ -127,6 +127,25 @@ in old call sites and only ever worked because `name` is undefined. Accessors li
 `memberAmount` when the admin set a member discount, else `amount`. `paymentConfig.methods`
 empty ⇒ free. A registration can now be `pending_payment` — a place held while checkout is
 in flight, which does **not** count toward capacity.
+
+## Membership applications — the applicant portal
+
+The portal hosts **two public routes that have nothing to do with a member session**:
+
+- `/track` — an applicant enters their application ID + the email they applied with
+- `/application` — the status page, behind `ApplicantLayout` (logo-only rail, one nav item)
+
+Neither may go inside `DashboardLayout`, which requires a logged-in member and would bounce
+them to `/login`. They use `apiPublic`, not `apiTenant`, for the same reason.
+
+The tracked application is cached in **`sessionStorage`** (`pages/applicant/trackedApplication.ts`)
+rather than the URL — a code and email in a URL end up in history, bookmarks and
+screenshots. It is a cache of an authorised lookup, never the authorisation: the status page
+re-fetches on mount.
+
+This is the applicant shell REDESIGN.md M1 deferred as "blocked on the backend". The block
+was real for an authenticated endpoint; the portal turned out to be a public code lookup.
+Backend: `rel8-backend-nordjs-2025` BE-39.
 
 ## Environments — one model, not three
 

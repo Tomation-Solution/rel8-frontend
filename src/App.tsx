@@ -3,6 +3,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./App.css";
 import Loader from "./components/Loader";
 import DashboardLayout from "./layouts/DashboardLayout";
+import ApplicantLayout from "./layouts/ApplicantLayout";
 import ActivateAccount from "./pages/ActivateAccount";
 import DuesPage from "./pages/dashboard/dues/DuesPage";
 import ErrorPage from "./pages/ErrorPage";
@@ -12,6 +13,8 @@ function App() {
   const ServiceRequestSubmission = lazy(() => import("./pages/dashboard/service_request/serviceSubbmission"));
   const ServiceRequest = lazy(() => import("./pages/dashboard/service_request"));
   const ServiceRequestDetail = lazy(() => import("./pages/dashboard/service_request/details"));
+  const TrackApplicationPage = lazy(() => import("./pages/applicant/TrackApplicationPage"));
+  const ApplicationStatusPage = lazy(() => import("./pages/applicant/ApplicationStatusPage"));
   const VerifyMemberPage = lazy(() => import("./pages/auth/VerifyMemberPage"));
   const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
   const RegistrationPage = lazy(() => import("./pages/auth/RegistrationPage"));
@@ -61,6 +64,33 @@ function App() {
 
   const EnvironmentDetailPage = lazy(() => import("./pages/dashboard/environment/EnvironmentDetailPage"));
   const router = createBrowserRouter([
+    /*
+     * Applicant portal — public, no account.
+     *
+     * `/track` takes an application ID + the email it was submitted with; `/application`
+     * shows the status behind the applicant shell. Neither sits inside DashboardLayout,
+     * which requires a logged-in member and would bounce them to /login.
+     */
+    {
+      path: "/track",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <TrackApplicationPage />
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/application",
+      element: (
+        <Suspense fallback={<Loader />}>
+          <ApplicantLayout>
+            <ApplicationStatusPage />
+          </ApplicantLayout>
+        </Suspense>
+      ),
+      errorElement: <ErrorPage />,
+    },
     {
       path: "/verify-membership",
       element: (

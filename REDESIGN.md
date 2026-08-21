@@ -44,7 +44,25 @@ Members' stale `selectedEnvironments` keys are left in localStorage; nothing rea
 Note this is a *different* thing from the `Environment` **page** (M4) and the backend
 `Environment` **model** (§0c), which are alive and well. Three uses of one word.
 
-### Deferred: the applicant shell is blocked on the backend
+### Resolved: the applicant shell is built (2026-08-21)
+
+**The block was real, but I had the wrong shape in mind.** I assumed the applicant dashboard
+needed a member-scoped, authenticated endpoint — and `applications.routes.js` was
+`requireOrgAdmin` end to end, so that was genuinely impossible.
+
+Then the actual portal mockups turned up (`Downloads/onboarding-rel8/`): it is a **public
+code lookup**, not a session. An applicant types their application ID and the email they
+applied with. No account, so no member-scoped endpoint needed — just a public one, which the
+backend now has (`POST /api/applications/track`, BE-39).
+
+Built: `pages/applicant/TrackApplicationPage.tsx`, `ApplicationStatusPage.tsx`,
+`layouts/ApplicantLayout.tsx`, routes `/track` and `/application`. Lesson worth keeping: the
+§0b check tells you what an endpoint *can* do, but it cannot tell you the screen was the
+wrong shape. Read the mockup for the screen you are actually building.
+
+<details><summary>The original (wrong) deferral note, kept for the reasoning</summary>
+
+
 
 `New Applicant dashboard.png` is not a restyle — this repo has no applicant route, page or
 API module, and **`rel8-backend-nordjs-2025/src/routes/applications.routes.js` mounts
@@ -55,6 +73,8 @@ Backend work needed first: a member/applicant-scoped `GET` for "my application"
 (name, applicant id, application date, application status, review status). Once that
 exists, the shell is a small piece of work — logo-only sidebar with one "Application"
 item, topbar with org + Logout and no search, and a `KeyValueList` card.
+
+</details>
 
 ### Assets
 
