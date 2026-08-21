@@ -2,6 +2,7 @@ import {} from "react";
 import { useQuery } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
 import { useAppContext } from "../../../context/authContext";
+import { DEFAULT_PRIMARY, DEFAULT_SECONDARY } from "../../../utils/themeUtils";
 import { getTenantInfo } from "../../../utils/constants";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { getInitials } from "../../../utils/strings";
@@ -20,8 +21,10 @@ const fmtDate = (d: Date): string => d.toLocaleDateString("en-GB", { day: "numer
 
 // Read actual hex values from org theme — avoids CSS-variable issues in html2canvas
 const getCardColors = (organization: any): { primary: string; secondary: string } => ({
-  primary: organization?.colorTheme?.primary ?? "#1a56db",
-  secondary: organization?.colorTheme?.secondary ?? "#0e3d91",
+  // Was hardcoded #1a56db / #0e3d91 — a blue, so an org with no colorTheme got a blue
+  // ID card regardless of the brand. Same bug family as the dues receipt.
+  primary: organization?.colorTheme?.primary ?? DEFAULT_PRIMARY,
+  secondary: organization?.colorTheme?.secondary ?? DEFAULT_SECONDARY,
 });
 
 // ── card dimensions (px) ───────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
+import { BackLink, PageHeader } from "../../../components/ui";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { fetchMemberById } from "../../../api/members/api-members";
@@ -10,9 +10,9 @@ import { FiLinkedin, FiTwitter, FiMail, FiPhone, FiBriefcase } from "react-icons
 const Field = ({ label, value }: { label: string; value?: string | null }) => {
   if (!value) return null;
   return (
-    <div className="p-3 bg-gray-50 rounded-lg">
-      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-      <p className="text-sm text-gray-800 font-medium">{value}</p>
+    <div className="p-3 bg-org-tint/50 rounded-lg">
+      <p className="text-xs text-muted mb-0.5">{label}</p>
+      <p className="text-sm text-ink font-medium">{value}</p>
     </div>
   );
 };
@@ -40,18 +40,19 @@ const MemberProfilePage = () => {
 
   return (
     <main className="max-w-4xl">
-      <BreadCrumb title={name} />
+      <BackLink to="/environment" label="Back to environment" />
+      <PageHeader title={name} subtitle="Member profile" />
 
       <button type="button" onClick={() => navigate(-1)} className="text-sm text-org-primary hover:underline mb-4 inline-block">
         ← Back
       </button>
 
       {isError || !member ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <p className="text-gray-500">Member not found or you don't have access to view this profile.</p>
+        <div className="bg-white border border-hairline rounded-xl p-6">
+          <p className="text-muted">Member not found or you don't have access to view this profile.</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-hairline rounded-xl overflow-hidden">
           {/* Top banner */}
           <div className="h-20 bg-org-primary/10" />
 
@@ -61,12 +62,12 @@ const MemberProfilePage = () => {
               <img src={photo} alt={name} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm shrink-0" />
               <div className="pt-2 sm:pt-12 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-bold text-gray-900">{name}</h2>
+                  <h2 className="text-xl font-bold text-ink">{name}</h2>
                   {memberType && <span className="text-xs font-medium bg-org-primary/10 text-org-primary px-2.5 py-0.5 rounded-full">{memberType.name}</span>}
                 </div>
                 {member.position && <p className="text-sm text-org-primary font-medium mt-0.5">{member.position}</p>}
                 {member.jobTitle && (
-                  <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
+                  <p className="text-sm text-muted flex items-center gap-1 mt-0.5">
                     <FiBriefcase size={13} /> {member.jobTitle}
                   </p>
                 )}
@@ -76,8 +77,8 @@ const MemberProfilePage = () => {
             {/* Bio */}
             {member.bio && (
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-1">About</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{member.bio}</p>
+                <h3 className="text-sm font-semibold text-ink mb-1">About</h3>
+                <p className="text-sm text-muted leading-relaxed">{member.bio}</p>
               </div>
             )}
 
@@ -100,14 +101,14 @@ const MemberProfilePage = () => {
 
             {/* Social links */}
             {(member.linkedIn || member.twitter || member.email) && (
-              <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-hairline">
                 {member.email && (
-                  <a href={`mailto:${member.email}`} className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-org-primary transition-colors">
+                  <a href={`mailto:${member.email}`} className="flex items-center gap-1.5 text-sm text-muted hover:text-org-primary transition-colors">
                     <FiMail size={15} /> {member.email}
                   </a>
                 )}
                 {member.linkedIn && (
-                  <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-org-primary transition-colors">
+                  <a href={member.linkedIn} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-muted hover:text-org-primary transition-colors">
                     <FiLinkedin size={15} /> LinkedIn
                   </a>
                 )}
@@ -116,13 +117,13 @@ const MemberProfilePage = () => {
                     href={member.twitter.startsWith("http") ? member.twitter : `https://twitter.com/${member.twitter}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-org-primary transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-muted hover:text-org-primary transition-colors"
                   >
                     <FiTwitter size={15} /> Twitter
                   </a>
                 )}
                 {member.phone && (
-                  <a href={`tel:${member.phone}`} className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-org-primary transition-colors">
+                  <a href={`tel:${member.phone}`} className="flex items-center gap-1.5 text-sm text-muted hover:text-org-primary transition-colors">
                     <FiPhone size={15} /> {member.phone}
                   </a>
                 )}

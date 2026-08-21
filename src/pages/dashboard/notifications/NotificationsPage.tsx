@@ -1,196 +1,49 @@
-// import blueEllipse from '../../../assets/images/notification-blue-ellipse.png';
-// import pinkEllipse from '../../../assets/images/notification-ink-ellipse.png';
-// import ZeroNotifications from '../../../assets/images/no-notification-available.png';
-// import BreadCrumb from '../../../components/breadcrumb/BreadCrumb';
-// import { fetchAllNotifications } from '../../../api/notifications/notifications-api';
-// import { useQuery } from 'react-query';
-// import { NotificationDataType } from '../../../types/myTypes';
-// import Spinner from '../../../components/loaders/CircleLoader'
+import { useMemo, useState } from "react";
+import { useQuery } from "react-query";
+import { FiBell } from "react-icons/fi";
 
+import { fetchAllNotifications } from "../../../api/notifications/notifications-api";
+import { NotificationDataType } from "../../../types/myTypes";
+import NotificationRow from "../../../components/notifications/NotificationRow";
+import CircleLoader from "../../../components/loaders/CircleLoader";
+import { EmptyState, PageHeader, Pagination } from "../../../components/ui";
 
-// const NotificationsPage = () => {
-//   const { data, isError, isLoading } = useQuery<NotificationDataType[]>('notifications', fetchAllNotifications);
-
-//   if (isLoading) return <div><Spinner /></div>;
-//   if (isError) return <div>Error loading notifications</div>;
-
-//   const notifications = data || [];
-
-//   const getRelativeDate = (date: string): string => {
-//     const now = new Date();
-//     const notificationDate = new Date(date);
-//     const diffInDays = Math.floor((now.getTime() - notificationDate.getTime()) / (1000 * 60 * 60 * 24));
-
-//     if (diffInDays === 0) return 'Today';
-//     if (diffInDays === 1) return 'Yesterday';
-//     return `${diffInDays} days ago`;
-//   };
-
-//   const groupedNotifications = notifications.reduce<Record<string, NotificationDataType[]>>((acc, notification) => {
-//     const dateKey = getRelativeDate(notification.created_on);
-//     if (!acc[dateKey]) {
-//       acc[dateKey] = [];
-//     }
-//     acc[dateKey].push(notification);
-//     return acc;
-//   }, {});
-
-//   const sortedKeys = Object.keys(groupedNotifications).sort((a, b) => {
-//     if (a === 'Today') return -1;
-//     if (b === 'Today') return 1;
-//     if (a === 'Yesterday') return -1;
-//     if (b === 'Yesterday') return 1;
-//     return 0;
-//   });
-
-//   return (
-//     <main>
-//       <BreadCrumb title='Notifications' />
-//       {sortedKeys.length > 0 ? (
-//         sortedKeys.map((dateKey) => (
-//           <div key={dateKey} className='flex flex-col my-2'>
-//             <small>{dateKey}</small>
-//             {groupedNotifications[dateKey].map((notification) => (
-//               <div key={notification.id} className='relative flex items-center p-2 bg-neutral-3 rounded-md my-1'>
-//                 <img src={pinkEllipse} className='absolute bottom-0 left-[30%] h-[30%] opacity-80' alt="" />
-//                 <img src={blueEllipse} className='absolute top-0 left-[50%] h-3/4 opacity-50' alt="" />
-//                 <div className='flex flex-col p-2 flex-1'>
-//                   <h3 className='text-sm font-semibold'>{notification.title}</h3>
-//                   <small className='text-xs text-neutral-1'>{notification.body}</small>
-//                 </div>
-//                 <small className='text-xs'>{new Date(notification.created_on).toLocaleTimeString()}</small>
-//               </div>
-//             ))}
-//           </div>
-//         ))
-//       ) : (
-//         <div className="my-2 flex justify-center">
-//           <img src={ZeroNotifications} className="object-contain max-w-[500px]" alt="" />
-//         </div>
-//       )}
-//     </main>
-//   );
-// };
-
-// export default NotificationsPage;
-
-
-
-
-
-
-
-
-
-
-import { Link } from 'react-router-dom';
-import blueEllipse from '../../../assets/images/notification-blue-ellipse.png';
-import pinkEllipse from '../../../assets/images/notification-ink-ellipse.png';
-import ZeroNotifications from '../../../assets/images/no-notification-available.png';
-import BreadCrumb from '../../../components/breadcrumb/BreadCrumb';
-import { fetchAllNotifications } from '../../../api/notifications/notifications-api';
-import { useQuery } from 'react-query';
-import { NotificationDataType } from '../../../types/myTypes';
-import Spinner from '../../../components/loaders/CircleLoader';
-import { unformatText } from '../../../utils/strings';
-
-// Function to get the correct link for notifications
-const getNotificationLink = (notification: NotificationDataType) => {
-  const title = notification.title.toLowerCase().replace(' ', '-');
-  if(title.includes('publication')) {
-    return `/publications`;
-  }
-  if(title.includes('event')) {
-    return `/events`;
-  }
-  if(title.includes("news")){
-    return `/news`;
-  }
-   if(title.includes("due")){
-    return `/account`;
-  }
-  if(title.includes("meeting")){
-    return `/meeting`;
-  }
-  if(title.includes("election")){
-    return `/election`;
-  }
-  return "/notifications";
-  // switch (notification.latest_update_table_name) {
-  //   case 'news':
-  //     return `/news/${notification.latest_update_table_id}/`;
-  //   case 'events':
-  //     return `/event/${notification.latest_update_table_id}/`;
-  //   case 'publication':
-  //     return `/publication/${notification.latest_update_table_id}/`;
-  //   default:
-  //     return '/notifications';
-  // }
-};
+const PER_PAGE = 10;
 
 const NotificationsPage = () => {
-  const { data, isError, isLoading } = useQuery<NotificationDataType[]>('notifications', fetchAllNotifications);
+  const [page, setPage] = useState(1);
+  const { data, isError, isLoading } = useQuery<NotificationDataType[]>("notifications", fetchAllNotifications, { staleTime: 5 * 60 * 1000 });
 
-  if (isLoading) return <div><Spinner /></div>;
-  if (isError) return <div>Error loading notifications</div>;
-
-  const notifications = data || [];
-  console.log(notifications)
-  const getRelativeDate = (date: string): string => {
-    const now = new Date();
-    const notificationDate = new Date(date);
-    const diffInDays = Math.floor((now.getTime() - notificationDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    return `${diffInDays} days ago`;
-  };
-
-  const groupedNotifications = notifications.reduce<Record<string, NotificationDataType[]>>((acc, notification) => {
-    const dateKey = getRelativeDate(notification.createdAt);
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(notification);
-    return acc;
-  }, {});
-
-  const sortedKeys = Object.keys(groupedNotifications).sort((a, b) => {
-    if (a === 'Today') return -1;
-    if (b === 'Today') return 1;
-    if (a === 'Yesterday') return -1;
-    if (b === 'Yesterday') return 1;
-    return 0;
-  });
+  // The endpoint returns the whole list in one response — there is no page parameter on
+  // `/notifications/latestupdate/member_lastest_updates/` — so paging is done here.
+  const notifications = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+  const totalPages = Math.max(1, Math.ceil(notifications.length / PER_PAGE));
+  const current = Math.min(page, totalPages);
+  const visible = notifications.slice((current - 1) * PER_PAGE, current * PER_PAGE);
 
   return (
-    <main>
-      <BreadCrumb title='Notifications' />
-      {sortedKeys.length > 0 ? (
-        sortedKeys.map((dateKey) => (
-          <div key={dateKey} className='flex flex-col my-2'>
-            <small>{dateKey}</small>
-            {groupedNotifications[dateKey].map((notification) => (
-              <Link key={notification._id} to={getNotificationLink(notification)} className="block">
-                <div className='relative flex items-center p-2 bg-neutral-3 rounded-md my-1 hover:bg-gray-100 transition'>
-                  <img src={pinkEllipse} className='absolute bottom-0 left-[30%] h-[30%] opacity-80' alt="" />
-                  <img src={blueEllipse} className='absolute top-0 left-[50%] h-3/4 opacity-50' alt="" />
-                  <div className='flex flex-col p-2 flex-1'>
-                    <h3 className='text-sm font-semibold'>{notification.title}</h3>
-                    <small className='text-xs text-neutral-1'>{unformatText(notification.message)}</small>
-                  </div>
-                  <small className='text-xs'>{new Date(notification.createdAt).toLocaleTimeString()}</small>
-                </div>
-              </Link>
+    <>
+      <PageHeader title="Welcome To Your Notification" subtitle="Here's how things are going for you." />
+
+      {isLoading ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
+        </div>
+      ) : isError ? (
+        <EmptyState icon={FiBell} title="Couldn't load your notifications" description="Something went wrong reaching the server. Try again in a moment." />
+      ) : notifications.length === 0 ? (
+        <EmptyState icon={FiBell} title="Nothing new" description="No notifications yet. Enjoy the silence." />
+      ) : (
+        <>
+          <div className="flex flex-col gap-4">
+            {visible.map((item, index) => (
+              <NotificationRow key={item._id ?? index} item={item} stamp="posted" />
             ))}
           </div>
-        ))
-      ) : (
-        <div className="my-2 flex justify-center">
-          <img src={ZeroNotifications} className="object-contain max-w-[500px]" alt="" />
-        </div>
+          <Pagination page={current} totalPages={totalPages} onChange={setPage} />
+        </>
       )}
-    </main>
+    </>
   );
 };
 

@@ -6,8 +6,9 @@ import {
   castVote,
   fetchElectionDetails,
 } from "../../../api/elections/api-elections";
-import StatCard from "../../../components/cards/StatCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import { BackLink, PageHeader, StatCard, StatusPill, Tabs } from "../../../components/ui";
+import { formatDate } from "../../../utils/dates";
 import Toast from "../../../components/toast/Toast";
 
 interface Position {
@@ -51,18 +52,18 @@ const PositionItem: React.FC<PositionItemProps> = ({
 }) => (
   <div
     className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${
-      isSelected ? "bg-blue-50 border-blue-200" : "bg-white hover:bg-gray-50"
+      isSelected ? "bg-org-tint border-org-tint-strong" : "bg-white hover:bg-org-tint/40"
     } border`}
     onClick={onClick}
   >
     <div className="flex justify-between items-center">
       <div>
-        <h3 className="font-semibold text-gray-800">{position.name}</h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <h3 className="font-semibold text-ink">{position.name}</h3>
+        <p className="text-sm text-muted mt-1">
           Candidates: {position.candidates.length}
         </p>
       </div>
-      <div className="text-blue-700">
+      <div className="text-org-primary">
         <svg
           className="w-5 h-5"
           fill="none"
@@ -92,11 +93,11 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
   const hasVoted = hasUserVotedForCandidate || votingState === "voted";
 
   return (
-    <div className="py-4 border-b border-gray-200 last:border-b-0">
+    <div className="py-4 border-b border-hairline last:border-b-0">
       <div className="flex justify-between items-center mb-2">
-        <h4 className="font-semibold text-gray-800">{candidate.name}</h4>
+        <h4 className="font-semibold text-ink">{candidate.name}</h4>
         <button
-          className="text-sm font-semibold text-org-primary hover:text-blue-800 underline"
+          className="text-sm font-semibold text-org-primary hover:text-org-primary underline"
           onClick={() => onViewManifesto(candidate)}
         >
           Read Manifesto
@@ -105,7 +106,7 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
 
       <div className="flex items-center">
         {hasVoted ? (
-          <button className="px-4 py-2 flex items-center gap-2 text-sm rounded bg-green-700 text-white cursor-not-allowed">
+          <button className="px-4 py-2 flex items-center gap-2 text-sm rounded bg-status-success text-white cursor-not-allowed">
             <FiCheck size={18} /> <span>Voted</span>
           </button>
         ) : (
@@ -114,9 +115,9 @@ const CandidateChoiceCard: React.FC<CandidateChoiceCardProps> = ({
             disabled={hasVotedInPosition || votingState === "voting"}
             className={`px-4 py-2 text-sm rounded text-white ${
               hasVotedInPosition || votingState === "voting"
-                ? "bg-gray-400 cursor-not-allowed"
+                ? "bg-past cursor-not-allowed"
                 : votingState === "error"
-                  ? "bg-red-500 hover:bg-red-600"
+                  ? "bg-status-danger hover:bg-status-danger"
                   : "bg-org-primary hover:bg-org-primary/80"
             }`}
           >
@@ -148,7 +149,7 @@ const ManifestoModal: React.FC<{
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-muted hover:text-muted"
           >
             <svg
               className="w-6 h-6"
@@ -167,7 +168,7 @@ const ManifestoModal: React.FC<{
         </div>
         <div className="p-6">
           {candidate.manifestoType === "text" ? (
-            <div className="bg-gray-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
+            <div className="bg-org-tint/40 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
               {candidate.manifesto || "No manifesto content available."}
             </div>
           ) : candidate.fileUrl ? (
@@ -181,7 +182,7 @@ const ManifestoModal: React.FC<{
               />
             </div>
           ) : (
-            <p className="text-gray-500">No manifesto file available.</p>
+            <p className="text-muted">No manifesto file available.</p>
           )}
         </div>
       </div>
@@ -201,7 +202,7 @@ const DuesModal: React.FC<{
       <div className="bg-white rounded-lg max-w-xl border-l-[4px] border-org-secondary w-full mx-4">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4">Not Eligible to Vote</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted mb-6">
             You have dues from your organization that haven't been confirmed
             yet. You cannot vote during this election period until all your dues
             are confirmed. Head over to the dues section to check the status of
@@ -210,7 +211,7 @@ const DuesModal: React.FC<{
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              className="px-4 py-2 border border-hairline rounded hover:bg-org-tint/40"
             >
               Cancel
             </button>
@@ -389,7 +390,7 @@ const ElectionDetailsPage = () => {
   if (error || !electionData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">{error || "Election not found"}</p>
+        <p className="text-status-danger">{error || "Election not found"}</p>
       </div>
     );
   }
@@ -411,61 +412,26 @@ const ElectionDetailsPage = () => {
     ) || false;
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md"
-          >
-            <FiArrowLeft className="w-4 h-4" />
-            Back
-          </button>
-        </div>
+    <>
+      <BackLink />
 
-        {/* Title and Actions */}
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              {electionData.theme}{" "}
-              {/* MP-5: members had no indication of whether voting was open. */}
-              <span
-                className={`ml-2 align-middle rounded-full px-3 py-1 text-xs font-semibold ${
-                  electionStatus === "Ongoing"
-                    ? "bg-green-100 text-green-800"
-                    : electionStatus === "Ended"
-                      ? "bg-gray-200 text-gray-700"
-                      : "bg-blue-100 text-blue-800"
-                }`}
-              >
-                {electionStatus === "Ongoing" ? "Voting open" : electionStatus === "Ended" ? "Voting closed" : "Not yet open"}
-              </span>
-            </h1>
-            <p className="text-sm text-gray-500">
-              {new Date(electionData.startDate).toLocaleDateString()} -{" "}
-              {new Date(electionData.endDate).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
+      <PageHeader
+        title={electionData.theme}
+        subtitle={`${formatDate(electionData.startDate)} – ${formatDate(electionData.endDate)}`}
+        action={
+          /* MP-5: members had no indication of whether voting was open. `status` is the
+             server's, so an admin closing early is reflected here too. */
+          <StatusPill
+            label={electionStatus === "Ongoing" ? "Voting open" : electionStatus === "Ended" ? "Voting closed" : "Not yet open"}
+            tone={electionStatus === "Ongoing" ? "success" : electionStatus === "Ended" ? "past" : "brand"}
+            size="md"
+          />
+        }
+      />
 
-        {/* Tabs */}
-        <div className="bg-white inline-flex border-b border-gray-200 gap-1 w-full mb-6">
-          {tabsData.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={`px-12 py-4 rounded-t-md font-medium text-sm bg-transparent border-gray-200 transition-colors ${
-                activeTab === tab.value
-                  ? "bg-org-secondary/40 text-gray-700 border-b-2 border-org-secondary font-semibold"
-                  : "text-gray-600"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <Tabs tabs={tabsData.map(t => ({ key: t.value, label: t.label }))} active={activeTab} onChange={setActiveTab} />
 
+      <div>
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <StatCard
@@ -488,9 +454,9 @@ const ElectionDetailsPage = () => {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Positions List */}
-              <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
-                <div className="p-5 border-b border-gray-200">
-                  <h4 className="font-semibold text-gray-700">Positions</h4>
+              <div className="bg-white rounded-lg border border-hairline border-l-4 border-l-org-primary">
+                <div className="p-5 border-b border-hairline">
+                  <h4 className="font-semibold text-ink">Positions</h4>
                 </div>
                 <div className="p-4 space-y-3">
                   {electionData.positions.length > 0 ? (
@@ -505,7 +471,7 @@ const ElectionDetailsPage = () => {
                       ),
                     )
                   ) : (
-                    <div className="p-4 text-center text-gray-500">
+                    <div className="p-4 text-center text-muted">
                       <p>No positions available for this election.</p>
                     </div>
                   )}
@@ -513,9 +479,9 @@ const ElectionDetailsPage = () => {
               </div>
 
               {/* Right Column - Position Results */}
-              <div className="bg-white rounded-lg border border-gray-200 border-l-4 border-l-org-primary">
-                <div className="p-5 border-b border-gray-200">
-                  <h4 className="font-semibold text-gray-700">
+              <div className="bg-white rounded-lg border border-hairline border-l-4 border-l-org-primary">
+                <div className="p-5 border-b border-hairline">
+                  <h4 className="font-semibold text-ink">
                     {currentPosition?.name} Results
                   </h4>
                 </div>
@@ -550,7 +516,7 @@ const ElectionDetailsPage = () => {
                       />
                     ))
                   ) : (
-                    <div className="text-center text-gray-500 py-8">
+                    <div className="text-center text-muted py-8">
                       <p>
                         No candidates or votes recorded for this position yet.
                       </p>
@@ -563,12 +529,12 @@ const ElectionDetailsPage = () => {
         )}
 
         {activeTab === "results" && (
-          <div className="bg-white rounded-lg border border-gray-200 p-8">
+          <div className="bg-white rounded-lg border border-hairline p-8">
             {isElectionOngoing() ? (
               <div className="text-center">
                 <div className="mb-4">
                   <svg
-                    className="mx-auto h-16 w-16 text-blue-500"
+                    className="mx-auto h-16 w-16 text-org-primary"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -581,10 +547,10 @@ const ElectionDetailsPage = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                <h3 className="text-xl font-semibold text-ink mb-2">
                   Elections are Ongoing
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-muted">
                   Results will be available once voting closes
                   {electionData.endDate && (
                     <>
@@ -598,7 +564,7 @@ const ElectionDetailsPage = () => {
               </div>
             ) : (
               <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-6">
+                <h3 className="text-xl font-semibold text-ink mb-6">
                   Election Results
                 </h3>
 
@@ -608,9 +574,9 @@ const ElectionDetailsPage = () => {
                     (position: any, index: number) => (
                       <div
                         key={position.id}
-                        className="border border-gray-200 rounded-lg p-6"
+                        className="border border-hairline rounded-lg p-6"
                       >
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        <h4 className="text-lg font-semibold text-ink mb-4">
                           {position.name}
                         </h4>
 
@@ -634,35 +600,35 @@ const ElectionDetailsPage = () => {
                                   }}
                                   className={`cursor-pointer flex items-center justify-between p-3 rounded-lg ${
                                     candidateIndex === 0
-                                      ? "bg-green-50 border border-green-200"
-                                      : "bg-gray-50"
+                                      ? "bg-status-success-bg border border-status-success/30"
+                                      : "bg-org-tint/40"
                                   }`}
                                 >
                                   <div className="flex items-center gap-3">
                                     <div
                                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                                         candidateIndex === 0
-                                          ? "bg-green-500 text-white"
-                                          : "bg-gray-400 text-white"
+                                          ? "bg-status-success-bg0 text-white"
+                                          : "bg-past text-white"
                                       }`}
                                     >
                                       {candidateIndex + 1}
                                     </div>
-                                    <span className="font-medium text-gray-800">
+                                    <span className="font-medium text-ink">
                                       {candidate.name}
                                     </span>
                                   </div>
                                   <div className="text-right">
-                                    <div className="font-semibold text-gray-800">
+                                    <div className="font-semibold text-ink">
                                       {candidate.votes} votes
                                     </div>
-                                    <div className="text-sm text-gray-600">
+                                    <div className="text-sm text-muted">
                                       {candidate.percentage}%
                                     </div>
                                   </div>
                                 </div>
                                 {expandedCandidates.has(candidate.id) && (
-                                  <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                  <div className="bg-org-tint/40 rounded-lg p-4 max-h-60 overflow-y-auto">
                                     {candidate.voters &&
                                     candidate.voters.length > 0 ? (
                                       <div className="space-y-2">
@@ -682,14 +648,14 @@ const ElectionDetailsPage = () => {
                                                 className="flex items-center justify-between text-sm bg-white px-3 py-2 rounded border"
                                               >
                                                 <div>
-                                                  <span className="font-medium text-gray-800">
+                                                  <span className="font-medium text-ink">
                                                     {voter.name}
                                                   </span>
-                                                  {/* <span className="text-gray-500 ml-2">
+                                                  {/* <span className="text-muted ml-2">
                                                     → {candidate.name}
                                                   </span> */}
                                                 </div>
-                                                {/* <span className="text-gray-500 text-xs">
+                                                {/* <span className="text-muted text-xs">
                                                   {new Date(
                                                     voter.votedAt,
                                                   ).toLocaleDateString()}{" "}
@@ -702,7 +668,7 @@ const ElectionDetailsPage = () => {
                                           )}
                                       </div>
                                     ) : (
-                                      <p className="text-sm text-gray-500 italic text-center">
+                                      <p className="text-sm text-muted italic text-center">
                                         No voters recorded for this candidate
                                       </p>
                                     )}
@@ -732,7 +698,7 @@ const ElectionDetailsPage = () => {
           onGoToDues={handleGoToDues}
         />
       </div>
-    </div>
+    </>
   );
 };
 

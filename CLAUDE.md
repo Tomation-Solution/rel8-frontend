@@ -3,6 +3,19 @@
 The member-facing app: dues, events, elections, projects, services, chat, profile.
 Served at `app.rel8.ng` (or whatever `FRONTEND_URL` is on the backend).
 
+> 🎨 **A full visual redesign is in flight — read [`REDESIGN.md`](./REDESIGN.md) before
+> touching any UI.** It carries the design tokens, the shared primitives in
+> `src/components/ui/`, the module-by-module plan and a "Resume here" section with the
+> current state. Currently: M0–M13 done — everything except Auth (M14) and the dead-code
+> sweep (M15). Nothing committed.
+> This file still governs stack rules, payment architecture and status vocabulary —
+> none of which the redesign changes.
+
+**Before building any screen, check the backend and the admin** — this app is older than
+both and still calls routes they renamed or deleted. `REDESIGN.md` §0b has the checklist;
+the short version is that `rel8-backend-nordjs-2025/src/app.js` decides what exists, and
+`rel8-admin-version-2/src/services/api/` shows how it is meant to be consumed.
+
 Sibling repos, each with its own CLAUDE.md:
 
 - `C:\Users\offic\documents\rel8-backend-nordjs-2025` — the API. **Read its CLAUDE.md**;
@@ -71,6 +84,10 @@ Every start returns the same `checkout`:
 { method: "bank_transfer", reference, amount, bankTransfer }  // show the details
 ```
 
+The member-facing dues screen is **one component**, `pages/dashboard/dues/DuesPanel.tsx`,
+used by both `DuesPage` and the Account page's Payments tab. Those were separate copies that
+declared transfers differently; do not fork them again.
+
 Render the second case with **`components/payments/BankTransferPanel`** — it handles the
 account details, copy-to-clipboard, the optional proof upload and the declare call. Do not
 hand-roll another one.
@@ -101,12 +118,48 @@ predating the migration can still carry them.
 
 ### Events pricing
 
+**An event has no `name` field — the title is `details`.** The backend's own
+`getEventStats` reads `eventTitle: "$event.details"`. `event.name || event.details` appears
+in old call sites and only ever worked because `name` is undefined. Accessors live in
+`src/pages/dashboard/events/eventFields.ts`.
+
 `event.isPaid` / `event.price` are gone. Use `event.pricing`:
 `memberAmount` when the admin set a member discount, else `amount`. `paymentConfig.methods`
 empty ⇒ free. A registration can now be `pending_payment` — a place held while checkout is
 in flight, which does **not** count toward capacity.
 
+## Environments — one model, not three
+
+Groups, committees and excos are **one backend resource**, `Environment`, discriminated by
+`environmentType: "exco" | "committee" | "general"`. The admin app already dropped its
+standalone Exco and Committee screens; this portal has not caught up, so
+`/api/excos`, `/api/committees` and `/api/groups` are all **unmounted** and every client
+calling them can only 404. Use `/api/environments` (`src/api/environments/environments-api.ts`).
+Full breakdown, including which files die and which only need repointing, is in
+`REDESIGN.md` §0c.
+
+**Content field names**: News is `topic` / `content` (no `name`, no `body`); Publication is
+`title` / `content`; Gallery is `images: [{url, caption}]`. `likes` / `dislikes` are arrays
+of member ids, so the count is the length. Accessors:
+`src/pages/dashboard/content/contentFields.ts`.
+
+**Chat lives inside an Environment.** There is no standalone Chat page — `Environment.hasChat`
+gates it, `EnvironmentMessage` stores it, and the socket protocol is keyed on
+`environmentId` (`joinEnvironment` / `environmentMessage`, *not* the old `joinGroup` /
+`groupMessage`). The UI is `pages/dashboard/environment/EnvironmentChatTab.tsx`.
+
+Two member fields that are not the same thing: **`Member.status`**
+(`active`/`inactive`/`suspended`/`pending`) is membership standing and is what the
+Active/Inactive chip shows; **`Member.isActive`** is account deactivation, paired with
+`deactivationReason` / `deactivatedAt`.
+
 ## Voting
+
+Four of the six election pages were static mocks with no data layer and were deleted in M8
+(`ElectionAllVotes`, `ElectionContestantDetailPage`, `ElectionStepsPage`,
+`ElectionCreateAspirantPage`). What remains is the list and the detail/vote/results page.
+`getElections` returns a server-computed `status` and `stats.turnout` — never recompute the
+election window in the browser.
 
 One vote per **member per position** (backend `BE-2`/`BE-3`, enforced by a unique index).
 `ElectionDetailsPage` computes `hasVotedInCurrentPosition` and disables every candidate in

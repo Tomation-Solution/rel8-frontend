@@ -7,11 +7,12 @@ import Toast from "../../../components/toast/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { getServiceDetail, DeliveryAddress } from "../../../api/serviceRequestApi";
 import { declareServicePayment, isFree, startServiceRequest, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
-import PaymentMethodChoice, { defaultMethod } from "../../../components/payments/PaymentMethodChoice";
+import PaymentMethodChoice from "../../../components/payments/PaymentMethodChoice";
+import { defaultMethod } from "../../../components/payments/defaultMethod";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import InputWithLabel from "../../../components/form/InputWithLabel";
-import Button from "../../../components/button/Button";
+import { BackLink, Button, Card, PageHeader } from "../../../components/ui";
 
 const schema = yup.object({
   street: yup.string().required("Street address is required"),
@@ -135,18 +136,23 @@ const ServiceSubmission = () => {
   };
 
   return (
-    <div>
-      {(loadingService || submitting) && <CircleLoader />}
+    <>
+      <BackLink to={`/service-requests/${serviceId}`} label="Go back" />
+      <PageHeader title={`Request ${service?.name ?? "Service"}`} subtitle="Tell us where it should go, then complete payment." />
 
-      <div className="max-w-2xl">
-        <div className="bg-white">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Request {service?.name}</h2>
+      {loadingService ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
+        </div>
+      ) : (
+      <Card className="max-w-2xl p-6">
+        <div>
 
           {service && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600">Service Description:</p>
-              <p className="text-gray-800 mb-2">{service.description}</p>
-              <p className="text-sm text-gray-600">Service Price:</p>
+            <div className="mb-6 p-4 bg-org-tint rounded-lg">
+              <p className="text-sm text-muted">Service Description:</p>
+              <p className="text-ink mb-2">{service.description}</p>
+              <p className="text-sm text-muted">Service Price:</p>
               <p className="text-2xl font-bold text-org-primary">{formatPrice(service.price)}</p>
             </div>
           )}
@@ -155,15 +161,15 @@ const ServiceSubmission = () => {
               arrive with a reference once the request exists, so the transfer can be
               matched back to this member. */}
           {service && !checkout && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700 mb-2">Payment</p>
+            <div className="mb-6 p-4 bg-org-tint/40 border border-hairline rounded-lg">
+              <p className="text-sm font-medium text-ink mb-2">Payment</p>
               {isFree(config) ? (
-                <p className="text-sm text-yellow-700">No payment method is configured for this service. Please contact the organisation.</p>
+                <p className="text-sm text-status-warning">No payment method is configured for this service. Please contact the organisation.</p>
               ) : (
                 <>
                   <PaymentMethodChoice config={config} value={effectiveMethod} onChange={setPayMethod} disabled={submitting} />
 
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-2 text-sm text-muted">
                     {effectiveMethod === "paystack"
                       ? "You'll be taken to Paystack to pay by card or bank transfer. Your request confirms automatically once payment succeeds."
                       : "You'll be shown the account details and a reference to quote on your transfer, then an admin confirms it."}
@@ -185,46 +191,51 @@ const ServiceSubmission = () => {
                 title="Transfer to the account below"
               />
               <div className="mt-4">
-                <Button text="Back to my requests" className="w-full" onClick={() => navigate(`/service-requests/${serviceId}`)} />
+                <Button fullWidth onClick={() => navigate(`/service-requests/${serviceId}`)}>Back to my requests</Button>
               </div>
             </div>
           )}
 
           {!checkout && (
             <form onSubmit={handleSubmit(onSubmit)}>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Delivery Address</h3>
+              <h3 className="text-lg font-semibold text-ink mb-4">Delivery Address</h3>
 
               <div className="space-y-4">
                 <InputWithLabel label="Street Address" register={register("street")} />
-                {errors.street && <p className="text-red-500 text-xs">{errors.street.message}</p>}
+                {errors.street && <p className="text-status-danger text-xs">{errors.street.message}</p>}
 
                 <InputWithLabel label="City" register={register("city")} />
-                {errors.city && <p className="text-red-500 text-xs">{errors.city.message}</p>}
+                {errors.city && <p className="text-status-danger text-xs">{errors.city.message}</p>}
 
                 <InputWithLabel label="State (Optional)" register={register("state")} />
 
                 <InputWithLabel label="Country" register={register("country")} />
-                {errors.country && <p className="text-red-500 text-xs">{errors.country.message}</p>}
+                {errors.country && <p className="text-status-danger text-xs">{errors.country.message}</p>}
 
                 <InputWithLabel label="Postal Code (Optional)" register={register("postalCode")} />
               </div>
 
               <div className="mt-6 flex gap-4">
                 <Button
-                  text="Cancel"
-                  className="flex-1 border border-gray-500 bg-transparent text-[#000] hover:bg-gray-500 hover:text-white"
+                  variant="outline"
+                  className="flex-1"
                   onClick={e => {
                     e.preventDefault();
                     navigate(`/service-requests/${serviceId}`);
                   }}
-                />
-                <Button text={submitting ? "Submitting..." : hasPaystack ? "Continue to payment" : "Submit request"} className="flex-1" isLoading={submitting} onClick={handleSubmit(onSubmit)} />
+                >
+                  Cancel
+                </Button>
+                <Button className="flex-1" isLoading={submitting} onClick={handleSubmit(onSubmit)}>
+                  {hasPaystack ? "Continue to payment" : "Submit request"}
+                </Button>
               </div>
             </form>
           )}
         </div>
-      </div>
-    </div>
+      </Card>
+      )}
+    </>
   );
 };
 

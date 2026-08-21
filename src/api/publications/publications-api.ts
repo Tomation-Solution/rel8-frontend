@@ -6,6 +6,16 @@ export const fetchUserPublications = async () =>{
 }
 
 /**
+ * One publication. `getPublicationById` populates `likes` as `{ name, email }` objects
+ * (news leaves them as raw ids), so read the like state through `hasLiked()` in
+ * `pages/dashboard/content/contentFields.ts`, which tolerates both.
+ */
+export const fetchPublicationById = async (id: string): Promise<any> => {
+    const response = await apiTenant.get(`/api/content/publication/${id}`);
+    return response.data;
+}
+
+/**
  * Publication comments.
  *
  * These pointed at `/publication/publicationview__comment/` — a Django route this backend

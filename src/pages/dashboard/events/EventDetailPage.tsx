@@ -1,129 +1,105 @@
 import { useState } from "react";
-import SeeAll from "../../../components/SeeAll";
-import eventsIcon from "../../../assets/icons/calendar.png";
-import clockIcon from "../../../assets/icons/clock.png";
-import dummyOrganizerImage from "../../../assets/images/dummy.jpg";
-import EventGrid from "../../../components/grid/EventGrid";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { FiEdit3, FiCalendar, FiClock, FiMapPin, FiTag, FiUser, FiDownload } from "react-icons/fi";
+
 import { fetchAllUserEvents, fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
-import { declareEventPayment, isFree, startEventRegistration, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
-import PaymentMethodChoice, { defaultMethod } from "../../../components/payments/PaymentMethodChoice";
+import { declareEventPayment, startEventRegistration, supportsMethod, type PaymentCheckout, type PaymentMethod } from "../../../api/paystack-api";
+import PaymentMethodChoice from "../../../components/payments/PaymentMethodChoice";
+import { defaultMethod } from "../../../components/payments/defaultMethod";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
+
+import { BackLink, Button, Card, EmptyState, InfoChip, PageHeader, StatusPill } from "../../../components/ui";
+import MediaCard from "../../../components/ui/MediaCard";
 import Toast from "../../../components/toast/Toast";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import DownloadFileButton from "../../../components/button/DownloadFileButton";
+import { formatCardDateTime, formatDate, isPast } from "../../../utils/dates";
+import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
+import { eventIsPaid, eventLocationKind, eventPrice, eventTitle, isPastEvent } from "./eventFields";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+const deadlinePassed = (deadline?: string) => !!deadline && isPast(deadline);
 
-const formatPrice = (price: number | string) => `₦${parseFloat(String(price)).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
-
-const deadlinePassed = (deadline?: string) => !!deadline && new Date(deadline) < new Date();
-
-// ── Registration section ─────────────────────────────────────────────────────
+/* ------------------------------------------------------------------- Registration -- */
 
 interface RegistrationPanelProps {
   event: any;
   myRegistrations: any[];
+  currencySymbol: string;
   onRegister: (method?: PaymentMethod) => void;
   onCancel: () => void;
   registerLoading: boolean;
   cancelLoading: boolean;
 }
 
-const RegistrationPanel = ({ event, myRegistrations, onRegister, onCancel, registerLoading, cancelLoading }: RegistrationPanelProps) => {
-  // Hooks must run before any early return.
+/**
+ * The mockup draws a single "Pay Now" beside the Type chip. That cannot express what the
+ * backend actually models — a capacity, a deadline, a choice of payment method, and the
+ * ability to cancel an unpaid registration — so those live here, in the design language,
+ * and the chip above only states the price. See REDESIGN.md M5.
+ */
+const RegistrationPanel = ({ event, myRegistrations, currencySymbol, onRegister, onCancel, registerLoading, cancelLoading }: RegistrationPanelProps) => {
   const [payMethod, setPayMethod] = useState<PaymentMethod | null>(null);
 
   if (!event.requiresRegistration) return null;
 
   const myReg = myRegistrations.find((r: any) => (r.eventId?._id || r.eventId) === (event._id || event.id));
-
   const isRegistered = myReg?.status === "registered";
   const alreadyPaid = myReg?.paymentStatus === "paid";
   const isFull = event.registrationCapacity != null && event.registrationCapacity <= 0;
   const pastDeadline = deadlinePassed(event.registrationDeadline);
-  // X-4: pricing lives in `pricing`; members get `memberAmount` when set.
-  const price = event.pricing?.memberAmount != null ? event.pricing.memberAmount : (event.pricing?.amount ?? 0);
-  const isPaidEvent = Array.isArray(event.paymentConfig?.methods) && event.paymentConfig.methods.length > 0 && price > 0;
+  const price = eventPrice(event);
+  const isPaidEvent = eventIsPaid(event);
   const effectiveMethod: PaymentMethod = payMethod && supportsMethod(event.paymentConfig, payMethod) ? payMethod : defaultMethod(event.paymentConfig);
 
   return (
-    <div className="mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
-      <h3 className="text-base font-semibold text-gray-800 mb-3">Registration</h3>
+    <Card className="p-6 mt-6">
+      <h3 className="text-[18px] font-semibold text-ink mb-4">Registration</h3>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {isPaidEvent && price > 0 ? (
-          <span className="text-xs font-semibold bg-org-primary/10 text-org-primary px-3 py-1 rounded-full">{formatPrice(price)}</span>
-        ) : (
-          <span className="text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">Free</span>
-        )}
-        {event.registrationDeadline && (
-          <span className={`text-xs font-medium px-3 py-1 rounded-full ${pastDeadline ? "bg-red-100 text-red-600" : "bg-yellow-50 text-yellow-700"}`}>
-            {pastDeadline ? "Registration closed" : `Deadline: ${new Date(event.registrationDeadline).toLocaleDateString()}`}
-          </span>
-        )}
-        {event.registrationCapacity != null && (
-          <span className="text-xs font-medium bg-blue-50 text-blue-600 px-3 py-1 rounded-full">{event.registrationCapacity > 0 ? `${event.registrationCapacity} spot${event.registrationCapacity !== 1 ? "s" : ""} left` : "Full"}</span>
-        )}
-        {isRegistered && <span className="text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">✓ Registered</span>}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {isPaidEvent ? <StatusPill label={formatMoney(price, currencySymbol)} tone="brand" /> : <StatusPill label="Free" tone="success" />}
+        {event.registrationDeadline && <StatusPill label={pastDeadline ? "Registration closed" : `Deadline: ${formatDate(event.registrationDeadline)}`} tone={pastDeadline ? "danger" : "warning"} />}
+        {event.registrationCapacity != null && <StatusPill label={event.registrationCapacity > 0 ? `${event.registrationCapacity} spot${event.registrationCapacity === 1 ? "" : "s"} left` : "Full"} tone="neutral" />}
+        {isRegistered && <StatusPill label="Registered" tone="success" />}
       </div>
 
       {!isRegistered && isPaidEvent && (
-        <div className="mb-4">
+        <div className="mb-5">
           <PaymentMethodChoice config={event.paymentConfig} value={effectiveMethod} onChange={setPayMethod} disabled={registerLoading} />
         </div>
       )}
 
       {isRegistered ? (
         !alreadyPaid && (
-          <button onClick={onCancel} disabled={cancelLoading} className="px-5 py-2 rounded-lg border border-red-400 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
-            {cancelLoading ? "Cancelling…" : "Cancel Registration"}
-          </button>
+          <Button variant="danger" isLoading={cancelLoading} onClick={onCancel}>
+            Cancel Registration
+          </Button>
         )
       ) : (
-        <button
-          onClick={() => onRegister(isPaidEvent ? effectiveMethod : undefined)}
-          disabled={registerLoading || pastDeadline || isFull}
-          className="px-6 py-2 rounded-lg bg-org-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {registerLoading ? "Registering…" : isPaidEvent && price > 0 ? `Register — ${formatPrice(price)}` : "Register"}
-        </button>
+        <Button isLoading={registerLoading} disabled={pastDeadline || isFull} onClick={() => onRegister(isPaidEvent ? effectiveMethod : undefined)}>
+          {isPaidEvent ? `Pay Now — ${formatMoney(price, currencySymbol)}` : "Register"}
+        </Button>
       )}
-    </div>
+    </Card>
   );
 };
 
-// ── Main page ────────────────────────────────────────────────────────────────
+/* --------------------------------------------------------------------------- Page -- */
 
 const EventDetailPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
   const { notifyUser } = Toast();
   const queryClient = useQueryClient();
+  const currencySymbol = useCurrencySymbol();
 
-  const {
-    data: allEvents,
-    isLoading,
-    isError,
-  } = useQuery("events", fetchAllUserEvents, {
-    refetchOnMount: false,
-    enabled: !!eventId,
-    retry: 2,
-  });
+  const { data: allEvents, isLoading, isError } = useQuery("events", fetchAllUserEvents, { refetchOnMount: false, enabled: !!eventId, retry: 2 });
+  const { data: myRegistrations = [] } = useQuery("myEventRegistrations", fetchMyRegistrations, { retry: 1, staleTime: 30_000 });
 
-  const { data: myRegistrations = [] } = useQuery("myEventRegistrations", fetchMyRegistrations, {
-    retry: 1,
-    staleTime: 30_000,
-  });
+  const events: any[] = Array.isArray(allEvents) ? allEvents : [];
+  const event = events.find((item: any) => (item._id || item.id)?.toString() === eventId);
+  const isPaidEvent = eventIsPaid(event);
 
-  const event = allEvents?.find((item: any) => (item._id || item.id)?.toString() === eventId);
-  // X-4: `isPaid`/`price` are gone. A member pays `pricing.memberAmount` when the
-  // admin set a member discount, otherwise `pricing.amount`.
-  const memberPrice = event?.pricing?.memberAmount != null ? event.pricing.memberAmount : (event?.pricing?.amount ?? 0);
-  const isPaidEvent = !isFree(event?.paymentConfig) && memberPrice > 0;
-
-  // X-1/X-7: registration now returns a unified `checkout` — a Paystack URL, or the
+  // X-1/X-7: registration returns a unified `checkout` — a Paystack URL, or the
   // association's bank details plus a reference to quote. Free events return neither.
   const [checkout, setCheckout] = useState<PaymentCheckout | null>(null);
   const [pendingRegistrationId, setPendingRegistrationId] = useState<string | null>(null);
@@ -197,102 +173,165 @@ const EventDetailPage = () => {
   });
 
   if (isError) notifyUser("An error occurred while fetching event detail", "error");
-  if (isLoading) return <CircleLoader />;
 
-  if (!event) {
+  if (isLoading) {
     return (
-      <main className="px-5 md:px-0">
-        <BreadCrumb title="Event Details" />
-        <p className="text-gray-500 py-16 text-center">Event not found.</p>
-      </main>
+      <div className="py-20 grid place-items-center">
+        <CircleLoader />
+      </div>
     );
   }
 
-  const fileUrl = event.bannerUrl || "";
-  const fileName = fileUrl.split("/").at(-1) || "";
+  if (!event) {
+    return (
+      <>
+        <BackLink />
+        <PageHeader title="Event's Details" />
+        <EmptyState icon={FiCalendar} title="Event not found" description="This event may have been removed." action={<Button onClick={() => navigate("/events")}>Back to events</Button>} />
+      </>
+    );
+  }
+
+  const past = isPastEvent(event);
+  const others = events.filter((item: any) => (item._id || item.id)?.toString() !== eventId).slice(0, 3);
+  const attachmentUrl = event.documentId || event.bannerUrl || "";
 
   return (
-    <main className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5 text-textColor">
-      <div className="col-span-3">
-        <BreadCrumb title="Event Details" />
+    <>
+      <BackLink />
+      <PageHeader title="Event's Details" subtitle="See the details of upcoming events here..." />
 
-        {/* Banner */}
-        <div className="relative">
-          <div className="relative flex items-center bg-gray-200 h-[40vh]">
-            <img src={event.image || event.bannerUrl} className="w-full max-h-[40vh] border object-contain rounded-md" alt="" />
-          </div>
-
-          <div className="grid md:grid-cols-5 grid-cols-3 my-5 gap-1">
-            <div className="col-span-3 flex items-center font-semibold">
-              <span className="block">
-                Name of event: <span className="font-light">{event.name || event.details}</span>
-              </span>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        {/* --------------------------------------------------------------- left column */}
+        <div className="xl:col-span-2 flex flex-col gap-6 min-w-0">
+          <Card className="overflow-hidden">
+            <div className="relative">
+              <img src={event.bannerUrl || event.image} alt="" className={`w-full h-64 sm:h-80 object-cover ${past ? "grayscale-[35%]" : ""}`} />
+              <StatusPill label={past ? "Past" : "New"} tone={past ? "past" : "brand"} className="!rounded-none absolute top-0 right-0 !px-4 !py-1.5" />
             </div>
-            <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 h-fit">
-              <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
-                <img src={eventsIcon} className="w-6 h-6" alt="" />
-                <span className="overflow-y-auto">{event.startDate || new Date(event.date).toLocaleDateString()}</span>
-              </span>
-              <span className="flex items-center whitespace-nowrap py-3 px-2 text-sm bg-neutral-3 text-textColor rounded-md gap-2">
-                <img src={clockIcon} className="w-6 h-6" alt="" />
-                <span>{event.startTime || event.time}</span>
-              </span>
+
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <InfoChip icon={FiEdit3} label="Event's Name" value={eventTitle(event)} />
+              <InfoChip icon={FiCalendar} label="Event's Date" value={formatDate(event.date)} />
+              <InfoChip icon={FiClock} label="Event's Time" value={event.time || formatCardDateTime(event.date).split(" | ")[1] || "—"} />
+              <InfoChip icon={FiTag} label="Type" value={isPaidEvent ? `Paid — ${formatMoney(eventPrice(event), currencySymbol)}` : "Free"} />
+              <div className="md:col-span-2 grid gap-3">
+                <InfoChip icon={FiMapPin} label="Location" value={eventLocationKind(event)} />
+                {event.address && <InfoChip icon={FiMapPin} label="Address" value={event.address} />}
+                {event.meetingLink && (
+                  <InfoChip
+                    icon={FiMapPin}
+                    label="Meeting Link"
+                    value={
+                      <a href={event.meetingLink} target="_blank" rel="noopener noreferrer" className="underline">
+                        {event.meetingLink}
+                      </a>
+                    }
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </Card>
 
-        {/* Organiser + attachment */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-3 my-5 border-t border-b py-4">
-          <div className="flex items-center gap-2">
-            <img src={event.organiserImage ?? dummyOrganizerImage} className="w-10 h-10 rounded-full border" alt="" />
-            <div>
-              <h3 className="text-base">
-                {event.organiser_name || event.organizer || "Not Available"} <span className="text-xs">~ Organizer</span>
-              </h3>
-              <p className="text-sm text-neutral1">{event.organiser_extra_info || "Organiser Info not available"}</p>
+          {/* Organiser strip */}
+          <Card className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-12 h-12 rounded-full bg-org-tint grid place-items-center flex-shrink-0">
+                <FiUser className="w-6 h-6 text-org-primary/60" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[15px] text-ink truncate">
+                  Organizer: <span className="text-org-primary font-medium">{event.organizer || "Not available"}</span>
+                </p>
+                <p className="text-sm text-muted">Organizer Details Not Available.</p>
+              </div>
             </div>
-          </div>
-          <DownloadFileButton fileName={fileName} fileUrl={fileUrl} buttonText="Event Attachment" />
-        </div>
+            {attachmentUrl && (
+              <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" download className="inline-flex items-center justify-center gap-2 rounded-lg font-medium text-sm px-4 py-2.5 border border-hairline text-ink hover:border-org-primary hover:text-org-primary transition-colors flex-shrink-0">
+                <FiDownload className="w-4 h-4" />
+                Download Event&rsquo;s Attachment
+              </a>
+            )}
+          </Card>
 
-        {/* Address */}
-        {event.address && (
-          <p className="text-sm text-gray-600 my-3">
-            <span className="font-semibold text-gray-700">Location: </span>
-            {event.address}
-          </p>
-        )}
+          {event.details && (
+            <Card className="p-6">
+              <h3 className="text-[18px] font-semibold text-org-primary mb-3">Event&rsquo;s Details</h3>
+              <p className="text-[15px] text-ink whitespace-pre-line leading-relaxed">{event.details}</p>
+            </Card>
+          )}
 
-        {/* Registration panel — hidden while a bank transfer is being completed, so the
-            member has one clear next action. */}
-        {!checkout && (
-          <RegistrationPanel event={event} myRegistrations={myRegistrations} onRegister={method => registerMutation.mutate(method)} onCancel={() => cancelMutation.mutate()} registerLoading={registerMutation.isLoading} cancelLoading={cancelMutation.isLoading} />
-        )}
-
-        {/* X-7: bank details + reference, after registration reserves the place */}
-        {checkout && (
-          <div className="mt-6">
-            <BankTransferPanel
-              checkout={checkout}
-              onDeclare={handleDeclareTransfer}
-              declaring={declaring}
-              declared={declared}
-              error={declareError}
-              requireProof={Boolean(event?.paymentConfig?.bankTransfer?.requireProof)}
-              title="Complete your payment to confirm your place"
+          {/* Hidden while a bank transfer is being completed, so there is one next action. */}
+          {!checkout && (
+            <RegistrationPanel
+              event={event}
+              myRegistrations={myRegistrations}
+              currencySymbol={currencySymbol}
+              onRegister={method => registerMutation.mutate(method)}
+              onCancel={() => cancelMutation.mutate()}
+              registerLoading={registerMutation.isLoading}
+              cancelLoading={cancelMutation.isLoading}
             />
-            <button type="button" onClick={() => setCheckout(null)} className="mt-3 text-sm text-gray-500 underline">
-              Back to event
+          )}
+
+          {/* X-7: bank details + reference, only after registration reserves the place */}
+          {checkout && (
+            <div>
+              <BankTransferPanel
+                checkout={checkout}
+                onDeclare={handleDeclareTransfer}
+                declaring={declaring}
+                declared={declared}
+                error={declareError}
+                requireProof={Boolean(event?.paymentConfig?.bankTransfer?.requireProof)}
+                title="Complete your payment to confirm your place"
+              />
+              <Button variant="ghost" className="mt-3" onClick={() => setCheckout(null)}>
+                Back to event
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* -------------------------------------------------------------- right column */}
+        <div className="min-w-0">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[18px] font-semibold text-ink">Others</h3>
+            <button type="button" onClick={() => navigate("/events")} className="text-sm font-medium text-org-primary hover:underline">
+              See All
             </button>
           </div>
-        )}
-      </div>
 
-      <div className="md:col-span-1 col-span-3">
-        <SeeAll title="Others" path="/events" />
-        <EventGrid heightOfCard="h-[160px]" numberOfItemsToShow={3} />
+          {others.length === 0 ? (
+            <EmptyState icon={FiCalendar} title="Nothing else on" description="There are no other events right now." />
+          ) : (
+            <div className="flex flex-col gap-5">
+              {others.map((item: any) => {
+                const itemPast = isPastEvent(item);
+                const id = item._id ?? item.id;
+                return (
+                  <MediaCard
+                    key={id}
+                    layout="tint"
+                    image={item.bannerUrl || item.image}
+                    title={eventTitle(item)}
+                    meta={formatCardDateTime(item.date, item.time)}
+                    badge={itemPast ? "Past" : "New"}
+                    badgeTone={itemPast ? "past" : "brand"}
+                    onClick={() => navigate(`/event/${id}`)}
+                    actions={
+                      <Button size="sm" variant={itemPast ? "muted" : "primary"}>
+                        View Details
+                      </Button>
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </main>
+    </>
   );
 };
 

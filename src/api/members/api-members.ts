@@ -58,13 +58,12 @@ export const fetchAllMembers = async () => {
   const response = await apiTenant.get(`/api/members/`);
   return response.data;
 };
-export const fetchAllExcos = async () => {
-  const response = await apiTenant.get(`/api/excos`);
-  // Backend returns { message, excos } so we extract excos array
-  return response.data.excos || response.data || [];
-};
-
-export const fetchExcoById = async (excoId: string) => {
-  const response = await apiTenant.get(`/api/excos/${excoId}`);
-  return response.data.exco || response.data;
-};
+/**
+ * Removed: `fetchAllExcos` / `fetchExcoById`.
+ *
+ * Both called `/api/excos`, which **this backend does not mount** — see `src/app.js`; there
+ * is no exco resource. Excos are `Environment` documents with `environmentType: "exco"`,
+ * and their people live in `positions[]`. Use
+ * `fetchEnvironmentsByType("exco")` from `src/api/environments/environments-api.ts`.
+ * REDESIGN.md §0c has the full consolidation note.
+ */

@@ -11,13 +11,14 @@ export const fetchNewsById = async (id: string):Promise<any> =>{
     return response.data
 }
 
-// Fetch comments for a specific news item
-export const fetchNewsComments = async (id:string|null) =>{
-    if (id){
-        const response = await apiTenant.get(`/api/content/news/${id}/comments`);
-        return response.data
-    }
-}
+/**
+ * Removed: `fetchNewsComments`.
+ *
+ * It GET `/api/content/news/:id/comments`, which **is not mounted** — `content.routes.js`
+ * has POST / PUT / DELETE for news comments but no GET (publications do have one). Comments
+ * arrive embedded on the article: `getNewsById` populates `comments.userId` with
+ * name/email/imageUrl, so `fetchNewsById` already returns everything the page needs.
+ */
 
 // Post a comment for a specific news item
 export const postNewsComment = async (comment: string, newsId: string) => {

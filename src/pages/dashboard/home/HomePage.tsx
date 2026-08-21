@@ -1,177 +1,199 @@
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
+import { ElementType, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
-import { fetchAllUserNews } from "../../../api/news/news-api";
-import CircleLoader from "../../../components/loaders/CircleLoader";
-import SeeAll from "../../../components/SeeAll";
-import { fetchAllUserEvents } from "../../../api/events/events-api";
-import EventsCard from "../../../components/cards/EventsCard";
-import HomePageNotification from "../../../components/homepage/HomePageNotification";
-import QuickNav from "../../../components/navigation/QuickNav";
-import GalleryGrid from "../../../components/grid/GalleryGrid";
-import Toast from "../../../components/toast/Toast";
-import HomePageNewsCard from "../../../components/cards/HomePageNewsCard";
-import { fetchUserPublications } from "../../../api/publications/publications-api";
-import { PublicationDataType } from "../../../types/myTypes";
-import PublicationCard from "../../../components/cards/PublicationCard";
+import { FiChevronRight, FiCalendar, FiBookOpen, FiImage, FiBriefcase } from "react-icons/fi";
+import { HiOutlineArrowPath } from "react-icons/hi2";
+import { IoWalletOutline } from "react-icons/io5";
+import { MdOutlineCalendarMonth } from "react-icons/md";
+import { PiHandCoins } from "react-icons/pi";
+
 import { fetchAllNotifications } from "../../../api/notifications/notifications-api";
-import { NotificationDataType } from "../../../types/myTypes";
-import { useEnvironmentContext } from "../../../context/environmentContext";
-import { filterContentByEnvironment } from "../../../utils/contentFilter";
-import { useMemo } from "react";
+import { fetchAllUserNews } from "../../../api/news/news-api";
+import { fetchAllUserEvents } from "../../../api/events/events-api";
+import { fetchUserPublications } from "../../../api/publications/publications-api";
+import { fetchUserMeetings } from "../../../api/meetings/api-meetings";
+import { fetchUserDues } from "../../../api/account/account-api";
+import { isOutstanding } from "../../../api/paystack-api";
+
+import { Button, Card, EmptyState, PageHeader, StatCard, StatCardRow } from "../../../components/ui";
+import CircleLoader from "../../../components/loaders/CircleLoader";
+import NotificationRow from "../../../components/notifications/NotificationRow";
+import { NotificationDataType, TableDataType } from "../../../types/myTypes";
+import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
+import { formatDate } from "../../../utils/dates";
+import { unformatText } from "../../../utils/strings";
+import emptyMailbox from "../../../assets/images/no-notification-available.png";
+
+/** Every list endpoint here answers either a bare array or a `{ results }` / `{ data }` envelope. */
+const asArray = <T,>(value: any): T[] => (Array.isArray(value) ? value : Array.isArray(value?.results) ? value.results : Array.isArray(value?.data) ? value.data : []);
+
+/* ------------------------------------------------------------------ Quick Actions -- */
+
+const QUICK_ACTIONS: { label: string; path: string; icon: ElementType; badgeKey?: "events" }[] = [
+  { label: "Publications", path: "/publications", icon: FiBookOpen },
+  { label: "Events", path: "/events", icon: FiCalendar, badgeKey: "events" },
+  { label: "Meetings", path: "/meeting", icon: MdOutlineCalendarMonth },
+  { label: "Gallery", path: "/gallery", icon: FiImage },
+  { label: "Fund a Project", path: "/fund-a-project", icon: PiHandCoins },
+  { label: "Service Request", path: "/service-requests", icon: FiBriefcase },
+];
+
+const QuickActionRow = ({ label, path, icon: Icon, badge }: { label: string; path: string; icon: ElementType; badge?: number }) => (
+  <Link to={path} className="flex items-center gap-3 rounded-lg border border-hairline px-4 py-3 hover:border-org-primary/40 hover:bg-org-tint/40 transition-colors">
+    <Icon className="w-5 h-5 text-org-primary flex-shrink-0" />
+    <span className="flex-1 min-w-0 truncate text-[15px] text-ink">{label}</span>
+    {!!badge && <span className="flex-shrink-0 text-[11px] font-medium text-white bg-org-primary rounded-full px-2 py-0.5">{badge}</span>}
+    <FiChevronRight className="w-4 h-4 text-muted flex-shrink-0" />
+  </Link>
+);
+
+/* -------------------------------------------------------------------------- Page -- */
 
 const HomePage = () => {
-  const { data, isError, isLoading } = useQuery("notifications", fetchAllNotifications);
-  const { notifyUser } = Toast();
-  const { selectedEnvironments } = useEnvironmentContext();
+  const navigate = useNavigate();
+  const currencySymbol = useCurrencySymbol();
 
-  const eventsResponsiveCarousel = {
-    superLargeDesktop: {
-      breakpoint: { max: 4000, min: 3000 },
-      items: 1,
-    },
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
-      items: 1,
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
-      items: 1,
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
-      items: 1,
-    },
-  };
+  const notifications = useQuery("notifications", fetchAllNotifications, { retry: 1, staleTime: 5 * 60 * 1000 });
+  const news = useQuery("news", fetchAllUserNews, { retry: 1, retryDelay: 3000 });
+  const events = useQuery("events", fetchAllUserEvents, { retry: 1, retryDelay: 3000, staleTime: 5 * 60 * 1000 });
+  const publications = useQuery("publications", fetchUserPublications, { retry: 1, retryDelay: 3000 });
+  const meetings = useQuery("meetings", fetchUserMeetings, { retry: 1, retryDelay: 3000 });
+  const dues = useQuery("userDues", fetchUserDues, { retry: 1 });
 
-  const newResponsiveCarousel = {
-    superLargeDesktop: {
-      breakpoint: { max: 4000, min: 3000 },
-      items: 5,
-    },
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
-      items: 3,
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
-      items: 2,
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
-      items: 1,
-    },
-  };
+  const newsList = useMemo(() => asArray<any>(news.data), [news.data]);
+  const eventList = useMemo(() => asArray<any>(events.data), [events.data]);
+  const meetingList = useMemo(() => asArray<any>(meetings.data), [meetings.data]);
+  const publicationList = useMemo(() => asArray<any>(publications.data), [publications.data]);
+  const notificationList = useMemo(() => asArray<NotificationDataType>(notifications.data), [notifications.data]);
 
-  const news = useQuery("news", fetchAllUserNews, {
-    retry: 1,
-    retryDelay: 3000,
-  });
+  // Same rule the dues blocker uses: anything not settled is still owed.
+  const outstanding = useMemo(
+    () =>
+      asArray<TableDataType>(dues.data)
+        .filter(d => isOutstanding(d.status))
+        .reduce((total, d) => total + (parseFloat(d.amount || "0") || 0), 0),
+    [dues.data]
+  );
 
-  const events = useQuery("events", fetchAllUserEvents, {
-    retry: 1,
-    retryDelay: 3000,
-  });
-
-  const publication = useQuery("publications", fetchUserPublications, {
-    retry: 1,
-    retryDelay: 3000,
-  });
-
-  // Filter content based on selected environments
-  const filteredNews = useMemo(() => {
-    return filterContentByEnvironment(news.data, selectedEnvironments);
-  }, [news.data, selectedEnvironments]);
-
-  const filteredPublications = useMemo(() => {
-    return filterContentByEnvironment(publication.data, selectedEnvironments);
-  }, [publication.data, selectedEnvironments]);
-
-  const filteredEvents = useMemo(() => {
-    return filterContentByEnvironment(events.data, selectedEnvironments);
-  }, [events.data, selectedEnvironments]);
-
-  if (news.isError) {
-    notifyUser("Sorry, an error occured when fetching news", "error");
-  }
-  if (events.isError) {
-    notifyUser("Sorry, an error occured when fetching events", "error");
-  }
+  const latest = newsList[0];
 
   return (
-    <main className="grid grid-cols-1 xl:grid-cols-4 gap-x-[80px] md:gap-8 gap-10 md:px-0 px-5">
-      <div className="col-span-1 xl:col-span-3 relative flex flex-col gap-8 min-w-0 overflow-hidden">
-        <div className="">
-          <BreadCrumb title="Latest Updates" />
-          {/* Latest Updates */}
-          <div className={`relative py-6 ${news.isLoading ? "flex items-center justify-center" : ""}`}>
-            {news.isLoading && <CircleLoader />}
-            {filteredNews && filteredNews.length > 0 && (
-              <Carousel
-                removeArrowOnDeviceType={["tablet", "mobile"]}
-                dotListClass="flex items-center !bg-white absolute top-0 h-fit w-fit bg-red-400 main-class"
-                renderDotsOutside
-                showDots
-                arrows={false}
-                className=""
-                responsive={newResponsiveCarousel}
-              >
-                {filteredNews.map((newsItem, index) => (
-                  <HomePageNewsCard key={index} newsItem={newsItem} index={index} />
-                ))}
-              </Carousel>
+    <>
+      <PageHeader title="Dashboard" subtitle="Here is what's happening with your community today." />
+
+      <StatCardRow>
+        <StatCard title="Active Dues" value={dues.isLoading ? "..." : formatMoney(outstanding, currencySymbol)} icon={IoWalletOutline} to="/dues" />
+        <StatCard title="Total Events" value={events.isLoading ? "..." : eventList.length} icon={FiCalendar} to="/events" />
+        <StatCard title="Meeting" value={meetings.isLoading ? "..." : meetingList.length} icon={MdOutlineCalendarMonth} to="/meeting" />
+      </StatCardRow>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        {/* --------------------------------------------------------------- left column */}
+        <div className="xl:col-span-2 flex flex-col gap-6 min-w-0">
+          <Card className="p-6">
+            <h3 className="text-[18px] font-semibold text-ink">Latest Update</h3>
+
+            {news.isLoading ? (
+              <div className="py-10 grid place-items-center">
+                <CircleLoader />
+              </div>
+            ) : latest ? (
+              <div className="mt-4 flex flex-col sm:flex-row gap-5">
+                {latest.bannerUrl && <img src={latest.bannerUrl} alt="" className="w-full sm:w-56 h-40 object-cover rounded-lg flex-shrink-0" />}
+                <div className="min-w-0 flex flex-col">
+                  <p className="text-xs text-muted">{formatDate(latest.created_at || latest.createdAt)}</p>
+                  <h4 className="text-[17px] font-semibold text-ink mt-1 line-clamp-2">{latest.name || latest.title}</h4>
+                  <p className="text-sm text-muted mt-2 line-clamp-3">{unformatText(latest.body || "")}</p>
+                  <div className="mt-4">
+                    <Button onClick={() => navigate(`/news/${latest.id ?? latest._id}/`)}>Read more</Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                layout="row"
+                image={emptyMailbox}
+                title="No Update Yet"
+                description="You will see the latest news and announcements here when available"
+                action={
+                  <Button icon={HiOutlineArrowPath} isLoading={news.isFetching} onClick={() => news.refetch()}>
+                    Check for Update
+                  </Button>
+                }
+              />
             )}
-            {!news.isLoading && filteredNews && filteredNews.length === 0 && <div className="text-center py-8 text-gray-500">No news available for the selected environment(s).</div>}
-          </div>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-[18px] font-semibold text-ink mb-4">Recent Notifications</h3>
+
+            {notifications.isLoading ? (
+              <div className="py-10 grid place-items-center">
+                <CircleLoader />
+              </div>
+            ) : notificationList.length === 0 ? (
+              <EmptyState title="Nothing new" description="No notifications yet. Enjoy the silence." />
+            ) : (
+              <>
+                <div className="flex flex-col gap-3">
+                  {notificationList.slice(0, 4).map((item, index) => (
+                    <NotificationRow key={item._id ?? index} item={item} />
+                  ))}
+                </div>
+                <Link to="/notifications" className="mt-5 flex items-center justify-center gap-1 text-sm font-medium text-org-primary">
+                  View all notifications <FiChevronRight className="w-4 h-4" />
+                </Link>
+              </>
+            )}
+          </Card>
         </div>
 
-        {/* Events & Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 my-7">
-          <div className="flex flex-col">
-            <SeeAll title="Events" path="/events" />
-            <div className={`grid place items-center`}>
-              {events.isLoading && <CircleLoader />}
-              {!events.isLoading && filteredEvents && filteredEvents.length === 0 && (
-                <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">No events available for the selected environment(s).</div>
-              )}
-              {filteredEvents && filteredEvents.length > 0 && (
-                <Carousel responsive={eventsResponsiveCarousel} autoPlay={true} arrows={true} rewind={true} autoPlaySpeed={3000} keyBoardControl={true} className="container">
-                  {filteredEvents.map((eventItem: any, index: number) => (
-                    <EventsCard key={index} eventItem={eventItem} />
-                  ))}
-                </Carousel>
-              )}
+        {/* -------------------------------------------------------------- right column */}
+        <div className="flex flex-col gap-6 min-w-0">
+          <Card className="p-6">
+            <h3 className="text-[18px] font-semibold text-ink mb-4">Quick Actions</h3>
+            <div className="flex flex-col gap-3">
+              {QUICK_ACTIONS.map(action => (
+                <QuickActionRow key={action.path} label={action.label} path={action.path} icon={action.icon} badge={action.badgeKey === "events" ? eventList.length : undefined} />
+              ))}
             </div>
-          </div>
-          <div className="flex flex-col">
-            <SeeAll title="Notifications" path="/notifications" />
-            <div className="grid md:justify-betwee">
-              {isLoading && <CircleLoader />}
-              {!isLoading && data?.length === 0 && <div className="bg-transparent w-full rounded-md py-2 px-2 border border-primary-dark1 text-center col-span-full">No notifications available, enjoy the silence.</div>}
-              {data && data.slice(0, 4).map((notificationItem: NotificationDataType, index: number) => <HomePageNotification key={index} notificationItem={notificationItem} />)}
-            </div>
-          </div>
-        </div>
-        {/* Publications */}
-        <div>
-          <SeeAll title="Publications" path="/publications" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
-            {filteredPublications && filteredPublications.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">No publications available for the selected environment(s).</div>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-[18px] font-semibold text-ink mb-4">Publications</h3>
+
+            {publications.isLoading ? (
+              <div className="py-10 grid place-items-center">
+                <CircleLoader />
+              </div>
+            ) : publicationList.length === 0 ? (
+              <EmptyState icon={FiBookOpen} title="Nothing published yet" description="Publications shared with you will appear here." />
             ) : (
-              filteredPublications?.map((publicationItem: any, index: number) => <PublicationCard key={index} publicationItem={publicationItem} />)
+              <>
+                <div className="flex flex-col gap-3">
+                  {publicationList.slice(0, 4).map((item: any, index: number) => (
+                    <Link
+                      key={item.id ?? item._id ?? index}
+                      to={`/publication/${item.id ?? item._id}/`}
+                      className="flex items-start gap-3 rounded-lg border border-hairline px-4 py-3 hover:border-org-primary/40 hover:bg-org-tint/40 transition-colors"
+                    >
+                      <FiBookOpen className="w-5 h-5 text-org-primary flex-shrink-0 mt-0.5" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-ink line-clamp-2">{item.name || item.title}</span>
+                        <span className="block text-xs text-muted mt-0.5">{formatDate(item.created_at || item.createdAt)}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+                <Link to="/publications" className="mt-5 flex items-center justify-center gap-1 text-sm font-medium text-org-primary">
+                  View all publications <FiChevronRight className="w-4 h-4" />
+                </Link>
+              </>
             )}
-          </div>
+          </Card>
         </div>
       </div>
-      {/* Gallery */}
-      <div className="col-span-1">
-        <SeeAll title="Gallery" path="/gallery" />
-        <GalleryGrid numberOfItemsToShow={3} />
-        <QuickNav />
-      </div>
-    </main>
+    </>
   );
 };
 

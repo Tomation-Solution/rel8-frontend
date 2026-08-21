@@ -1,47 +1,115 @@
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
-import { Link } from "react-router-dom";
+import { FiCalendar, FiClock, FiCheckCircle } from "react-icons/fi";
+
 import { fetchAllUserEvents } from "../../../api/events/events-api";
-import SeeAll from "../../../components/SeeAll";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import EventsCard from "../../../components/cards/EventsCard";
-import GalleryGrid from "../../../components/grid/GalleryGrid";
+import { Button, EmptyState, MediaCardGrid, PageHeader, Pagination, SearchFilterBar, StatCard, StatCardRow } from "../../../components/ui";
+import MediaCard from "../../../components/ui/MediaCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import QuickNav from "../../../components/navigation/QuickNav";
-import Toast from "../../../components/toast/Toast";
+import { eventTitle, eventWhen, isPastEvent } from "./eventFields";
+import { formatCardDateTime } from "../../../utils/dates";
+
+const PER_PAGE = 9;
+
+const FILTERS = [
+  { value: "all", label: "All Events" },
+  { value: "new", label: "New Events" },
+  { value: "past", label: "Past Events" },
+];
 
 const EventsPage = () => {
-  const { notifyUser } = Toast();
-  const { data, isError, isLoading } = useQuery("events", fetchAllUserEvents);
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  if (isError) {
-    notifyUser("An error occurred while fetching events", "error");
-  }
+  const { data, isError, isLoading } = useQuery("events", fetchAllUserEvents, { staleTime: 5 * 60 * 1000 });
+
+  const events = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+
+  const counts = useMemo(() => {
+    const past = events.filter(isPastEvent).length;
+    return { total: events.length, past, upcoming: events.length - past };
+  }, [events]);
+
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return events.filter(event => {
+      if (filter === "new" && isPastEvent(event)) return false;
+      if (filter === "past" && !isPastEvent(event)) return false;
+      if (!needle) return true;
+      return `${eventTitle(event)} ${event.address ?? ""} ${event.organizer ?? ""}`.toLowerCase().includes(needle);
+    });
+  }, [events, search, filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const current = Math.min(page, totalPages);
+  const visible = filtered.slice((current - 1) * PER_PAGE, current * PER_PAGE);
+
+  const resetPage = <T,>(setter: (value: T) => void) => (value: T) => {
+    setter(value);
+    setPage(1);
+  };
 
   return (
-    <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,_1fr)_280px] gap-7">
-      <div className="min-w-0 overflow-hidden md:px-0 px-5">
-        <div className="flex items-center justify-between">
-          <BreadCrumb title="Events" />
-          <Link to="/events/my-registrations" className="text-sm text-org-primary font-medium hover:underline whitespace-nowrap">
-            My Registrations →
+    <>
+      <PageHeader
+        title="Welcome To Your Events"
+        subtitle="See the details of upcoming events here..."
+        action={
+          <Link to="/events/my-registrations" className="text-sm font-medium text-org-primary hover:underline whitespace-nowrap">
+            My Registrations &rarr;
           </Link>
-        </div>
+        }
+      />
 
-        <div className="grid grid-col-1 md:grid-cols-2 gap-y-3 gap-x-6">
-          {isLoading && <CircleLoader />}
-          {!isLoading && data && Array.isArray(data) && data.length === 0 && <div className="py-10 text-center col-span-full md:text-[25px]">No events available.</div>}
-          {!isLoading && !data && <div className="py-10 text-center col-span-full md:text-[25px]">No events available.</div>}
-          {!isLoading && data && Array.isArray(data) && data.map((eventItem: any, index: number) => <EventsCard key={index} eventItem={eventItem} />)}
+      <StatCardRow>
+        <StatCard title="Total Events" value={isLoading ? "..." : counts.total} icon={FiCalendar} />
+        <StatCard title="New Events" value={isLoading ? "..." : counts.upcoming} icon={FiCheckCircle} />
+        <StatCard title="Past Events" value={isLoading ? "..." : counts.past} icon={FiClock} />
+      </StatCardRow>
+
+      <SearchFilterBar search={search} onSearchChange={resetPage(setSearch)} searchPlaceholder="Search Event by name" filter={filter} onFilterChange={resetPage(setFilter)} filterOptions={FILTERS} className="mb-6" />
+
+      {isLoading ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
         </div>
-      </div>
-      <div className="min-w-0">
-        <SeeAll title="Gallery" path="/gallery" />
-        <div className="relative">
-          <GalleryGrid heightOfCard={"h-[170px]"} numberOfItemsToShow={2} />
-        </div>
-        <QuickNav />
-      </div>
-    </main>
+      ) : isError ? (
+        <EmptyState icon={FiCalendar} title="Couldn't load events" description="Something went wrong reaching the server. Try again in a moment." />
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={FiCalendar} title={events.length === 0 ? "No events yet" : "Nothing matches that"} description={events.length === 0 ? "Events your association publishes will show up here." : "Try a different name, or clear the filter."} />
+      ) : (
+        <>
+          <MediaCardGrid>
+            {visible.map((event: any, index: number) => {
+              const past = isPastEvent(event);
+              const id = event._id ?? event.id;
+              return (
+                <MediaCard
+                  key={id ?? index}
+                  layout="tint"
+                  image={event.bannerUrl || event.image}
+                  title={eventTitle(event)}
+                  meta={formatCardDateTime(eventWhen(event), event.time)}
+                  badge={past ? "Past" : "New"}
+                  badgeTone={past ? "past" : "brand"}
+                  onClick={() => navigate(`/event/${id}`)}
+                  actions={
+                    <Button size="sm" variant={past ? "muted" : "primary"}>
+                      View Details
+                    </Button>
+                  }
+                />
+              );
+            })}
+          </MediaCardGrid>
+
+          <Pagination page={current} totalPages={totalPages} onChange={setPage} />
+        </>
+      )}
+    </>
   );
 };
 

@@ -1,78 +1,90 @@
-import blueEllipse from '../../../assets/images/notification-blue-ellipse.png'
-import pinkEllipse from '../../../assets/images/notification-ink-ellipse.png'
-import BreadCrumb from '../../../components/breadcrumb/BreadCrumb'
-import { getActiveServices } from '../../../api/serviceRequestApi'
-import { useQuery } from 'react-query'
-import CircleLoader from '../../../components/loaders/CircleLoader'
-import Button from '../../../components/button/Button'
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
+import { FiBriefcase } from "react-icons/fi";
+
+import { getActiveServices } from "../../../api/serviceRequestApi";
+import { Button, EmptyState, PageHeader, Pagination, SearchFilterBar, Table, TableColumn } from "../../../components/ui";
+import CircleLoader from "../../../components/loaders/CircleLoader";
+import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
+
+const PER_PAGE = 12;
 
 const ServiceRequest = () => {
+  const navigate = useNavigate();
+  const currencySymbol = useCurrencySymbol();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
-    const { isLoading, data: services, error } = useQuery('getActiveServices', getActiveServices, {
-        retry: 1,
-        onError: (err) => {
-            console.error('Error fetching services:', err);
-        }
-    })
-    const navigate = useNavigate();
+  const { isLoading, data, error } = useQuery("getActiveServices", getActiveServices, { retry: 1 });
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: 'NGN',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(price);
-    };
+  const services = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
-    return (
-        <main>
-            <BreadCrumb title={"Service Request"} />
-            {isLoading && <CircleLoader />}
-            <br />
-            {error && (
-                <div className="py-10 text-center col-span-full md:text-[25px] text-red-500">
-                    Error loading services. Please try again later.
-                </div>
-            )}
-            {!isLoading && !error && (!services || services?.length === 0) && (
-                <div className="py-10 text-center col-span-full md:text-[25px]">
-                    No services available at the moment.
-                </div>
-            )}
-            {
-                services && services?.length > 0 && services?.map((service, index) => (
-                    <div
-                        key={index}
-                        className='relative block md:flex items-center p-4 bg-neutral-3 rounded-md my-2 shadow-sm hover:shadow-md transition-shadow'>
-                        <img src={pinkEllipse} className='absolute bottom-0 left-[30%] h-[30%] opacity-80' alt="" />
-                        <img src={blueEllipse} className='absolute top-0 left-[50%] h-3/4 opacity-50' alt="" />
-                        <div className='flex flex-col p-2 flex-1 z-10'>
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return services.filter(service => !needle || `${service.name ?? ""} ${service.description ?? ""}`.toLowerCase().includes(needle));
+  }, [services, search]);
 
-                            <h3 className='text-lg font-semibold text-gray-800'>
-                                {service.name}
-                            </h3>
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const current = Math.min(page, totalPages);
+  const visible = filtered.slice((current - 1) * PER_PAGE, current * PER_PAGE);
 
-                            <p className='text-sm text-gray-600 mt-1'>{service.description}</p>
-                            <p className='text-lg font-bold text-org-primary mt-2'>
-                                {formatPrice(service.price)}
-                            </p>
-                        </div>
-                        <Button
-                            text='Request Service'
-                            className='w-[140px] z-10'
-                            onClick={() => {
-                                navigate(`/service-requests/${service._id}`)
-                            }}
-                        />
-                    </div>
+  const columns: TableColumn<any>[] = [
+    { key: "name", label: "Service Name", render: service => <span className="font-medium">{service.name}</span> },
+    { key: "description", label: "Descriptions", render: service => <span className="text-muted">{service.description || "—"}</span> },
+    {
+      // The mockup labels this "Price (Naira)". The symbol comes from the org's own
+      // currency setting — this page used to hardcode `en-NG` / NGN.
+      key: "price",
+      label: `Price (${currencySymbol})`,
+      render: service => <span className="text-org-primary font-semibold">{formatMoney(service.price, "")}</span>,
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      align: "right",
+      render: service => (
+        <Button size="sm" onClick={() => navigate(`/service-requests/${service._id}`)}>
+          Request Service
+        </Button>
+      ),
+    },
+  ];
 
-                ))
-            }
+  return (
+    <>
+      <PageHeader title="Service Request" subtitle="See the details of the service request here..." />
 
-        </main>
-    )
-}
+      <SearchFilterBar
+        search={search}
+        onSearchChange={value => {
+          setSearch(value);
+          setPage(1);
+        }}
+        searchPlaceholder="Search service by name"
+        className="mb-6"
+      />
 
-export default ServiceRequest
+      {isLoading ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
+        </div>
+      ) : error ? (
+        <EmptyState icon={FiBriefcase} title="Couldn't load services" description="Something went wrong reaching the server. Try again in a moment." />
+      ) : (
+        <>
+          <Table
+            columns={columns}
+            rows={visible}
+            rowKey={service => service._id}
+            onRowClick={service => navigate(`/service-requests/${service._id}`)}
+            empty={<EmptyState icon={FiBriefcase} title={services.length === 0 ? "No services" : "Nothing matches that"} description={services.length === 0 ? "Services your association offers will appear here." : "Try a different search."} />}
+          />
+          <Pagination page={current} totalPages={totalPages} onChange={setPage} />
+        </>
+      )}
+    </>
+  );
+};
+
+export default ServiceRequest;

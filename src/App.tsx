@@ -21,7 +21,6 @@ function App() {
   const PayupPage = lazy(() => import("./pages/auth/PayupPage"));
   const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
 
-  const ChatPage = lazy(() => import("./pages/chat/ChatPage"));
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
   // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
   const EventsPage = lazy(() => import("./pages/dashboard/events/EventsPage"));
@@ -37,26 +36,17 @@ function App() {
   const NewsPage = lazy(() => import("./pages/dashboard/news/index"));
   const NewsDetailPage = lazy(() => import("./pages/dashboard/news/NewsDetailPage"));
 
+  const EnvironmentPage = lazy(() => import("./pages/dashboard/environment/EnvironmentPage"));
   const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
-  const ExcosPage = lazy(() => import("./pages/dashboard/members/ExcosPage"));
-  const ExcoDetailPage = lazy(() => import("./pages/dashboard/members/ExcoDetailPage"));
   const MemberProfilePage = lazy(() => import("./pages/dashboard/members/MemberProfilePage"));
   const MemberTypesPage = lazy(() => import("./pages/dashboard/member-types/MemberTypesPage"));
   const MemberTypeDetailPage = lazy(() => import("./pages/dashboard/member-types/MemberTypeDetailPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
   const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
   const ElectionsPage = lazy(() => import("./pages/dashboard/elections/ElectionsPage"));
-  const ElectionsContestantDetailPage = lazy(() => import("./pages/dashboard/elections/ElectionContestantDetailPage"));
 
-  const ElectionAllVotesPage = lazy(() => import("./pages/dashboard/elections/ElectionAllVotes"));
-  const ElectionStepPage = lazy(() => import("./pages/dashboard/elections/ElectionStepsPage"));
-  const ElectionCreateAspirantPage = lazy(() => import("./pages/dashboard/elections/ElectionCreateAspirantPage"));
   const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
   const FundAProjectPage = lazy(() => import("./pages/dashboard/projects/FundAProjectPage"));
-  const FundAProjectDetailPage = lazy(() => import("./pages/dashboard/fund-a-project/FundAProjectDetailPage"));
-  const SupportInKindPage = lazy(() => import("./pages/dashboard/fund-a-project/SuportInKindPage"));
-  const SupportInCashPage = lazy(() => import("./pages/dashboard/fund-a-project/SupportInCashPage"));
-  const ThankYouSuccessPage = lazy(() => import("./components/PaymentSuccess/ThankYou"));
   const PaystackCallbackPage = lazy(() => import("./pages/PaystackCallbackPage"));
   const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
   const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
@@ -68,13 +58,8 @@ function App() {
   const MergerOfCompaniesPage = lazy(() => import("./pages/dashboard/services/MergerOfCompaniesPage"));
   const ProductManufacturingUpdatePage = lazy(() => import("./pages/dashboard/services/ProductManufacturingUpdatePage"));
   const SupportPage = lazy(() => import("./pages/dashboard/support/SupportPage"));
-  const FAQPage = lazy(() => import("./pages/dashboard/support/FAQPage"));
-  const TechnicalSupportPage = lazy(() => import("./pages/dashboard/support/TechnicalSupportPage"));
-  const AdminSupportPage = lazy(() => import("./pages/dashboard/support/AdminSupportPage"));
 
-  const CommitteeDetails = lazy(() => import("./pages/dashboard/committees/CommitteesDetails"));
-  const CommitteesPage = lazy(() => import("./pages/dashboard/committees/CommitteesPage"));
-  const GroupDetailPage = lazy(() => import("./pages/dashboard/groups/GroupDetailPage"));
+  const EnvironmentDetailPage = lazy(() => import("./pages/dashboard/environment/EnvironmentDetailPage"));
   const router = createBrowserRouter([
     {
       path: "/verify-membership",
@@ -358,40 +343,20 @@ function App() {
       ),
       errorElement: <ErrorPage />,
     },
-    // Excos Environment page replaced by groups-based pages — kept for reference
-    // {
-    //   path: "/excos",
-    //   element: (
-    //     <Suspense fallback={<Loader />}>
-    //       <DashboardLayout>
-    //         <ExcosPage />
-    //       </DashboardLayout>
-    //     </Suspense>
-    //   ),
-    //   errorElement: <ErrorPage />,
-    // },
     {
-      path: "/committees",
+      // The consolidated Environment page (REDESIGN.md M4 / §0c). Excos and Committees had
+      // their own screens here until the backend collapsed all three into `Environment`;
+      // `/members` and `/member-types` still resolve to their old screens until M15.
+      path: "/environment",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
-            <CommitteesPage />
+            <EnvironmentPage />
           </DashboardLayout>
         </Suspense>
       ),
       errorElement: <ErrorPage />,
     },
-    // {
-    //   path: "/excos/:id",
-    //   element: (
-    //     <Suspense fallback={<Loader />}>
-    //       <DashboardLayout>
-    //         <ExcoDetailPage />
-    //       </DashboardLayout>
-    //     </Suspense>
-    //   ),
-    //   errorElement: <ErrorPage />,
-    // },
     {
       path: "/members",
       element: (
@@ -472,47 +437,6 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/elections-contestant/:id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ElectionsContestantDetailPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/all-votes",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ElectionAllVotesPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-    },
-    {
-      path: "/election-steps",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ElectionStepPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-    },
-    {
-      path: "/create-aspirant",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ElectionCreateAspirantPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-    },
-    {
       path: "/election/:id",
       element: (
         <Suspense fallback={<Loader />}>
@@ -529,50 +453,6 @@ function App() {
           <DashboardLayout>
             <FundAProjectPage />
           </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/fund-a-project/:projectId",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <FundAProjectDetailPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/support-in-kind/:projectId",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <SupportInKindPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/support-in-cash/:projectId",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <SupportInCashPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/fund-a-project/thank-you/:project_id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          {/* <DashboardLayout > */}
-          <ThankYouSuccessPage />
-          {/* </DashboardLayout> */}
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -688,64 +568,13 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/faq",
+      // Was `/groups/:id`. Groups, committees and excos are all `Environment` documents
+      // (REDESIGN.md §0c), so there is one detail route for all three.
+      path: "/environment/:id",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
-            <FAQPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/technical-support",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <TechnicalSupportPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/admin-support",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <AdminSupportPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/chat",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ChatPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-    },
-    {
-      path: "/committees/:id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <CommitteeDetails />
-          </DashboardLayout>
-        </Suspense>
-      ),
-    },
-    {
-      path: "/groups/:id",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <GroupDetailPage />
+            <EnvironmentDetailPage />
           </DashboardLayout>
         </Suspense>
       ),

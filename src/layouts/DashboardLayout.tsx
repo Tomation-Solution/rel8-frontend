@@ -15,6 +15,15 @@ interface DashboardLayoutInterfaceProps {
   children: ReactNode;
 }
 
+const currencySymbols: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  NGN: "₦",
+  CAD: "C$",
+  AUD: "A$",
+};
+
 const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
   const { user, organization } = useAppContext();
   const navigate = useNavigate();
@@ -28,16 +37,7 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
 
   // Get organization settings for currency
   const { data: orgSettings } = useQuery("organizationSettings", fetchOrganizationSettings);
-  const currentCurrency = orgSettings?.settings?.currency || "USD";
-  const currencySymbols: { [key: string]: string } = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    NGN: "₦",
-    CAD: "C$",
-    AUD: "A$",
-  };
-  const currencySymbol = currencySymbols[currentCurrency] || "$";
+  const currencySymbol = currencySymbols[orgSettings?.settings?.currency || "USD"] || "$";
 
   // Get user dues data
   const { data: userDues } = useQuery("userDues", fetchUserDues, {
@@ -72,12 +72,28 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
     }
   }, [user, userDues, totalOutstandingAmount, isAccountPage]);
 
+  // Every route change starts at the top of the page — the scroll container is ours, not
+  // the window's, so react-router's own scroll restoration never sees it.
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [location.pathname]);
+
   return (
-    <div className="font-sans h-screen overflow-hidden relative flex">
+    <div className="font-sans h-screen overflow-hidden relative flex bg-white">
       <Sidebar isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
-      <section className="flex-1 overflow-hidden h-screen relative flex flex-col min-w-0">
+
+      <section className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Navbar setIsMobileSidebarOpen={setIsMobileSidebarOpen} isMobileSidebarOpen={isMobileSidebarOpen} />
-        <div className="scrollbar-thin scrollbar-thumb-[#C1C1C1] scrollbar-track-gray-200 scrollbar-rounded overflow-y-auto overflow-x-hidden text-black z-1 w-full px-2 md:px-4 lg:px-6 py-4 pt-[70px]">{children}</div>
+
+        {/*
+          The navbar sits in the flow now (it used to be `fixed`, which is what the old
+          `pt-[70px]` on this container was compensating for), so this scrolls under
+          nothing and needs no top offset.
+        */}
+        <main ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-hairline scrollbar-track-transparent">
+          <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 lg:py-8">{children}</div>
+        </main>
       </section>
 
       {/* Outstanding Dues Modal */}

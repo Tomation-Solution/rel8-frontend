@@ -1,7 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { getServiceDetail, getMyServiceRequests, uploadServiceRequestPaymentProof } from "../../../api/serviceRequestApi";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import Button from "../../../components/button/Button";
+import { BackLink, Button, Card, EmptyState, PageHeader, StatusPill } from "../../../components/ui";
+import { FiBriefcase } from "react-icons/fi";
+import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
+import { formatDate } from "../../../utils/dates";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { useRef, useState } from "react";
 import Toast from "../../../components/toast/Toast";
@@ -11,13 +14,13 @@ const ServiceRequestDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { notifyUser } = Toast();
+  const currencySymbol = useCurrencySymbol();
   const [uploadingForRequestId, setUploadingForRequestId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const { isLoading: loadingService, data: service } = useQuery(["getServiceDetail", serviceId], () => getServiceDetail({ serviceId: typeof serviceId === "string" ? serviceId : "-1" }), {
     enabled: typeof serviceId === "string" ? true : false,
   });
-  console.log(service, "service here");
 
   const { isLoading: loadingRequests, data: requests } = useQuery(["getMyServiceRequests"], getMyServiceRequests, {
     enabled: typeof serviceId === "string" ? true : false,
@@ -44,93 +47,72 @@ const ServiceRequestDetail = () => {
     },
   );
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  // Was hardcoded `en-NG` / NGN; the org's own currency setting drives it now.
+  const formatPrice = (price: number) => formatMoney(price, currencySymbol);
 
-  const getStatusBadge = (status: string) => {
-    const statusStyles: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      confirmed: "bg-blue-100 text-blue-800",
-      dispatched: "bg-purple-100 text-purple-800",
-      completed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-    };
-    return <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status] || "bg-gray-100 text-gray-800"}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
-  };
-
-  const getPaymentStatusBadge = (status: string) => {
-    const statusStyles: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      confirmed: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
-    };
-    return <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status] || "bg-gray-100 text-gray-800"}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
-  };
+  /**
+   * ⚠️ Two chips per request, and they are **different enums** (CLAUDE.md):
+   *   `requestStatus`  — fulfilment: pending -> confirmed -> dispatched -> completed
+   *   `paymentStatus`  — money, the unified X-7 vocabulary
+   * `statusTone()` renders them with one colour set as a convenience only. Do not merge
+   * the enums anywhere upstream of the pill.
+   */
+  const getStatusBadge = (status: string) => <StatusPill status={status} />;
+  const getPaymentStatusBadge = (status: string) => <StatusPill status={status} />;
 
   return (
-    <div>
-      {(loadingService || loadingRequests) && <CircleLoader />}
+    <>
+      <BackLink to="/service-requests" label="Go back" />
+      <PageHeader title="Service Request" subtitle="See the details of the service request here..." />
 
-      <div style={{ maxWidth: "900px" }}>
+      {loadingService || loadingRequests ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
+        </div>
+      ) : (
+      <Card className="max-w-4xl p-6">
         <div>
-          <br />
-          <br />
-          <h2 className="text-2xl font-bold text-gray-800">{service?.name}</h2>
-          <p className="text-gray-600 mt-2">{service?.description}</p>
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-gray-600">Service Price:</p>
-            <p className="text-2xl font-bold text-org-primary">{service ? formatPrice(service.price) : ""}</p>
-          </div>
+          <h2 className="text-[20px] font-semibold text-org-primary">{service?.name}</h2>
+          <p className="text-sm text-muted mt-1">{service?.description}</p>
+          <p className="mt-3 text-[15px] text-ink">
+            Service Price: <span className="text-org-primary font-semibold">{service ? formatPrice(service.price) : ""}</span>
+          </p>
 
           {/* Payment Information */}
           {service && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700 mb-2">Payment Information:</p>
+            <div className="mt-5 p-4 bg-org-tint rounded-lg">
+              <p className="text-sm font-medium text-org-primary mb-2">Payment Information:</p>
               {/* X-7: account details arrive with a payment reference once a request
                   exists, so the transfer can be matched — they are not shown up front. */}
               {service.paymentConfig?.methods?.includes("bank_transfer") && !service.paymentConfig?.methods?.includes("paystack") ? (
                 <div>
-                  <p className="text-sm text-gray-600">Pay by bank transfer. You'll get the account details and a reference to quote when you submit a request.</p>
+                  <p className="text-sm text-muted">Pay by bank transfer. You'll get the account details and a reference to quote when you submit a request.</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-gray-600">Payment will be completed after submitting your service request.</p>
+                  <p className="text-sm text-muted">Payment will be completed after submitting your service request.</p>
                 </div>
               )}
             </div>
           )}
           <br />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-            <h2 className="text-xl font-semibold text-gray-800">Your Previous Requests</h2>
-            <Button
-              className="w-[280px]"
-              onClick={() => {
-                navigate(`/service-requests-submission/${serviceId}`);
-              }}
-              text={`Request ${service?.name ?? ""}`}
-            />
+            <h2 className="text-[18px] font-semibold text-ink">Your Previous Requests</h2>
+            <Button onClick={() => navigate(`/service-requests-submission/${serviceId}`)}>Request Service</Button>
           </div>
           <br />
           <br />
 
           {serviceRequests.length === 0 ? (
-            <div className="py-10 text-gray-500">
-              <p>No previous requests for this service.</p>
-            </div>
+            <EmptyState icon={FiBriefcase} title="No previous requests" description="You have not requested this service yet." />
           ) : (
             <div className="space-y-4">
               {serviceRequests.map(request => (
-                <div key={request._id} className="border rounded-lg p-4 bg-white shadow-sm">
+                <div key={request._id} className="border border-hairline rounded-xl p-4 bg-white">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <p className="text-sm text-gray-500">Request ID: {request._id.slice(-8)}</p>
-                      <p className="text-sm text-gray-500">Date: {new Date(request.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted">Request ID: {request._id.slice(-8)}</p>
+                      <p className="text-sm text-muted">Date: {formatDate(request.createdAt)}</p>
                     </div>
                     <div className="flex gap-2">
                       {getStatusBadge(request.requestStatus)}
@@ -139,22 +121,22 @@ const ServiceRequestDetail = () => {
                   </div>
 
                   <div className="mb-3">
-                    <p className="text-sm font-medium text-gray-700">Delivery Address:</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm font-medium text-ink">Delivery Address:</p>
+                    <p className="text-sm text-muted">
                       {request.deliveryAddress.street}, {request.deliveryAddress.city}, {request.deliveryAddress.country}
                     </p>
                   </div>
 
                   {request.adminNotes && (
-                    <div className="mb-3 p-3 bg-yellow-50 rounded">
-                      <p className="text-sm font-medium text-gray-700">Admin Notes:</p>
-                      <p className="text-sm text-gray-600">{request.adminNotes}</p>
+                    <div className="mb-3 p-3 bg-status-warning-bg rounded">
+                      <p className="text-sm font-medium text-ink">Admin Notes:</p>
+                      <p className="text-sm text-muted">{request.adminNotes}</p>
                     </div>
                   )}
 
                   <div className="flex gap-2">
                     {request.paymentId?.proofUrl && (
-                      <a href={request.paymentId?.proofUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
+                      <a href={request.paymentId?.proofUrl} target="_blank" rel="noreferrer" className="text-sm text-org-primary hover:underline">
                         View Payment Proof
                       </a>
                     )}
@@ -187,8 +169,9 @@ const ServiceRequestDetail = () => {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </Card>
+      )}
+    </>
   );
 };
 

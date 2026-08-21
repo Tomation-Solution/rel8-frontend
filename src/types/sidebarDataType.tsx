@@ -24,4 +24,10 @@ export interface SideBarLinkType {
   requiresExco?: boolean;
   requiresCommittee?: boolean;
   activeFor?: string[];
+  /** Stable id the Sidebar uses to attach a live count badge or unread dot. */
+  key?: string;
+  /** Opens a new visual group — renders extra space above the item. */
+  startsGroup?: boolean;
+  /** Destructive styling (Logout). */
+  danger?: boolean;
 }

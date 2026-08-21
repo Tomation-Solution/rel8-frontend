@@ -9,7 +9,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { AppProvider } from "./context/authContext.tsx";
 import TenantGate from "./components/TenantProvider.tsx";
 import { ThemeProvider } from "./context/themeContext.tsx";
-import { EnvironmentProvider } from "./context/environmentContext.tsx";
 
 const queryClient = new QueryClient();
 
@@ -19,9 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <TenantGate>
           <AppProvider>
-            <EnvironmentProvider>
-              <App />
-            </EnvironmentProvider>
+            <App />
           </AppProvider>
         </TenantGate>
       </ThemeProvider>

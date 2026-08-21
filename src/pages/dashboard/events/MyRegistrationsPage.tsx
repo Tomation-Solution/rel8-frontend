@@ -1,37 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
+import { FiCalendar, FiMapPin, FiClock } from "react-icons/fi";
+
+import { fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
+import { BackLink, Button, Card, EmptyState, PageHeader, StatusPill } from "../../../components/ui";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
-import { fetchMyRegistrations, unregisterFromEvent } from "../../../api/events/events-api";
-import dummyImage from "../../../assets/images/dummy.jpg";
+import { formatDate, formatDateTime } from "../../../utils/dates";
+import { eventTitle } from "./eventFields";
 
-// X-3/BE-14: `pending_payment` is a real registration state now — a place held while
-// checkout is in flight. It does NOT count toward the event's capacity.
-const statusColors: Record<string, string> = {
-  registered: "bg-green-100 text-green-700",
-  pending_payment: "bg-orange-100 text-orange-700",
-  cancelled: "bg-gray-100 text-gray-500",
-  pending: "bg-yellow-100 text-yellow-700",
-};
-
+/**
+ * Two chips per row, and they are **different enums** — same trap as service requests.
+ *
+ * `EventRegistration.status` is attendance: `registered` / `pending_payment` / `cancelled`.
+ * `pending_payment` (X-3/BE-14) is a place held while checkout is in flight and does NOT
+ * count toward the event's capacity.
+ *
+ * `EventRegistration.paymentStatus` is the money, and uses the unified X-7 vocabulary.
+ * Do not fold them together.
+ */
 const STATUS_LABEL: Record<string, string> = {
   registered: "Registered",
   pending_payment: "Not confirmed",
   cancelled: "Cancelled",
   pending: "Pending",
-};
-
-// X-7: the unified payment vocabulary.
-const paymentColors: Record<string, string> = {
-  free: "bg-blue-50 text-blue-600",
-  paid: "bg-green-100 text-green-700",
-  pending: "bg-yellow-100 text-yellow-700",
-  awaiting_verification: "bg-orange-100 text-orange-700",
-  rejected: "bg-red-100 text-red-500",
-  failed: "bg-red-100 text-red-500",
-  cancelled: "bg-gray-100 text-gray-500",
-  unpaid: "bg-red-100 text-red-500",
 };
 
 const PAYMENT_LABEL: Record<string, string> = {
@@ -50,7 +42,7 @@ const MyRegistrationsPage = () => {
   const { notifyUser } = Toast();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError } = useQuery("myEventRegistrations", fetchMyRegistrations, {
+  const { data, isLoading } = useQuery("myEventRegistrations", fetchMyRegistrations, {
     retry: 1,
     staleTime: 30_000,
     onError: () => notifyUser("Failed to load your registrations", "error"),
@@ -66,83 +58,88 @@ const MyRegistrationsPage = () => {
     },
   });
 
-  if (isLoading) return <CircleLoader />;
-
   const registrations: any[] = Array.isArray(data) ? data : [];
 
   return (
-    <main>
-      <BreadCrumb title="My Event Registrations" />
+    <>
+      <BackLink to="/events" label="Back to events" />
+      <PageHeader title="My Event Registrations" subtitle="Every event you have signed up for, and where each one stands." />
 
-      {registrations.length === 0 ? (
-        <div className="py-20 text-center">
-          <p className="text-gray-400 text-base">You have not registered for any events yet.</p>
-          <button onClick={() => navigate("/events")} className="mt-4 text-org-primary text-sm underline">
-            Browse Events
-          </button>
+      {isLoading ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
         </div>
+      ) : registrations.length === 0 ? (
+        <EmptyState icon={FiCalendar} title="No registrations yet" description="You have not registered for any events." action={<Button onClick={() => navigate("/events")}>Browse events</Button>} />
       ) : (
-        <div className="mt-4 flex flex-col gap-4">
-          {registrations.map((reg: any, i: number) => {
+        <div className="flex flex-col gap-5">
+          {registrations.map((reg: any, index: number) => {
             const ev = reg.eventId ?? {};
             const eventId = ev._id || reg.eventId;
-            const title = ev.details || ev.name || "Event";
-            const banner = ev.bannerUrl || ev.image || dummyImage;
-            const date = ev.date ? new Date(ev.date).toLocaleDateString() : "—";
-            const time = ev.time ?? "—";
-            const address = ev.address ?? "";
-            const registeredAt = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString() : "—";
+            const status = reg.status ?? "registered";
+            const payment = reg.paymentStatus ?? "free";
 
-            const statusLabel = reg.status ?? "registered";
-            const paymentLabel = reg.paymentStatus ?? "free";
-
-            const canCancel = statusLabel === "registered" && paymentLabel !== "paid" && paymentLabel !== "awaiting_verification";
-            const isPaidRegistration = statusLabel === "registered" && paymentLabel === "paid";
+            const canCancel = status === "registered" && payment !== "paid" && payment !== "awaiting_verification";
+            const isPaidRegistration = status === "registered" && payment === "paid";
             const isCancellingThis = cancelMutation.isLoading && cancelMutation.variables === eventId;
 
             return (
-              <div key={i} className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col sm:flex-row hover:shadow-md transition-shadow">
-                {/* Banner thumbnail */}
-                <img src={banner} alt={title} className="w-full sm:w-40 h-36 sm:h-auto object-cover shrink-0" />
+              <Card key={reg._id ?? index} className="overflow-hidden flex flex-col sm:flex-row">
+                {ev.bannerUrl || ev.image ? (
+                  <img src={ev.bannerUrl || ev.image} alt="" className="w-full sm:w-48 h-40 sm:h-auto object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-full sm:w-48 h-40 sm:h-auto bg-org-tint/50 grid place-items-center flex-shrink-0">
+                    <FiCalendar className="w-10 h-10 text-org-primary/25" />
+                  </div>
+                )}
 
-                {/* Info */}
-                <div className="p-4 flex-1 min-w-0 flex flex-col justify-between">
+                <div className="p-5 flex-1 min-w-0 flex flex-col justify-between gap-4">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-800 text-base leading-tight">{title}</h3>
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>{STATUS_LABEL[statusLabel] ?? statusLabel}</span>
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${paymentColors[paymentLabel] ?? "bg-gray-100 text-gray-600"}`}>{PAYMENT_LABEL[paymentLabel] ?? paymentLabel}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-[17px] font-medium text-org-primary">{eventTitle(ev)}</h3>
+                      <StatusPill status={status} label={STATUS_LABEL[status] ?? status} />
+                      <StatusPill status={payment} label={PAYMENT_LABEL[payment] ?? payment} />
                     </div>
 
-                    <div className="text-xs text-gray-500 space-y-0.5 mt-2">
-                      <p>
-                        📅 {date} at {time}
-                      </p>
-                      {address && <p>📍 {address}</p>}
-                      <p>Registered: {registeredAt}</p>
+                    <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
+                      <span className="inline-flex items-center gap-1.5">
+                        <FiCalendar className="w-4 h-4" />
+                        {formatDate(ev.date)}
+                        {ev.time ? ` at ${ev.time}` : ""}
+                      </span>
+                      {ev.address && (
+                        <span className="inline-flex items-center gap-1.5 min-w-0">
+                          <FiMapPin className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{ev.address}</span>
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1.5">
+                        <FiClock className="w-4 h-4" />
+                        Registered {formatDateTime(reg.registeredAt)}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     {eventId && (
-                      <button onClick={() => navigate(`/event/${eventId}`)} className="self-start text-sm text-org-primary font-medium hover:underline">
-                        View Event →
-                      </button>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/event/${eventId}`)}>
+                        View Event
+                      </Button>
                     )}
                     {canCancel && (
-                      <button onClick={() => cancelMutation.mutate(eventId)} disabled={isCancellingThis} className="self-start text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50">
-                        {isCancellingThis ? "Cancelling…" : "Unregister"}
-                      </button>
+                      <Button size="sm" variant="danger" isLoading={isCancellingThis} onClick={() => cancelMutation.mutate(eventId)}>
+                        Unregister
+                      </Button>
                     )}
-                    {isPaidRegistration && <p className="text-xs text-gray-400 italic">Paid registrations cannot be cancelled. Contact your admin.</p>}
+                    {isPaidRegistration && <p className="text-xs text-muted italic">Paid registrations cannot be cancelled. Contact your admin.</p>}
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
-    </main>
+    </>
   );
 };
 

@@ -1,321 +1,185 @@
-import React, { useState } from "react";
-import { useQuery } from "react-query";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiPlus, FiChevronRight } from "react-icons/fi";
-import {
-  fetchElections,
-  fetchPositions,
-  fetchElectionStatsForMembers,
-} from "../../../api/elections/api-elections";
-import StatCard from "../../../components/cards/StatCard";
-import { DataTable } from "../../../components/Table/DataTable";
-import PageHeading from "../../../components/PageHeading";
+import { useQuery } from "react-query";
+import { FiBarChart2, FiCalendar, FiPieChart } from "react-icons/fi";
+
+import { fetchElections, fetchPositions, fetchElectionStatsForMembers } from "../../../api/elections/api-elections";
+import { Button, EmptyState, PageHeader, Pagination, SearchFilterBar, StatCard, StatCardRow, StatusPill, Table, TableColumn, Tabs, TabItem } from "../../../components/ui";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import Toast from "../../../components/toast/Toast";
+import { formatDate } from "../../../utils/dates";
 
-// Define types based on rel8-frontend
-interface Election {
-  id: number;
-  name: string;
-  role_name: string;
-  role_detail: string;
-  is_close: boolean;
-  election_startDate: string | null;
-  election_endDate: string | null;
-  election_endTime: string | null;
-  election_startTime: string | null;
-  positionIds?: string[];
-  stats?: {
-    totalVotes: number;
-    eligibleVoters: number;
-    turnout: number;
-  };
-}
+const PER_PAGE = 12;
 
-interface Position {
-  id: string;
-  name: string;
-  currentHolder?: {
-    name: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-const filterOptions = [
-  { value: "all", label: "All elections" },
-  { value: "upcoming", label: "Upcoming elections" },
-  { value: "completed", label: "Completed elections" },
+const TABS: TabItem[] = [
+  { key: "elections", label: "Elections" },
+  { key: "positions", label: "Positions" },
 ];
 
+const ELECTION_FILTERS = [
+  { value: "all", label: "All Elections" },
+  { value: "Upcoming", label: "Upcoming" },
+  { value: "Ongoing", label: "Ongoing" },
+  { value: "Ended", label: "Ended" },
+];
+
+/**
+ * `getElectionStatus()` on the backend returns exactly these three, and it accounts for
+ * `closedAt` — an admin closing an election early. Do **not** recompute the window in the
+ * browser: this page used to build `new Date(\`${startDate}T${startTime}:00\`)`, which
+ * resolves the election's wall-clock time against the *viewer's* timezone. That is the
+ * same bug BE-6 fixed server-side and MP-5 removed from the detail page.
+ */
+const STATUS_TONE: Record<string, "brand" | "success" | "past"> = {
+  Upcoming: "brand",
+  Ongoing: "success",
+  Ended: "past",
+};
+
 const ElectionsPage = () => {
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("elections");
   const navigate = useNavigate();
+  const [tab, setTab] = useState("elections");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  const { notifyUser } = Toast();
+  const elections = useQuery("elections", fetchElections, { staleTime: 2 * 60 * 1000 });
+  const positions = useQuery("positions", fetchPositions, { staleTime: 5 * 60 * 1000 });
+  const stats = useQuery("electionStats", fetchElectionStatsForMembers, { staleTime: 5 * 60 * 1000 });
 
-  const {
-    data: electionsData,
-    isLoading: electionsLoading,
-    isError: electionsError,
-  } = useQuery("elections", fetchElections);
-  const {
-    data: positionsData,
-    isLoading: positionsLoading,
-    isError: positionsError,
-  } = useQuery("positions", fetchPositions);
-  const {
-    data: statsData,
-    isLoading: statsLoading,
-    isError: statsError,
-  } = useQuery("electionStats", fetchElectionStatsForMembers);
+  const electionRows = useMemo(() => {
+    const rows = Array.isArray(elections.data) ? [...elections.data].reverse() : [];
+    const needle = search.trim().toLowerCase();
+    return rows.filter((item: any) => {
+      if (filter !== "all" && item.status !== filter) return false;
+      if (!needle) return true;
+      return `${item.theme ?? ""} ${item.description ?? ""}`.toLowerCase().includes(needle);
+    });
+  }, [elections.data, search, filter]);
 
-  const isLoading = electionsLoading || positionsLoading || statsLoading;
-  const isError = electionsError || positionsError || statsError;
+  const positionRows = useMemo(() => {
+    const rows = Array.isArray(positions.data) ? positions.data : [];
+    const needle = search.trim().toLowerCase();
+    return rows.filter((item: any) => !needle || `${item.name ?? ""} ${item.currentHolder?.name ?? ""}`.toLowerCase().includes(needle));
+  }, [positions.data, search]);
 
-  const currentTime = new Date().getTime();
+  const rows = tab === "elections" ? electionRows : positionRows;
+  const totalPages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
+  const current = Math.min(page, totalPages);
+  const visible = rows.slice((current - 1) * PER_PAGE, current * PER_PAGE);
 
-  // Map backend data to display format
-  const elections: Election[] =
-    electionsData?.map((item: any) => {
-      // Combine date and time for accurate comparison
-      const startDateTime = new Date(
-        `${item.startDate.split("T")[0]}T${item.startTime}:00`
-      ).getTime();
-      const endDateTime = new Date(
-        `${item.endDate.split("T")[0]}T${item.endTime}:00`
-      ).getTime();
+  const statValues = stats.data?.stats ?? {};
 
-      // Determine status based on timestamps
-      let status: string;
-      let is_close: boolean;
-
-      if (currentTime < startDateTime) {
-        status = "Upcoming";
-        is_close = false;
-      } else if (currentTime >= startDateTime && currentTime <= endDateTime) {
-        status = "Ongoing";
-        is_close = false;
-      } else {
-        status = "Completed";
-        is_close = true;
-      }
-
-      return {
-        id: item._id,
-        name: item.theme,
-        role_name: item.theme,
-        role_detail: item.description || "",
-        is_close: is_close,
-        status: status,
-        election_startDate: item.startDate,
-        election_endDate: item.endDate,
-        election_endTime: item.endTime,
-        election_startTime: item.startTime,
-        positionIds: item.positionIds,
-        stats: item.stats,
-      };
-    }).reverse()   || [];
-  // Map positions data
-  const positions: Position[] =
-    positionsData?.map((item: any) => ({
-      id: item._id,
-      name: item.name,
-      currentHolder: item.currentHolder,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-    })) || [];
-
-  // Filter elections based on selected filter
-  const filteredElections = React.useMemo(() => {
-    if (selectedFilter === "upcoming") {
-      return elections.filter((election) => !election.is_close);
-    } else if (selectedFilter === "completed") {
-      return elections.filter((election) => election.is_close);
-    }
-    return elections;
-  }, [elections, selectedFilter]);
-
-  const tabsData = [
-    { value: "elections", label: "Elections" },
-    { value: "positions", label: "Positions" },
-  ];
-
-  // Define columns for DataTable
-  const electionsColumns = [
-    { key: "name", label: "Theme" },
-    {
-      key: "status",
-      label: "Status",
-      render: (item: any) => {
-        const statusColors = {
-          Upcoming: "bg-blue-100 text-blue-800",
-          Ongoing: "bg-yellow-100 text-yellow-800",
-          Completed: "bg-green-100 text-green-800",
-        };
-
-        const bgColor =
-          statusColors[item.status as keyof typeof statusColors] ||
-          "bg-gray-100 text-gray-800";
-
-        return (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor}`}
-          >
-            {item.status}
-          </span>
-        );
-      },
-    },
+  const electionColumns: TableColumn<any>[] = [
+    { key: "theme", label: "Theme", render: item => <span className="font-medium">{item.theme || "Untitled election"}</span> },
+    { key: "status", label: "Status", render: item => <StatusPill label={item.status} tone={STATUS_TONE[item.status] ?? "neutral"} /> },
     {
       key: "duration",
       label: "Duration",
-      render: (item: Election) => {
-        if (item.election_startDate && item.election_endDate) {
-          return `${new Date(
-            item.election_startDate
-          ).toLocaleDateString()} - ${new Date(
-            item.election_endDate
-          ).toLocaleDateString()}`;
+      render: item => (item.startDate && item.endDate ? `${formatDate(item.startDate)} – ${formatDate(item.endDate)}` : "—"),
+    },
+    { key: "positions", label: "Positions", align: "center", render: item => item.positionIds?.length ?? 0 },
+    { key: "turnout", label: "Turnout", align: "center", render: item => `${item.stats?.turnout ?? 0}%` },
+    {
+      key: "actions",
+      label: "Actions",
+      align: "right",
+      render: item => {
+        const id = item._id ?? item.id;
+        // Ongoing -> vote. Ended -> results. Upcoming -> nothing to do yet. Whether this
+        // member has already voted is per-position and only known on the detail page, so
+        // "Voted Already" is decided there rather than guessed from the list.
+        if (item.status === "Ongoing") {
+          return (
+            <Button size="sm" onClick={() => navigate(`/election/${id}`)}>
+              Click To Vote
+            </Button>
+          );
         }
-        return "N/A";
+        if (item.status === "Ended") {
+          return (
+            <Button size="sm" variant="outline" onClick={() => navigate(`/election/${id}`)}>
+              View Result
+            </Button>
+          );
+        }
+        return (
+          <Button size="sm" variant="muted" disabled>
+            Not Yet Open
+          </Button>
+        );
       },
-    },
-    {
-      key: "positions",
-      label: "Positions",
-      render: (item: Election) => item.positionIds?.length || 0,
-    },
-    {
-      key: "turnout",
-      label: "Turnout",
-      render: (item: Election) => `${item.stats?.turnout || 0}%`,
     },
   ];
 
-  const positionsColumns = [
-    { key: "name", label: "Position" },
-    {
-      key: "currentHolder",
-      label: "Current Holder",
-      render: (item: Position) => item.currentHolder?.name || "Vacant",
-    },
-    {
-      key: "createdAt",
-      label: "Date Started",
-      render: (item: Position) => new Date(item.createdAt).toLocaleDateString(),
-    },
-    {
-      key: "timeSpent",
-      label: "Time Spent",
-      render: (item: Position) => {
-        const created = new Date(item.createdAt);
-        const now = new Date();
-        const diffTime = Math.abs(now.getTime() - created.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return `${diffDays} day${diffDays === 1 ? "" : "s"}`;
-      },
-    },
-    {
-      key: "pastHolders",
-      label: "Past Holders",
-      render: (item: Position) => "0", // Placeholder - would need historical data
-    },
+  /**
+   * `Position.png` also draws "Date Started", "Time Spent" and "Past Holder". The Position
+   * model is `{ name, orgId, currentHolder }` plus timestamps — none of those three exist,
+   * and there is no position-history collection to derive them from. Omitted per §5.
+   */
+  const positionColumns: TableColumn<any>[] = [
+    { key: "name", label: "Position", render: item => <span className="font-medium">{item.name}</span> },
+    { key: "currentHolder", label: "Current Holder", render: item => item.currentHolder?.name || "Vacant" },
+    { key: "createdAt", label: "Date Created", render: item => formatDate(item.createdAt) },
   ];
 
-  if (isLoading) {
-    return <CircleLoader />;
-  }
-
-  if (isError) {
-    notifyUser("Sorry, an error occurred when fetching data", "error");
-    return null;
-  }
+  const isLoading = tab === "elections" ? elections.isLoading : positions.isLoading;
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <PageHeading>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Elections</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Here's how things are going for you.
-          </p>
+    <>
+      <PageHeader title="Elections" subtitle="Here's how things are going for you." />
+
+      <StatCardRow>
+        <StatCard title="Total Elections Held" value={stats.isLoading ? "..." : (statValues.totalElectionsHeld ?? 0)} icon={FiBarChart2} />
+        <StatCard title="Upcoming Elections" value={stats.isLoading ? "..." : (statValues.upcomingElections ?? 0)} icon={FiCalendar} />
+        <StatCard title="Average Turn-out" value={stats.isLoading ? "..." : `${statValues.averageTurnout ?? 0}%`} icon={FiPieChart} />
+      </StatCardRow>
+
+      <Tabs
+        tabs={TABS}
+        active={tab}
+        onChange={key => {
+          setTab(key);
+          setSearch("");
+          setPage(1);
+        }}
+      />
+
+      <SearchFilterBar
+        search={search}
+        onSearchChange={value => {
+          setSearch(value);
+          setPage(1);
+        }}
+        searchPlaceholder={tab === "elections" ? "Search election by theme" : "Search position by name"}
+        filter={tab === "elections" ? filter : undefined}
+        onFilterChange={
+          tab === "elections"
+            ? value => {
+                setFilter(value);
+                setPage(1);
+              }
+            : undefined
+        }
+        filterOptions={tab === "elections" ? ELECTION_FILTERS : undefined}
+        className="mb-6"
+      />
+
+      {isLoading ? (
+        <div className="py-20 grid place-items-center">
+          <CircleLoader />
         </div>
-      </PageHeading>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard
-          title="Total Elections Held"
-          value={statsData?.stats?.totalElectionsHeld || 0}
-        />
-        <StatCard
-          title="Upcoming Elections"
-          value={statsData?.stats?.upcomingElections || 0}
-        />
-        <StatCard
-          title="Average Turnout"
-          value={`${statsData?.stats?.averageTurnout || 0}%`}
-        />
-        <StatCard
-          title="Total Positions"
-          value={statsData?.stats?.totalPositions || 0}
-        />
-        <StatCard
-          title="Vacant Positions"
-          value={statsData?.stats?.vacantPositions || 0}
-        />
-      </div>
-
-      <div>
-        {/* Tabs */}
-        <div className="bg-white inline-flex border-b border-gray-200 gap-1 w-full">
-          {tabsData.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={`px-12 py-4 rounded-t-md font-medium text-sm bg-transparent border-gray-200  transition-colors ${
-                activeTab === tab.value
-                  ? "bg-org-secondary/40 text-gray-700 border-b-2 border-org-secondary font-semibold"
-                  : "text-gray-600"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-2">
-          {activeTab === "elections" && (
-            <DataTable
-              title={`Elections (${filteredElections.length})`}
-              columns={electionsColumns}
-              data={filteredElections}
-              filterOptions={filterOptions}
-              onFilterSelect={setSelectedFilter}
-              onRowClick={(item) => navigate(`/election/${item.id}`)}
-              onEdit={(item) => navigate(`/election/${item.id}`)}
-              showActions={true}
-              emptyMessage="No elections available"
-              getItemName={(item) => item.name}
-            />
-          )}
-
-          {activeTab === "positions" && (
-            <DataTable
-              title={`Positions (${positions.length})`}
-              columns={positionsColumns}
-              data={positions}
-              showActions={true}
-              emptyMessage="No positions available"
-              getItemName={(item) => item.name}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+      ) : (
+        <>
+          <Table
+            columns={tab === "elections" ? electionColumns : positionColumns}
+            rows={visible}
+            rowKey={item => item._id ?? item.id}
+            empty={<EmptyState icon={FiBarChart2} title={tab === "elections" ? "No elections" : "No positions"} description={tab === "elections" ? "Elections your association runs will appear here." : "No positions have been defined yet."} />}
+          />
+          <Pagination page={current} totalPages={totalPages} onChange={setPage} />
+        </>
+      )}
+    </>
   );
 };
 

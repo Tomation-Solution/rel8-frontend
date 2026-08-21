@@ -1,119 +1,126 @@
-import { FiGrid, FiImage, FiCalendar, FiUser, FiBell, FiHelpCircle, FiLogOut, FiBriefcase, FiLayers } from "react-icons/fi";
-import { PiChatTeardropText } from "react-icons/pi";
-import { CgWebsite } from "react-icons/cg";
-import { MdBallot } from "react-icons/md";
+import { FiHome, FiUsers, FiCalendar, FiBookOpen, FiImage, FiBarChart2, FiBriefcase, FiHeadphones, FiLogOut, FiBell } from "react-icons/fi";
+import { PiHandCoins } from "react-icons/pi";
+import { HiOutlineNewspaper, HiOutlineIdentification } from "react-icons/hi2";
+import { IoWalletOutline } from "react-icons/io5";
+import { MdOutlineCalendarMonth } from "react-icons/md";
 import { SideBarLinkType } from "../types/sidebarDataType";
 
+/**
+ * The rail, in the order every mockup draws it. See REDESIGN.md §4.
+ *
+ * `Chat` is deliberately absent. The mockups draw a standalone Chat page, but chat is a
+ * property of an Environment on this backend (`Environment.hasChat`, and a socket protocol
+ * keyed on `environmentId`), so it lives inside the Environment detail page instead of as
+ * a second, parallel place to have the same conversations. Decided with the user, M13.
+ *
+ * Two rules worth keeping:
+ *  - every entry gets a distinct icon (the pre-redesign rail reused FiUser four times);
+ *  - `key` is what Sidebar.tsx looks up to hang a count badge or unread dot on an item,
+ *    so renaming an entry does not silently drop its badge.
+ */
 export const sideBarData: SideBarLinkType[] = [
   {
-    mainIcon: FiGrid,
+    key: "home",
+    mainIcon: FiHome,
     name: "Home",
     path: "/",
   },
   {
-    mainIcon: PiChatTeardropText,
-    name: "Chat",
-    path: "/chat",
-  },
-  {
+    key: "notifications",
     mainIcon: FiBell,
     name: "Notifications",
     path: "/notifications",
   },
-  // {
-  //   mainIcon:membersEnviroment,
-  //   name: "Directory",
-  //   path: "/registry",
-  //   activeLinkIcon: '',
-  //   notActiveLinkIcon:'',
-  // },
   {
-    mainIcon: FiLayers,
-    name: "Environments",
-    subMenu: [], // populated dynamically in Sidebar.tsx based on user role
-    activeFor: ["/members", "/excos", "/committees", "/groups", "/member-types"],
+    key: "environment",
+    mainIcon: FiUsers,
+    name: "Environment",
+    // One tabbed page: members, excos, committees, groups, member types. The rail used to
+    // expand into those as a submenu; the backend has since collapsed them into one
+    // `Environment` resource (REDESIGN.md §0c).
+    path: "/environment",
+    activeFor: ["/members", "/member-types", "/registry"],
   },
 
   {
+    key: "events",
     mainIcon: FiCalendar,
     name: "Events",
     path: "/events",
     activeFor: ["/event"],
+    startsGroup: true,
   },
   {
-    mainIcon: FiCalendar,
+    key: "meetings",
+    mainIcon: MdOutlineCalendarMonth,
     name: "Meetings",
     path: "/meeting",
   },
-  // {
-  //   mainIcon: FiCalendar,
-  //   name: "Special Events",
-  //   path: "/special-events",
-  // },
   {
-    mainIcon: CgWebsite,
-    name: "Publication",
+    key: "publications",
+    mainIcon: FiBookOpen,
+    name: "Publications",
     path: "/publications",
     activeFor: ["/publication"],
   },
   {
-    mainIcon: CgWebsite,
+    key: "news",
+    mainIcon: HiOutlineNewspaper,
     name: "News",
     path: "/news",
   },
-  // {
-  //   mainIcon:resourcesIcon,
-  //   name: "Resources",
-  //   path: "/resources",
-  // },
   {
+    key: "gallery",
     mainIcon: FiImage,
     name: "Gallery",
     path: "/gallery",
   },
   {
-    mainIcon: MdBallot,
-    // mainIcon: electionIcon,
-    name: "Election",
+    key: "elections",
+    mainIcon: FiBarChart2,
+    name: "Elections",
     path: "/election",
-    activeFor: ["/elections-contestant", "/election-steps", "/all-votes", "/create-aspirant"],
+    
   },
   {
-    mainIcon: FiUser,
+    key: "dues",
+    mainIcon: IoWalletOutline,
     name: "Dues",
     path: "/dues",
   },
   {
-    mainIcon: FiUser,
+    key: "account",
+    mainIcon: HiOutlineIdentification,
     name: "My Account",
     path: "/account",
   },
   {
-    mainIcon: FiUser,
+    key: "projects",
+    mainIcon: PiHandCoins,
     name: "Fund a Project",
     path: "/fund-a-project",
     activeFor: ["/support-in-kind", "/support-in-cash"],
   },
   {
+    key: "services",
     mainIcon: FiBriefcase,
-    name: "Service Requests",
+    name: "Service Request",
     path: "/service-requests",
-    activeFor: ["/service-requests-submission"],
+    activeFor: ["/service-requests-submission", "/services"],
   },
-  // {
-  //   mainIcon: subscribeIcon,
-  //   name: "Subscribe",
-  //   path: "/subscribe",
-  // },
   {
-    mainIcon: FiHelpCircle,
+    key: "support",
+    mainIcon: FiHeadphones,
     name: "Support",
     path: "/support",
-    activeFor: ["/faq", "/technical-support", "/admin-support"],
+    
   },
   {
+    key: "logout",
     mainIcon: FiLogOut,
     name: "Logout",
     path: "/logout",
+    danger: true,
+    startsGroup: true,
   },
 ];

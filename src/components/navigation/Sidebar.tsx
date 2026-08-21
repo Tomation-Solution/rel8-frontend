@@ -1,70 +1,41 @@
-import { sideBarData as initialSideBarData } from "../../data/sideBarData";
-import NavItem from "./NavItem";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { SubMenuItem, SideBarLinkType } from "../../types/sidebarDataType";
+import { useQuery } from "react-query";
+import { sideBarData } from "../../data/sideBarData";
+import NavItem from "./NavItem";
 import { useAppContext } from "../../context/authContext";
+import { fetchAllUserEvents } from "../../api/events/events-api";
+import { fetchAllNotifications } from "../../api/notifications/notifications-api";
+import { greeting } from "../../utils/dates";
 
 interface Props {
   isMobileSidebarOpen: boolean;
   setIsMobileSidebarOpen: (value: boolean) => void;
 }
 
+/** The member's headline role — the pill under the greeting. */
+const roleLabel = (user: any): string => {
+  if (user?.exco?.isExco) return user?.exco?.position || "Exco";
+  if (user?.memberType && typeof user.memberType === "object" && user.memberType.name) return user.memberType.name;
+  return "Member";
+};
+
 const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const navigate = useNavigate();
   const { user } = useAppContext();
-  const [sideBarData, setSideBarData] = useState<SideBarLinkType[]>(initialSideBarData);
 
-  const isExco: boolean = user?.exco?.isExco === true;
-  const userGroups: { _id: string; name: string }[] = Array.isArray(user?.groups) ? user.groups : [];
+  // Same query keys the Events page and Navbar use, so react-query serves these from cache
+  // rather than firing a second request just to draw a badge.
+  const { data: events } = useQuery("events", fetchAllUserEvents, { enabled: !!user, staleTime: 5 * 60 * 1000 });
+  const { data: notifications } = useQuery("notifications", fetchAllNotifications, { enabled: !!user, staleTime: 5 * 60 * 1000 });
 
-  // member type: can be { _id, name } object or a plain id string
-  const userMemberType: { _id: string; name: string } | null = (() => {
-    if (!user?.memberType) return null;
-    if (typeof user.memberType === "object" && user.memberType._id) return user.memberType;
-    return null; // plain id — name unknown until types are loaded
-  })();
-
-  useEffect(() => {
-    const environmentsSubMenu: SubMenuItem[] = [
-      {
-        name: "Members Environment",
-        path: "/member-types",
-      },
-    ];
-
-    // Add the user's own member type as a quick-link if we have the name
-    if (userMemberType) {
-      environmentsSubMenu.push({
-        name: userMemberType.name,
-        path: `/member-types/${userMemberType._id}`,
-      });
-    }
-
-    const committeeGroups: SubMenuItem[] = [];
-    const otherGroups: SubMenuItem[] = [];
-
-    userGroups.forEach(group => {
-      const entry: SubMenuItem = { name: group.name, path: `/groups/${group._id}` };
-      if (group.name.toLowerCase().includes("committee")) {
-        committeeGroups.push(entry);
-      } else {
-        otherGroups.push(entry);
-      }
-    });
-
-    // If more than one committee group, nest them under a "Committee" parent entry
-    if (committeeGroups.length > 1) {
-      environmentsSubMenu.push({ name: "Committee", path: "", children: committeeGroups });
-    } else {
-      committeeGroups.forEach(g => environmentsSubMenu.push(g));
-    }
-
-    otherGroups.forEach(g => environmentsSubMenu.push(g));
-
-    const updated = initialSideBarData.map(item => (item.name === "Environments" ? { ...item, subMenu: environmentsSubMenu } : item));
-    setSideBarData(updated);
-  }, [isExco, userGroups.length, userMemberType?._id]);
+  const badges = useMemo(
+    () => ({
+      events: Array.isArray(events) ? events.length : Array.isArray((events as any)?.data) ? (events as any).data.length : 0,
+      notifications: Array.isArray(notifications) ? notifications.length : 0,
+    }),
+    [events, notifications]
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("rel8User");
@@ -72,29 +43,51 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
     navigate("/login");
   };
 
+  const firstName = String(user?.name ?? "").split(" ")[0];
+
+  const header = (
+    <div className="px-6 pt-6 pb-5">
+      <p className="text-[17px] leading-tight">
+        <span className="text-org-primary font-semibold">{greeting()},</span> <span className="text-ink font-semibold">{firstName}</span>
+      </p>
+      <p className="text-xs text-muted mt-1 leading-snug">Welcome back to your member portal..</p>
+      <span className="inline-block mt-3 text-xs font-medium text-org-primary bg-org-tint border border-org-primary/40 rounded-full px-4 py-1.5">{roleLabel(user)}</span>
+    </div>
+  );
+
+  const items = sideBarData.map((item, index) => (
+    <div key={item.key ?? index} className={item.startsGroup ? "mt-4" : ""}>
+      <NavItem
+        item={item}
+        isMobileSidebarOpen={isMobileSidebarOpen}
+        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+        onLogout={item.name === "Logout" ? handleLogout : undefined}
+        badge={item.key === "events" ? badges.events : undefined}
+        dot={item.key === "notifications" && badges.notifications > 0}
+      />
+    </div>
+  ));
+
   return (
     <>
-      {/* Desktop Navbar */}
-      {/* <nav className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-y-auto hidden lg:inline-block lg:w-80 z-10 !bg-[#FAFAFB] fixed h-full shadow-md py-5"> */}
-      <nav className="hidden lg:block lg:w-80 z-10 !bg-[#FAFAFB] h-screen shadow-md py-5 sticky top-0 overflow-y-auto">
-        {sideBarData.map((item, index) => (
-          <NavItem key={index} item={item} isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} onLogout={item.name === "Logout" ? handleLogout : undefined} />
-        ))}
+      {/* Desktop rail */}
+      <nav className="hidden lg:flex lg:w-[272px] flex-col flex-shrink-0 bg-app border-r border-hairline h-screen sticky top-0 overflow-y-auto scrollbar-thin scrollbar-thumb-hairline">
+        {header}
+        <div className="pb-8">{items}</div>
       </nav>
 
-      {/* Mobile Navbar */}
+      {/* Mobile drawer */}
       <div
         onClick={() => setIsMobileSidebarOpen(false)}
-        className={`lg:hidden fixed left-0 right-0 bottom-0 top-[70px] bg-black/60 z-40 transition-opacity duration-200 ${isMobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`lg:hidden fixed inset-0 top-[70px] bg-black/50 z-40 transition-opacity duration-200 ${isMobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       >
         <nav
-          className={`fixed left-0 bottom-0 top-[70px] w-[80%] max-w-[320px] bg-white px-3 py-6 overflow-y-auto transform transition-transform duration-200 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          className={`fixed left-0 bottom-0 top-[70px] w-[82%] max-w-[300px] bg-app overflow-y-auto transform transition-transform duration-200 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
           onClick={e => e.stopPropagation()}
           aria-label="Mobile navigation"
         >
-          {sideBarData.map((item, index) => (
-            <NavItem key={index} item={item} isMobileSidebarOpen={isMobileSidebarOpen} setIsMobileSidebarOpen={setIsMobileSidebarOpen} onLogout={item.name === "Logout" ? handleLogout : undefined} />
-          ))}
+          {header}
+          <div className="pb-8">{items}</div>
         </nav>
       </div>
     </>

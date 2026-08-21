@@ -38,7 +38,7 @@ const MembersPage = () => {
         ))}
       </div>
 
-      {currentItems?.length <= 0 && <h3 className="text-org-primary-blue text-xl">No Members Available</h3>}
+      {currentItems?.length <= 0 && <h3 className="text-org-primary text-xl">No Members Available</h3>}
 
       {pageNumbers.length > 0 && (
         <ul className="flex space-x-2 items-center justify-center my-2">

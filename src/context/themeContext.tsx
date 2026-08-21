@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { setOrganizationTheme } from '../utils/themeUtils';
+import { setOrganizationTheme, resetToDefaultTheme } from '../utils/themeUtils';
 
 interface OrganizationTheme {
   primaryColor: string;
@@ -27,12 +27,28 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   useEffect(() => {
-    // Load saved theme on mount
+    /*
+     * Restore the tenant's theme, but never leave the app on a half-set palette.
+     *
+     * This used to do nothing at all when `orgTheme` was absent or unparseable, so the
+     * CSS `:root` fallback was the only thing painting — and a stale value written by an
+     * earlier tenant survived forever, which is one way the app ends up looking like a
+     * brand it no longer serves. Anything missing or malformed now resets to the house
+     * theme explicitly.
+     */
     const savedTheme = localStorage.getItem('orgTheme');
-    if (savedTheme) {
+    if (!savedTheme) {
+      resetToDefaultTheme();
+      return;
+    }
+    try {
       const { primaryColor, secondaryColor } = JSON.parse(savedTheme);
+      if (!primaryColor || !secondaryColor) throw new Error('incomplete theme');
       setOrganizationTheme(primaryColor, secondaryColor);
       setCurrentTheme({ primaryColor, secondaryColor });
+    } catch {
+      localStorage.removeItem('orgTheme');
+      resetToDefaultTheme();
     }
   }, []);
 

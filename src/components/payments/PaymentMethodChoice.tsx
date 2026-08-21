@@ -43,7 +43,7 @@ const PaymentMethodChoice = ({ config, value, onChange, disabled, label = "How w
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">{label}</label>
       <div className="space-y-2">
         {available.map(method => {
           const selected = value === method;
@@ -53,21 +53,21 @@ const PaymentMethodChoice = ({ config, value, onChange, disabled, label = "How w
               type="button"
               disabled={disabled}
               onClick={() => onChange(method)}
-              className={`w-full text-left rounded-lg border p-3 transition-colors disabled:opacity-50 ${
-                selected ? "border-org-primary bg-org-secondary" : "border-gray-300 bg-white hover:border-gray-400"
+              className={`w-full text-left rounded-lg border p-3.5 transition-colors disabled:opacity-50 ${
+                selected ? "border-org-primary bg-org-tint" : "border-hairline bg-white hover:border-org-primary/40"
               }`}
             >
               <div className="flex items-start gap-3">
                 <span
                   className={`mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border ${
-                    selected ? "border-org-primary" : "border-gray-400"
+                    selected ? "border-org-primary" : "border-muted"
                   }`}
                 >
                   {selected && <span className="h-2 w-2 rounded-full bg-org-primary" />}
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-gray-800">{COPY[method].label}</span>
-                  <span className="block text-xs text-gray-500">{COPY[method].hint}</span>
+                  <span className="block text-sm font-semibold text-ink">{COPY[method].label}</span>
+                  <span className="block text-xs text-muted">{COPY[method].hint}</span>
                 </span>
               </div>
             </button>
@@ -78,8 +78,7 @@ const PaymentMethodChoice = ({ config, value, onChange, disabled, label = "How w
   );
 };
 
-/** The method to start on: Paystack when offered (it reconciles itself), else transfer. */
-export const defaultMethod = (config?: PaymentConfig | null): PaymentMethod =>
-  supportsMethod(config, "paystack") ? "paystack" : "bank_transfer";
+// `defaultMethod` lives in ./defaultMethod — a component file that also exports a helper
+// trips react-refresh/only-export-components, and this repo lints at --max-warnings 0.
 
 export default PaymentMethodChoice;

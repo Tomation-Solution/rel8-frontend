@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { SideBarLinkType } from "../../types/sidebarDataType";
-import { useState } from "react";
 import { FiChevronDown, FiFolder } from "react-icons/fi";
 
 interface NavItemProps {
@@ -9,9 +8,13 @@ interface NavItemProps {
   isMobileSidebarOpen: boolean;
   setIsMobileSidebarOpen: (value: boolean) => void;
   onLogout?: () => void;
+  /** Count badge after the label (Events). */
+  badge?: number;
+  /** Unread marker after the label (Notifications). */
+  dot?: boolean;
 }
 
-const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }: NavItemProps) => {
+const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout, badge, dot }: NavItemProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,22 +42,32 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
     setIsMobileSidebarOpen(false);
   };
 
+  const matches = (base: string) => location.pathname === base || location.pathname.startsWith(base + "/");
+
   const isActive = item.path
     ? item.path === "/"
       ? location.pathname === "/"
-      : location.pathname === item.path || location.pathname.startsWith(item.path + "/") || (item.activeFor?.some(p => location.pathname === p || location.pathname.startsWith(p + "/")) ?? false)
-    : isSubMenuActive || (item.activeFor?.some(p => location.pathname === p || location.pathname.startsWith(p + "/")) ?? false);
+      : matches(item.path) || (item.activeFor?.some(matches) ?? false)
+    : isSubMenuActive || (item.activeFor?.some(matches) ?? false);
+
+  // Active state: lavender pill with a brand-coloured bar down its left edge, bleeding to
+  // the rail's edge. Inactive rows are plain — no hover fill on the icon.
+  const base = "relative flex items-center justify-between gap-3 pl-6 pr-4 py-3 rounded-r-lg transition-colors";
+  const tone = item.danger ? "text-status-danger hover:bg-status-danger-bg/60" : isActive ? "bg-org-tint text-org-primary font-medium" : "text-ink hover:bg-org-tint/60";
 
   const itemContent = (
-    <div className={`flex my-1 items-center justify-between gap-3 text-[15px] p-3 mx-4 rounded-lg text-gray-500 ${isActive ? "bg-org-primary text-white font-bold" : "hover:bg-org-secondary hover:text-org-primary"}`}>
-      <div className="flex items-center gap-2">
-        {item.mainIcon && React.createElement(item.mainIcon, { className: "w-5 h-5" })}
-        <span className="text-sm md:text-[15px]">{item.name}</span>
-      </div>
-      <div className="flex items-center gap-1">
+    <div className={`${base} ${tone}`}>
+      {isActive && !item.danger && <span className="absolute left-0 top-0 bottom-0 w-1 rounded-r bg-org-primary" aria-hidden />}
+      <span className="flex items-center gap-3 min-w-0">
+        {item.mainIcon && React.createElement(item.mainIcon, { className: "w-5 h-5 flex-shrink-0" })}
+        <span className="text-[15px] truncate">{item.name}</span>
+        {dot && <span className="w-2 h-2 rounded-full bg-org-primary flex-shrink-0" aria-label="unread" />}
+      </span>
+      <span className="flex items-center gap-1 flex-shrink-0">
+        {typeof badge === "number" && badge > 0 && <span className={`text-xs rounded-full px-2 py-0.5 ${isActive ? "bg-org-primary text-white" : "bg-neutral-2 text-white"}`}>{badge}</span>}
         {(item.activeLinkIcon || item.notActiveLinkIcon) && <img className="w-fit h-6 object-fit" src={isActive ? item.activeLinkIcon : item.notActiveLinkIcon} alt="" />}
-        {item.subMenu && <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""} ${isActive ? "text-white" : "text-gray-400"}`} />}
-      </div>
+        {item.subMenu && <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />}
+      </span>
     </div>
   );
 
@@ -71,22 +84,20 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout }
       )}
 
       {isDropdownOpen && item.subMenu && (
-        <div className="ml-6 mt-1 mb-1 space-y-1">
+        <div className="ml-10 mt-1 mb-1 space-y-1">
           {item.subMenu.map((subItem, index) => {
             // ── Nested group (e.g. Committee folder) ──────────────────
             if (subItem.children && subItem.children.length > 0) {
-              return <NestedSubGroup key={index} label={subItem.name} children={subItem.children} onNavigate={path => handleSubMenuClick(path)} />;
+              return <NestedSubGroup key={index} label={subItem.name} items={subItem.children} onNavigate={path => handleSubMenuClick(path)} />;
             }
 
             // ── Regular sub-item ──────────────────────────────────────
-            const subIsActive = !subItem.isMessage && (location.pathname === subItem.path || location.pathname.startsWith(subItem.path + "/"));
+            const subIsActive = !subItem.isMessage && matches(subItem.path);
             return (
               <div
                 key={index}
                 onClick={() => handleSubMenuClick(subItem.path, subItem.isMessage)}
-                className={`text-sm px-3 py-2 rounded-lg mx-4 ${
-                  subItem.isMessage ? "text-gray-400 italic cursor-default" : `cursor-pointer ${subIsActive ? "bg-org-primary text-white font-semibold" : "text-gray-600 hover:bg-org-secondary hover:text-org-primary"}`
-                }`}
+                className={`text-sm px-3 py-2 mr-4 rounded-lg ${subItem.isMessage ? "text-muted italic cursor-default" : `cursor-pointer ${subIsActive ? "bg-org-tint text-org-primary font-medium" : "text-muted hover:bg-org-tint/60"}`}`}
               >
                 {subItem.name}
               </div>
@@ -104,23 +115,18 @@ export default NavItem;
 
 interface NestedSubGroupProps {
   label: string;
-  children: { name: string; path: string }[];
+  items: { name: string; path: string }[];
   onNavigate: (path: string) => void;
 }
 
-const NestedSubGroup = ({ label, children, onNavigate }: NestedSubGroupProps) => {
+const NestedSubGroup = ({ label, items, onNavigate }: NestedSubGroupProps) => {
   const location = useLocation();
-  const anyChildActive = children.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + "/"));
+  const anyChildActive = items.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + "/"));
   const [open, setOpen] = useState(anyChildActive);
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => setOpen(prev => !prev)}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-lg mx-4 text-sm text-gray-600 hover:bg-org-secondary hover:text-org-primary"
-        style={{ width: "calc(100% - 2rem)" }}
-      >
+      <button type="button" onClick={() => setOpen(prev => !prev)} className="w-full flex items-center justify-between px-3 py-2 mr-4 rounded-lg text-sm text-muted hover:bg-org-tint/60">
         <span className="flex items-center gap-2">
           <FiFolder className="w-4 h-4 flex-shrink-0" />
           {label}
@@ -129,10 +135,10 @@ const NestedSubGroup = ({ label, children, onNavigate }: NestedSubGroupProps) =>
       </button>
       {open && (
         <div className="ml-4 mt-0.5 space-y-0.5">
-          {children.map((child, i) => {
+          {items.map((child, i) => {
             const isActive = location.pathname === child.path || location.pathname.startsWith(child.path + "/");
             return (
-              <div key={i} onClick={() => onNavigate(child.path)} className={`text-sm px-3 py-2 rounded-lg mx-4 cursor-pointer ${isActive ? "bg-org-primary text-white font-semibold" : "text-gray-600 hover:bg-org-secondary hover:text-org-primary"}`}>
+              <div key={i} onClick={() => onNavigate(child.path)} className={`text-sm px-3 py-2 mr-4 rounded-lg cursor-pointer ${isActive ? "bg-org-tint text-org-primary font-medium" : "text-muted hover:bg-org-tint/60"}`}>
                 {child.name}
               </div>
             );

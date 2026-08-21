@@ -1,180 +1,149 @@
-import SeeAll from "../../../components/SeeAll";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
-import { PublicationDataType } from "../../../types/myTypes";
-import { useQuery } from "react-query";
-import { useParams } from "react-router-dom";
-import { fetchUserPublications } from "../../../api/publications/publications-api";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { FiBookOpen, FiThumbsUp, FiDownload } from "react-icons/fi";
+
+import { fetchPublicationById, fetchPublicationsComments, postPublicationComment, deletePublicationComment, togglePublicationLike } from "../../../api/publications/publications-api";
+import { BackLink, Button, EmptyState, PageHeader, StatusPill } from "../../../components/ui";
+import CommentsPanel from "../content/CommentsPanel";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import EventGrid from "../../../components/grid/EventGrid";
 import Toast from "../../../components/toast/Toast";
-import PublicationCard from "../../../components/cards/PublicationCard";
-import { toast } from "react-toastify";
-import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
-import { useState, useEffect } from "react";
-import PublicationComment from "../../../components/cards/PublicationComment";
-import DownloadFileButton from "../../../components/button/DownloadFileButton";
-import { togglePublicationLike } from "../../../api/publications/publications-api";
+import { useAppContext } from "../../../context/authContext";
+import { formatCardDateTime, isPast } from "../../../utils/dates";
+import { contentAuthor, contentBanner, hasLiked, likeCount, publicationBody, publicationTitle } from "../content/contentFields";
 
 const PublicationsDetailPage = () => {
-  const { notifyUser } = Toast();
   const { publicationId } = useParams();
-  const [hasLiked, setHasLiked] = useState(false);
-  const [hasDisliked, setHasDisliked] = useState(false);
-  const { data, isLoading, isError } = useQuery(
-    "publications",
-    fetchUserPublications,
-    {
-      // enabled: false,
-    }
-  );
+  const navigate = useNavigate();
+  const { user } = useAppContext();
+  const { notifyUser } = Toast();
+  const queryClient = useQueryClient();
 
-  const publicationItem = data?.find((item: any) => item._id === publicationId);
-  console.log("--->", data);
-  const otherPublicationItems = data?.filter(
-    (item: any) => item._id !== publicationId
-  );
+  const memberId = String((user as any)?._id ?? user?.id ?? "");
 
-  const formattedDate = publicationItem
-    ? new Date(publicationItem.updatedAt).toLocaleDateString()
-    : "";
-  console.log(publicationItem);
-  useEffect(() => {
-    if (publicationItem) {
-      // Check if current user has liked this publication
-      const currentUserId = localStorage.getItem("userId"); // Adjust based on how you store user ID
-      setHasLiked(
-        publicationItem.likes?.some(
-          (like: any) => like._id === currentUserId
-        ) || false
-      );
-      setHasDisliked(
-        publicationItem.dislikes !== null && publicationItem.dislikes > 0
-      );
-    }
-  }, [publicationItem]);
+  const { data: item, isLoading, isError } = useQuery(["publication", publicationId], () => fetchPublicationById(publicationId as string), { enabled: !!publicationId });
 
-  const handleLike = async () => {
-    if (!publicationId) return;
+  /**
+   * Publications, unlike news, **do** have a `GET /publication/:id/comments` route, so the
+   * comment list is its own query and can be refetched without re-pulling the article.
+   */
+  const { data: comments = [] } = useQuery(["publicationComments", publicationId], () => fetchPublicationsComments(publicationId as string), { enabled: !!publicationId });
 
-    try {
-      const response = await togglePublicationLike(publicationId);
-      setHasLiked(response.liked);
-      // Update the publication data to reflect the new like count
-      // You might need to refetch or update the local state
-      toast.success(response.liked ? "Liked!" : "Unliked!", {
-        autoClose: 2000,
-      });
-    } catch (error) {
-      toast.error("Failed to toggle like", { autoClose: 2000 });
-    }
+  const invalidate = () => {
+    queryClient.invalidateQueries(["publication", publicationId]);
+    queryClient.invalidateQueries(["publicationComments", publicationId]);
+    queryClient.invalidateQueries("publications");
   };
 
-  const handleDislike = () => {
-    toast.info("Dislike functionality coming soon", { autoClose: 2000 });
-  };
+  const likeMutation = useMutation(() => togglePublicationLike(publicationId as string), {
+    onSuccess: invalidate,
+    onError: () => {
+      notifyUser("Failed to toggle like", "error");
+    },
+  });
+
+  const commentMutation = useMutation((content: string) => postPublicationComment(content, publicationId as string), {
+    onSuccess: invalidate,
+    onError: () => {
+      notifyUser("Could not post your comment", "error");
+    },
+  });
+
+  const deleteCommentMutation = useMutation((commentId: string) => deletePublicationComment(publicationId as string, commentId), {
+    onSuccess: invalidate,
+    onError: () => {
+      notifyUser("Could not delete the comment", "error");
+    },
+  });
 
   if (isLoading) {
-    return <CircleLoader />;
-  }
-
-  if (isError) {
-    return notifyUser(
-      "An error occured while fetching publication details",
-      "error"
-    );
-  }
-
-  if (data) {
-    const bannerUrl = publicationItem.bannerUrl || publicationItem.fileUrl ||"";
-    const attachmentUrls = publicationItem.attachmentUrls || [];
-
     return (
-      <main>
-        <div className="grid md:grid-cols-4 md:gap-10 gap-[50px] md:px-0 px-5">
-          <div className="col-span-3">
-            <BreadCrumb title="Publications" />
-            {bannerUrl && (
-              <div className="relative flex items-center bg-gray-200 h-[40vh]">
-                <img
-                  src={bannerUrl}
-                  className="w-full  max-h-[40vh] border object-contain rounded-md"
-                  // className="w-full absolute top-0 right-0 left-0 bottom-0 object-cover h-full max-h-[inheit] "
-                  alt=""
-                />
-              </div>
-            )}
-            <div className="col-span-1 mt-6">
-              <div className="mb-3">
-                <h3 className="font-semibold my-2">{publicationItem?.name}</h3>
-                {/* <p className="text-sm font-light">Date published: {publicationItem?.created_at}</p> */}
-                <p className="text-sm font-light">
-                  Date published: {formattedDate}
-                </p>
-              </div>
-              <br />
-              {publicationItem?.content ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: `${publicationItem.content}`,
-                  }}
-                />
-              ) : (
-                ""
-              )}
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button
-                className={`px-2 py-1 rounded-md ${
-                  hasLiked ? "bg-green-500 text-white" : "bg-gray-200"
-                }`}
-                onClick={handleLike}
-              >
-                <AiOutlineLike />
-              </button>
-              <button
-                className={`px-2 py-1 rounded-md ${
-                  hasDisliked ? "bg-red-500 text-white" : "bg-gray-200"
-                }`}
-                onClick={handleDislike}
-              >
-                <AiOutlineDislike />
-              </button>
-            </div>
-            {attachmentUrls.length > 0 && (
-              <div className="mt-4">
-                <DownloadFileButton
-                  fileUrls={attachmentUrls}
-                  fileNames={attachmentUrls.map((url) => {
-                    const fileNameArr: string[] = url.split("/") || [];
-                    return fileNameArr[fileNameArr.length - 1];
-                  })}
-                  buttonText="Attachments"
-                />
-              </div>
-            )}
-            <div>
-              <PublicationComment newsId={publicationId} />
-            </div>
-          </div>
-          <div className="md:col-span-1 col-span-3">
-            <SeeAll title="Others" />
-            <EventGrid numberOfItemsToShow={3} />
-            <div className="">
-              {otherPublicationItems?.map(
-                (publicationItem: PublicationDataType, index: number) => (
-                  <PublicationCard
-                    hidePostDetails={true}
-                    key={index}
-                    publicationItem={publicationItem}
-                  />
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
+      <div className="py-20 grid place-items-center">
+        <CircleLoader />
+      </div>
     );
   }
+
+  if (isError || !item) {
+    return (
+      <>
+        <BackLink to="/publications" label="Go back" />
+        <PageHeader title="Publication Details" />
+        <EmptyState icon={FiBookOpen} title="Publication not found" description="It may have been removed." action={<Button onClick={() => navigate("/publications")}>Back to publications</Button>} />
+      </>
+    );
+  }
+
+  const isRecent = !isPast(new Date(new Date(item.createdAt ?? 0).getTime() + 30 * 24 * 60 * 60 * 1000));
+  const liked = hasLiked(item, memberId);
+
+  return (
+    <>
+      <BackLink to="/publications" label="Go back" />
+      <PageHeader title="Publication Details" subtitle="See the details of the latest publications here..." />
+
+      <div className="max-w-4xl flex flex-col gap-6">
+        <div>
+          <h2 className="text-[22px] font-semibold text-org-primary">{publicationTitle(item)}</h2>
+          <p className="text-sm text-muted mt-1">Date Posted: {formatCardDateTime(item.createdAt)}</p>
+        </div>
+
+        {contentBanner(item) && (
+          <div className="relative rounded-xl overflow-hidden">
+            <img src={contentBanner(item)} alt="" className="w-full max-h-[420px] object-cover" />
+            {isRecent && <StatusPill label="New" tone="brand" className="!rounded-none absolute top-0 right-0 !px-4 !py-1.5" />}
+          </div>
+        )}
+
+        <p className="text-[15px] text-ink whitespace-pre-line leading-relaxed">{publicationBody(item)}</p>
+
+        {Array.isArray(item.attachmentUrls) && item.attachmentUrls.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {item.attachmentUrls.map((url: string, index: number) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                className="inline-flex items-center gap-2 rounded-lg border border-hairline px-4 py-2.5 text-sm text-ink hover:border-org-primary hover:text-org-primary transition-colors"
+              >
+                <FiDownload className="w-4 h-4" />
+                Attachment {index + 1}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-5">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => likeMutation.mutate()}
+              disabled={likeMutation.isLoading}
+              aria-pressed={liked}
+              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${liked ? "bg-org-primary text-white" : "bg-org-tint text-org-primary hover:bg-org-tint-strong"}`}
+            >
+              <FiThumbsUp className="w-4 h-4" />
+              {likeCount(item)}
+            </button>
+            <span className="text-sm text-muted">Like this publication</span>
+          </div>
+
+          <p className="text-sm text-ink">
+            Author: <span className="text-org-primary font-medium">{contentAuthor(item)}</span>
+          </p>
+        </div>
+
+        <CommentsPanel
+          comments={comments as any[]}
+          currentMemberId={memberId}
+          submitting={commentMutation.isLoading}
+          onSubmit={content => commentMutation.mutate(content)}
+          onDelete={commentId => deleteCommentMutation.mutate(commentId)}
+        />
+      </div>
+    </>
+  );
 };
 
 export default PublicationsDetailPage;

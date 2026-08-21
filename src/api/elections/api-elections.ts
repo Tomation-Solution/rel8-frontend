@@ -32,20 +32,15 @@ export const fetchElectionResults = async (electionId: string) => {
     const response = await apiTenant.get(`/api/elections/results/${electionId}`);
     return response.data
 }
-export const fetchElectionContestants = async (id:string|null) =>{
-    console.log('sdsddsds')
-    if (id){
-        
-        const response = await apiTenant.get(`/election/adminmanageballotbox/list_of_contestant/?election_id=${id}`);
-        // const response = await apiTenant.get(`/election/adminmanageballotbox/list_of_contestant/?election_id=3`);
-        return response.data
-    }
-    // console.log('hahah',id)
-    // const response = await apiTenant.get(`/election/adminmanageballotbox/list_of_contestant/?election_id=${id}`);
-    // const response = await apiTenant.get(`/election/adminmanageballotbox/list_of_contestant/?postion_id=${id}`);
-    // return response.data
-   
-}
+/**
+ * Removed: `fetchElectionContestants`.
+ *
+ * It called `/election/adminmanageballotbox/list_of_contestant/` — a Django-style path with
+ * no `/api` prefix that this backend does not mount — and had no callers left. Candidates
+ * come from `GET /api/elections/:id/details` (already used by `ElectionDetailsPage`) or
+ * `GET /api/elections/:electionId/candidates`.
+ */
+
 // export const voteContestant = async (data: {ballotBoxID: number, contestantID: number, vote: boolean}) =>{
 //     const response = await apiTenant.get(`/election/adminmanageballotbox/vote_for_contestant/`,data);
 //     return response.data

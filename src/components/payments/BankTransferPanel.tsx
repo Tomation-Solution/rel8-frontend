@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { FiCheckCircle, FiAlertTriangle, FiInfo } from "react-icons/fi";
 import type { PaymentCheckout } from "../../api/paystack-api";
+import { Button } from "../ui";
+import { formatMoney, useCurrencySymbol } from "../../utils/currency";
 
 /**
  * The bank-transfer half of the unified payment flow (X-1 / X-7).
@@ -25,9 +28,10 @@ interface BankTransferPanelProps {
   title?: string;
 }
 
-const formatAmount = (amount?: number) => (amount == null ? "" : `₦${Number(amount).toLocaleString()}`);
-
 const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = false, error, requireProof = false, title = "Complete your payment" }: BankTransferPanelProps) => {
+  // The amount used to be hardcoded to a naira sign, so every non-NGN tenant saw the wrong
+  // currency on the one screen where the number has to be exactly right.
+  const currencySymbol = useCurrencySymbol();
   const [proof, setProof] = useState<File | null>(null);
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
@@ -59,9 +63,11 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
 
   if (declared) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-        <p className="text-sm font-semibold text-green-900">Payment submitted</p>
-        <p className="mt-1 text-xs text-green-800">
+      <div className="rounded-xl border border-status-success/30 bg-status-success-bg p-4">
+        <p className="inline-flex items-center gap-2 text-sm font-semibold text-status-success">
+          <FiCheckCircle className="w-4 h-4" /> Payment submitted
+        </p>
+        <p className="mt-1 text-xs text-ink">
           We've told the organisation. They'll confirm it against their records — you'll be notified once it's approved.
           {checkout.reference && (
             <>
@@ -75,77 +81,76 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-hairline bg-white p-5">
       {checkout.fallbackFrom === "paystack" && (
-        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3">
-          <p className="text-sm font-semibold text-amber-900">Online payment isn't available right now</p>
-          <p className="mt-1 text-xs text-amber-800">
+        <div className="mb-4 rounded-lg border border-status-warning/30 bg-status-warning-bg p-3">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-status-warning">
+            <FiInfo className="w-4 h-4" /> Online payment isn&rsquo;t available right now
+          </p>
+          <p className="mt-1 text-xs text-ink">
             We couldn't start your online payment, so we've set up a bank transfer instead. You can pay to the account below — nothing has been charged.
           </p>
         </div>
       )}
 
-      <p className="text-sm font-semibold text-gray-900">{title}</p>
-      <p className="mt-1 text-xs text-gray-500">Transfer the amount below and quote your reference so the payment can be matched to you.</p>
+      <p className="text-[15px] font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-xs text-muted">Transfer the amount below and quote your reference so the payment can be matched to you.</p>
 
       {/* Items migrated from the pre-X-7 schema can offer bank transfer with no structured
           account details — the old free-text blob was preserved but never parsed. Showing
           the usual "transfer to the account below" with no account is worse than saying so:
           the payer either gives up or sends money somewhere wrong. */}
       {!hasAccountDetails && (
-        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
-          <p className="text-sm font-semibold text-red-900">Account details are missing</p>
-          <p className="mt-1 text-xs text-red-800">
+        <div className="mt-4 rounded-lg border border-status-danger/30 bg-status-danger-bg p-3">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-status-danger">
+            <FiAlertTriangle className="w-4 h-4" /> Account details are missing
+          </p>
+          <p className="mt-1 text-xs text-ink">
             The organisation hasn't finished setting up bank transfer for this item, so there's no account to pay into yet. Please contact them before
             sending anything{bt?.instructions ? " — the note below is all they have provided." : "."}
           </p>
         </div>
       )}
 
-      <div className="mt-3 space-y-2 rounded-md bg-gray-50 p-3">
+      <div className="mt-4 space-y-2.5 rounded-lg bg-org-tint p-4">
         {bt?.accountName && <Row label="Account name" value={bt.accountName} onCopy={copy} copied={copied} />}
         {bt?.accountNumber && <Row label="Account number" value={bt.accountNumber} onCopy={copy} copied={copied} />}
         {bt?.bankName && <Row label="Bank" value={bt.bankName} />}
-        {checkout.amount != null && <Row label="Amount" value={formatAmount(checkout.amount)} />}
+        {checkout.amount != null && <Row label="Amount" value={formatMoney(checkout.amount, currencySymbol)} />}
         {checkout.reference && <Row label="Reference" value={checkout.reference} highlight onCopy={copy} copied={copied} />}
-        {bt?.instructions && <p className="border-t border-gray-200 pt-2 text-xs text-gray-600">{bt.instructions}</p>}
+        {bt?.instructions && <p className="border-t border-org-tint-strong pt-2.5 text-xs text-muted">{bt.instructions}</p>}
       </div>
 
       <div className={`mt-4 space-y-3 ${hasAccountDetails ? "" : "opacity-50 pointer-events-none"}`} aria-disabled={!hasAccountDetails}>
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-700">
-            Proof of payment {requireProof ? <span className="text-red-500">*</span> : <span className="text-gray-400">(optional)</span>}
+          <label className="mb-1.5 block text-xs font-medium text-ink">
+            Proof of payment {requireProof ? <span className="text-status-danger">*</span> : <span className="text-muted">(optional)</span>}
           </label>
           <input
             type="file"
             accept="image/*,application/pdf"
             onChange={e => setProof(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-org-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-org-primary"
+            className="block w-full text-xs text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-org-tint file:px-3 file:py-2 file:text-xs file:font-medium file:text-org-primary"
           />
-          {!requireProof && <p className="mt-1 text-xs text-gray-400">You can submit without a receipt — the organisation can match your reference on their statement.</p>}
+          {!requireProof && <p className="mt-1.5 text-xs text-muted">You can submit without a receipt — the organisation can match your reference on their statement.</p>}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-700">Note (optional)</label>
+          <label className="mb-1.5 block text-xs font-medium text-ink">Note (optional)</label>
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="Anything the organisation should know"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-org-primary focus:outline-none"
+            className="w-full rounded-lg border border-hairline px-3 py-2.5 text-sm text-ink placeholder:text-muted focus:border-org-primary focus:outline-none"
           />
         </div>
 
-        {(localError || error) && <p className="text-xs text-red-600">{localError || error}</p>}
+        {(localError || error) && <p className="text-xs text-status-danger">{localError || error}</p>}
 
-        <button
-          type="button"
-          onClick={handleDeclare}
-          disabled={declaring}
-          className="w-full rounded-md bg-org-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {declaring ? "Submitting…" : "I've made the transfer"}
-        </button>
+        <Button fullWidth isLoading={declaring} onClick={handleDeclare}>
+          I&rsquo;ve made the transfer
+        </Button>
       </div>
     </div>
   );
@@ -153,9 +158,9 @@ const BankTransferPanel = ({ checkout, onDeclare, declaring = false, declared = 
 
 const Row = ({ label, value, highlight, onCopy, copied }: { label: string; value: string; highlight?: boolean; onCopy?: (l: string, v: string) => void; copied?: string | null }) => (
   <div className="flex items-center justify-between gap-3">
-    <span className="shrink-0 text-xs text-gray-500">{label}</span>
+    <span className="shrink-0 text-xs text-muted">{label}</span>
     <span className="flex items-center gap-2 text-right">
-      <span className={`break-all text-sm ${highlight ? "font-bold text-org-primary" : "font-medium text-gray-900"}`}>{value}</span>
+      <span className={`break-all text-sm ${highlight ? "font-bold text-org-primary" : "font-medium text-ink"}`}>{value}</span>
       {onCopy && (
         <button type="button" onClick={() => onCopy(label, value)} className="shrink-0 text-xs text-org-primary underline">
           {copied === label ? "Copied" : "Copy"}
