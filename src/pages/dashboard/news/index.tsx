@@ -10,7 +10,7 @@ import MediaCard from "../../../components/ui/MediaCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { commentCount, contentAuthor, contentBanner, likeCount, newsBody, newsTitle } from "../content/contentFields";
 import { formatCardDateTime, isPast } from "../../../utils/dates";
-import { unformatText } from "../../../utils/strings";
+import { htmlToText } from "../../../utils/html";
 
 const PER_PAGE = 9;
 
@@ -35,7 +35,7 @@ const NewsPage = () => {
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    const rows = news.filter((item: any) => !needle || `${newsTitle(item)} ${unformatText(newsBody(item))}`.toLowerCase().includes(needle));
+    const rows = news.filter((item: any) => !needle || `${newsTitle(item)} ${htmlToText(newsBody(item))}`.toLowerCase().includes(needle));
     if (filter === "old") return [...rows].sort((a, b) => +new Date(a.createdAt ?? 0) - +new Date(b.createdAt ?? 0));
     if (filter === "new") return [...rows].sort((a, b) => +new Date(b.createdAt ?? 0) - +new Date(a.createdAt ?? 0));
     return rows;
@@ -79,7 +79,7 @@ const NewsPage = () => {
                   image={contentBanner(item)}
                   title={newsTitle(item)}
                   meta={formatCardDateTime(item.createdAt)}
-                  excerpt={unformatText(newsBody(item))}
+                  excerpt={htmlToText(newsBody(item))}
                   badge={isRecent(item) ? "New" : undefined}
                   badgeTone="brand"
                   onClick={() => navigate(`/news/${id}/`)}

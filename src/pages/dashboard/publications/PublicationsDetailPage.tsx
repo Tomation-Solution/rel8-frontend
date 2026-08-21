@@ -10,6 +10,7 @@ import Toast from "../../../components/toast/Toast";
 import { useAppContext } from "../../../context/authContext";
 import { formatCardDateTime, isPast } from "../../../utils/dates";
 import { contentAuthor, contentBanner, hasLiked, likeCount, publicationBody, publicationTitle } from "../content/contentFields";
+import { RichText } from "../../../utils/richText";
 
 const PublicationsDetailPage = () => {
   const { publicationId } = useParams();
@@ -94,7 +95,8 @@ const PublicationsDetailPage = () => {
           </div>
         )}
 
-        <p className="text-[15px] text-ink whitespace-pre-line leading-relaxed">{publicationBody(item)}</p>
+        {/* Editor HTML — sanitised and styled, not printed as text. */}
+        <RichText html={publicationBody(item)} />
 
         {Array.isArray(item.attachmentUrls) && item.attachmentUrls.length > 0 && (
           <div className="flex flex-wrap gap-3">

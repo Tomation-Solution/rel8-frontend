@@ -22,8 +22,8 @@ import ApplicationFeeGate from "../../../components/payments/ApplicationFeeGate"
 import { NotificationDataType, TableDataType } from "../../../types/myTypes";
 import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
 import { formatDate } from "../../../utils/dates";
-import { unformatText } from "../../../utils/strings";
 import emptyMailbox from "../../../assets/images/no-notification-available.png";
+import { htmlToText } from "../../../utils/html";
 
 /** Every list endpoint here answers either a bare array or a `{ results }` / `{ data }` envelope. */
 const asArray = <T,>(value: any): T[] => (Array.isArray(value) ? value : Array.isArray(value?.results) ? value.results : Array.isArray(value?.data) ? value.data : []);
@@ -107,7 +107,7 @@ const HomePage = () => {
                 <div className="min-w-0 flex flex-col">
                   <p className="text-xs text-muted">{formatDate(latest.created_at || latest.createdAt)}</p>
                   <h4 className="text-[17px] font-semibold text-ink mt-1 line-clamp-2">{latest.name || latest.title}</h4>
-                  <p className="text-sm text-muted mt-2 line-clamp-3">{unformatText(latest.body || "")}</p>
+                  <p className="text-sm text-muted mt-2 line-clamp-3">{htmlToText(latest.content || latest.body || "")}</p>
                   <div className="mt-4">
                     <Button onClick={() => navigate(`/news/${latest.id ?? latest._id}/`)}>Read more</Button>
                   </div>

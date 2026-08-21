@@ -13,10 +13,14 @@ import { apiPublic } from "../baseApi";
  * them.
  */
 
-export const resetPassword =async (data: {newPassword: string, token: string}) =>{
-    const response = await apiPublic.post(`/members/reset-password/${data.token}`, {newPassword: data.newPassword});
-    return response.data
-}
+/*
+ * Removed: `resetPassword`.
+ *
+ * `POST /members/reset-password/:token` exists on the backend but nothing here called it.
+ * The portal sets passwords through `setPassword` (`POST /members/set-password`), which is
+ * where the forgot-password email now points and which also marks the member verified —
+ * `reset-password` does neither. One path, not two.
+ */
 
 export const setPassword =async (data: {password: string, token: string}) =>{
     const response = await apiPublic.post(`/members/set-password`,data);

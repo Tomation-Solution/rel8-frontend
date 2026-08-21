@@ -33,22 +33,31 @@ export interface Ticket {
   updatedAt: string;
 }
 
+/**
+ * Support types and categories, **verbatim from the admin's `libs/constant.ts`**.
+ *
+ * Kept identical on purpose: both apps write to the same `Ticket` collection and the same
+ * `category` / `supportType` enums (see `models/Ticket.js`), and an admin filtering their
+ * queue by category has to find what a member filed. Any divergence here shows up as
+ * tickets that quietly fall outside the admin's filters.
+ *
+ * If this list changes, change it in the admin, here, and the model's enum together.
+ */
 export const SUPPORT_TYPES: { value: SupportType; label: string }[] = [
   { value: "TECHNICAL", label: "Technical" },
-  { value: "SALES", label: "General / Admin" },
+  { value: "SALES", label: "Sales" },
 ];
 
-/**
- * Categories, mirrored from the admin's `libs/constant.ts`.
- *
- * Trimmed to the ones that mean something to a member: the admin list carries HR, Payroll,
- * Attendance, Leave and Performance, which belong to a different product and would only
- * confuse someone raising a ticket about their dues.
- */
 export const TICKET_CATEGORIES = [
-  { value: "GENERAL", label: "General" },
   { value: "TECHNICAL", label: "Technical" },
-  { value: "FINANCE", label: "Finance / Payments" },
+  { value: "SALES", label: "Sales" },
+  { value: "HR", label: "HR" },
+  { value: "PAYROLL", label: "Payroll" },
+  { value: "ATTENDANCE", label: "Attendance" },
+  { value: "LEAVE", label: "Leave" },
+  { value: "PERFORMANCE", label: "Performance" },
+  { value: "FINANCE", label: "Finance" },
+  { value: "GENERAL", label: "General" },
   { value: "COMPLAINT", label: "Complaint" },
   { value: "SUGGESTION", label: "Suggestion" },
 ];

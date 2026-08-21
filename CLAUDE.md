@@ -128,9 +128,24 @@ in old call sites and only ever worked because `name` is undefined. Accessors li
 empty ⇒ free. A registration can now be `pending_payment` — a place held while checkout is
 in flight, which does **not** count toward capacity.
 
+## Password recovery
+
+`POST /api/members/forgot-password` sends a link whose destination depends on
+`settings.magic_link`: a password organization gets `/setup-new-password?token=`
+(→ `POST /members/set-password`), a passwordless one gets `/authentication?token=`. It used
+to send everyone to `/authentication`, so forgot-password signed you in without ever
+changing the password — see the backend's BE-40.
+
+`POST /members/reset-password/:token` exists but is deliberately **not** used: it skips the
+`userType` check and does not mark the member verified. Set passwords through
+`setPassword`.
+
 ## Support tickets
 
 Members raise and track tickets at Support → My Tickets (`api/tickets/tickets-api.ts`).
+Support types and categories are **verbatim copies of the admin's `libs/constant.ts`** and
+must stay that way — both apps write the same `Ticket.category` / `supportType` enums, and
+a divergence means members file tickets that fall outside the admin's filters.
 `ticket.routes.js` is `requireOrgAdminOrMember`, so the portal client deliberately exposes
 only read + create — status changes and deletion are the admin's, and `getMyTickets` scopes
 the list server-side. The Admin/Technical Support contact forms create tickets through the
@@ -173,6 +188,17 @@ standalone Exco and Committee screens; this portal has not caught up, so
 calling them can only 404. Use `/api/environments` (`src/api/environments/environments-api.ts`).
 Full breakdown, including which files die and which only need repointing, is in
 `REDESIGN.md` §0c.
+
+**Content bodies are rich HTML**, written in the admin's editor — headings, lists, bold,
+`&nbsp;` entities. Never print one as a text node and never strip it with a tag regex:
+
+- rendering → `<RichText html={...} />` (`utils/richText.tsx`), which sanitises with
+  DOMPurify and supplies the typography Tailwind's preflight strips
+- excerpts, search, `line-clamp` → `htmlToText()` (`utils/html.ts`), which parses with
+  `DOMParser` so entities decode
+
+`unformatText()` in `utils/strings.ts` is a bare `replace(/<[^>]*>/g, "")`: it leaves
+`&nbsp;` behind and is not for article bodies.
 
 **Content field names**: News is `topic` / `content` (no `name`, no `body`); Publication is
 `title` / `content`; Gallery is `images: [{url, caption}]`. `likes` / `dislikes` are arrays

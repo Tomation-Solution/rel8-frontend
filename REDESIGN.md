@@ -571,6 +571,16 @@ So a news item has **no `name` and no `body`**. `contentFields.ts` holds the acc
 - Gallery is the one content endpoint that **pages server-side** (`gallery_version2`), so
   its `Pagination` is driven by `total`/`limit` from the response rather than a client slice
 
+**Rich text (fixed 2026-08-21).** News and publication bodies are editor HTML, and both
+ends of the pipe were wrong: detail pages rendered the body as a **text node**, so members
+read `<p><strong>News&nbsp;Details:</strong></p>…`, while cards ran it through
+`unformatText()` — a bare tag regex — which strips tags but leaves entities, giving
+excerpts full of `&nbsp;`. Now `RichText` (sanitised via DOMPurify, with the typography
+preflight removes) for rendering, and `htmlToText()` (DOMParser, so entities decode) for
+excerpts and search. `dompurify` became a real dependency: it was only reachable as an
+*optional* transitive of `jspdf`, so importing it directly would have broken on any
+`--no-optional` install.
+
 **Two mockup affordances not built**, both moved into §5 with reasons: threaded replies and
 per-comment likes. The comment subdocument has no `parentId` and no like field, so both
 would have been client-only state that vanishes on reload.

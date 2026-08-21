@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { NotificationDataType } from "../../types/myTypes";
 import { formatPostedAt, relativeTime } from "../../utils/dates";
-import { unformatText } from "../../utils/strings";
 import { notificationIcon, notificationLink } from "./notificationMeta";
+import { htmlToText } from "../../utils/html";
 
 interface NotificationRowProps {
   item: NotificationDataType;
@@ -25,7 +25,7 @@ const NotificationRow = ({ item, stamp = "relative" }: NotificationRowProps) => 
 
       <span className="flex-1 min-w-0">
         <span className="block text-[15px] font-semibold text-ink truncate">{item.title}</span>
-        <span className="block text-xs text-muted line-clamp-2 mt-0.5">{unformatText(item.message || "")}</span>
+        <span className="block text-xs text-muted line-clamp-2 mt-0.5">{htmlToText(item.message || "")}</span>
       </span>
 
       <span className="hidden sm:flex items-center gap-2 flex-shrink-0 pt-1">

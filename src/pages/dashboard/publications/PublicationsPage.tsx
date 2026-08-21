@@ -9,7 +9,7 @@ import MediaCard from "../../../components/ui/MediaCard";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import { commentCount, contentAuthor, contentBanner, likeCount, publicationBody, publicationTitle } from "../content/contentFields";
 import { formatCardDateTime, isPast } from "../../../utils/dates";
-import { unformatText } from "../../../utils/strings";
+import { htmlToText } from "../../../utils/html";
 
 const PER_PAGE = 9;
 
@@ -33,7 +33,7 @@ const PublicationsPage = () => {
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    const rows = publications.filter((item: any) => !needle || `${publicationTitle(item)} ${unformatText(publicationBody(item))}`.toLowerCase().includes(needle));
+    const rows = publications.filter((item: any) => !needle || `${publicationTitle(item)} ${htmlToText(publicationBody(item))}`.toLowerCase().includes(needle));
     if (filter === "old") return [...rows].sort((a, b) => +new Date(a.createdAt ?? 0) - +new Date(b.createdAt ?? 0));
     if (filter === "new") return [...rows].sort((a, b) => +new Date(b.createdAt ?? 0) - +new Date(a.createdAt ?? 0));
     return rows;
@@ -89,7 +89,7 @@ const PublicationsPage = () => {
                   image={contentBanner(item)}
                   title={publicationTitle(item)}
                   meta={formatCardDateTime(item.createdAt)}
-                  excerpt={unformatText(publicationBody(item))}
+                  excerpt={htmlToText(publicationBody(item))}
                   badge={isRecent(item) ? "New" : undefined}
                   badgeTone="brand"
                   onClick={() => navigate(`/publication/${id}/`)}

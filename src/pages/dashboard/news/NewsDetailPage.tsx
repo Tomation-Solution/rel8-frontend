@@ -12,6 +12,7 @@ import Toast from "../../../components/toast/Toast";
 import { useAppContext } from "../../../context/authContext";
 import { formatCardDateTime, isPast } from "../../../utils/dates";
 import { commentCount, contentAuthor, contentBanner, dislikeCount, hasDisliked, hasLiked, likeCount, newsBody, newsTitle } from "../content/contentFields";
+import { RichText } from "../../../utils/richText";
 
 const NewsDetailPage = () => {
   const { newsId } = useParams();
@@ -105,7 +106,8 @@ const NewsDetailPage = () => {
           </div>
         )}
 
-        <p className="text-[15px] text-ink whitespace-pre-line leading-relaxed">{newsBody(item)}</p>
+        {/* Editor HTML — sanitised and styled, not printed as text. */}
+        <RichText html={newsBody(item)} />
 
         {Array.isArray(item.attachmentUrls) && item.attachmentUrls.length > 0 && (
           <div className="flex flex-wrap gap-3">

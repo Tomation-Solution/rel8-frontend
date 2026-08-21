@@ -982,10 +982,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dompurify@^3.3.1:
-  version "3.4.2"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.2.tgz"
-  integrity sha512-lHeS9SA/IKeIFFyYciHBr2n0v1VMPlSj843HdLOwjb2OxNwdq9Xykxqhk+FE42MzAdHvInbAolSE4mhahPpjXA==
+dompurify@^3.3.1, dompurify@^3.4.14:
+  version "3.4.14"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.14.tgz"
+  integrity sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
