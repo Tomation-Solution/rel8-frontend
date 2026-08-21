@@ -18,6 +18,7 @@ import { isOutstanding } from "../../../api/paystack-api";
 import { Button, Card, EmptyState, PageHeader, StatCard, StatCardRow } from "../../../components/ui";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import NotificationRow from "../../../components/notifications/NotificationRow";
+import ApplicationFeeGate from "../../../components/payments/ApplicationFeeGate";
 import { NotificationDataType, TableDataType } from "../../../types/myTypes";
 import { formatMoney, useCurrencySymbol } from "../../../utils/currency";
 import { formatDate } from "../../../utils/dates";
@@ -80,6 +81,9 @@ const HomePage = () => {
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Here is what's happening with your community today." />
+
+      {/* Renders nothing unless this member joined by applying and still owes the fee. */}
+      <ApplicationFeeGate />
 
       <StatCardRow>
         <StatCard title="Active Dues" value={dues.isLoading ? "..." : formatMoney(outstanding, currencySymbol)} icon={IoWalletOutline} to="/dues" />

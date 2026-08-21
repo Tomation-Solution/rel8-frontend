@@ -39,7 +39,6 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
 
   const handleLogout = () => {
     localStorage.removeItem("rel8User");
-    localStorage.removeItem("userRel8RegistrationData");
     navigate("/login");
   };
 

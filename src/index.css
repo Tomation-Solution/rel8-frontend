@@ -36,38 +36,13 @@
         @apply text-org-primary no-underline hover:text-org-primary-hover;
     }
 
-    /* Legacy helpers. Superseded by src/components/ui/* — kept until the last screen that
-       still uses them is migrated (REDESIGN.md M15). */
-    .btn-block {
-        @apply w-full
-    }
-    .btnPrimary {
-        @apply bg-org-primary text-white hover:bg-org-primary-hover
-    }
-    .btnSecondary {
-        @apply bg-org-secondary text-white hover:bg-org-secondary-hover
-    }
-    .btn-Outlined {
-        @apply bg-white border border-org-primary !text-org-primary !capitalize hover:bg-org-primary/10
-    }
-    .btn {
-        @apply w-full mt-2 capitalize text-center rounded-lg font-medium text-sm
-    }
-    .form-control {
-        @apply bg-white border border-hairline text-ink py-2 px-3 w-full rounded-lg outline-none placeholder:text-muted focus:border-org-primary
-    }
-    .form-control-icon {
-        @apply w-10 h-10 object-contain bg-org-tint p-[10px] rounded-lg
-    }
-    .form-group {
-        @apply flex items-center gap-2
-    }
-    .auth-form-container {
-        @apply flex flex-col justify-center items-center w-[90%] sm:w-[70%] md:w-[80%] md:max-w-[80%] 2xl:w-[60%] xl:w-[70%] mx-auto h-full z-[2]
-    }
-    .registration-table {
-        @apply !table-auto py-0 mt-6 bg-white border-hairline rounded-xl w-full overflow-x-auto
-    }
+    /*
+      The `.btn*`, `.form-control`, `.form-group`, `.auth-form-container` and
+      `.registration-table` helpers lived here through the redesign so that screens not yet
+      migrated kept working. Every screen is migrated now (M15), so they are gone — a
+      component that needs a button uses `components/ui/Button`, and a field uses
+      `IconInput`.
+    */
     .table {
         @apply w-full border-collapse overflow-x-auto text-ink
     }

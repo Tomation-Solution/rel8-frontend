@@ -18,8 +18,6 @@ export interface SideBarLinkType {
   name: string;
   path?: string;
   mainIcon?: React.ElementType;
-  activeLinkIcon?: string;
-  notActiveLinkIcon?: string;
   subMenu?: SubMenuItem[];
   requiresExco?: boolean;
   requiresCommittee?: boolean;

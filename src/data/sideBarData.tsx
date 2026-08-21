@@ -39,7 +39,7 @@ export const sideBarData: SideBarLinkType[] = [
     // expand into those as a submenu; the backend has since collapsed them into one
     // `Environment` resource (REDESIGN.md §0c).
     path: "/environment",
-    activeFor: ["/members", "/member-types", "/registry"],
+    activeFor: ["/members", "/member-types"],
   },
 
   {

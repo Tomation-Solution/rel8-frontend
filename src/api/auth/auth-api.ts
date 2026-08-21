@@ -1,14 +1,17 @@
-// import { RegistrationFormFields } from "../../pages/auth/RegistrationPage";
-// import { VerifyMembershipForm } from "../../pages/auth/VerifyMember";
-import { VerifyMembershipForm } from "../../pages/auth/VerifyMemberPage";
 import { apiPublic } from "../baseApi";
-import { VerifiedMembershipResponse } from "./auth-types";
 
-
-export const verifyUserMembership =async (data:VerifyMembershipForm): Promise<VerifiedMembershipResponse> =>{
-    const response = await apiPublic.post(`/auth/ManageMemberValidation/`,data);
-    return response.data
-}
+/**
+ * Removed: `verifyUserMembership` and `createMember`.
+ *
+ * They posted to `/auth/ManageMemberValidation/` and
+ * `/auth/ManageMemberValidation/create_member/` — Django-era paths this backend does not
+ * mount — and they implemented a self-registration flow that **does not exist**. Members
+ * are created by an admin (or by an approved application); they receive an email, set a
+ * password and log in. There is nothing to register for.
+ *
+ * The two screens that drove it, `VerifyMemberPage` and `RegistrationPage`, are gone with
+ * them.
+ */
 
 export const resetPassword =async (data: {newPassword: string, token: string}) =>{
     const response = await apiPublic.post(`/members/reset-password/${data.token}`, {newPassword: data.newPassword});
@@ -20,11 +23,6 @@ export const setPassword =async (data: {password: string, token: string}) =>{
     return response.data
 }
 
-
-export const createMember = async (data: any) =>{
-    const response = await apiPublic.post(`/auth/ManageMemberValidation/create_member/`, data);
-    return response.data
-}
 
 export const memberLogin = async (data: {email: string, userType: string, password: string}) =>{
     const response = await apiPublic.post(`/members/login`, data);

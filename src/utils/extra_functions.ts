@@ -1,30 +1,12 @@
+/*
+ * `setRel8UserRegistrationData` / `getRel8UserRegistrationData` were removed with the
+ * self-registration flow — there is no registration in this portal. Members are created by
+ * an admin (or by an approved application), emailed a link, set a password and log in.
+ */
 import React from "react";
 import jwt_decode from "jwt-decode";
 import { useLocation } from "react-router-dom";
 import { MemberType } from "../api/members/api-members";
-
-type UserRegistrationParticluarsDataType = {
-  MEMBERSHIP_NO: string;
-  TITLE: string;
-  name: string;
-  MEMBERSHIP_GRADE: string;
-  POSITION_HELD: string | null;
-};
-
-export const setRel8UserRegistrationData = (data: UserRegistrationParticluarsDataType) => {
-  localStorage.setItem("userRel8RegistrationData", JSON.stringify(data));
-  return true;
-};
-
-export const getRel8UserRegistrationData = () => {
-  const data = localStorage.getItem("userRel8RegistrationData");
-  if (data) {
-    const userData = JSON.parse(data);
-    return userData;
-  } else {
-    return null;
-  }
-};
 
 export const getRel8LoginUserToken = () => {
   try {

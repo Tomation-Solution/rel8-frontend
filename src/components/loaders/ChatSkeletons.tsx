@@ -4,21 +4,21 @@ export const ChatListSkeleton: React.FC = () => {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div key={index} className="p-3 rounded-md bg-neutral-3 animate-pulse">
+        <div key={index} className="p-3 rounded-md bg-hairline animate-pulse">
           <div className="flex items-center gap-3">
             {/* Avatar skeleton */}
-            <div className="w-10 h-10 rounded-full bg-neutral-4 flex-shrink-0"></div>
+            <div className="w-10 h-10 rounded-full bg-hairline flex-shrink-0"></div>
 
             {/* Content skeleton */}
             <div className="flex-1 min-w-0">
               {/* Name skeleton */}
-              <div className="h-4 bg-neutral-4 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-hairline rounded w-3/4 mb-2"></div>
               {/* Subtitle skeleton */}
-              <div className="h-3 bg-neutral-4 rounded w-1/2"></div>
+              <div className="h-3 bg-hairline rounded w-1/2"></div>
             </div>
 
             {/* Status indicator skeleton */}
-            <div className="w-2 h-2 rounded-full bg-neutral-4"></div>
+            <div className="w-2 h-2 rounded-full bg-hairline"></div>
           </div>
         </div>
       ))}
@@ -37,19 +37,19 @@ export const ChatMessagesSkeleton: React.FC = () => {
           <div className={`min-w-[50%] ${index % 2 === 0 ? 'mr-auto' : 'ml-auto'}`}>
             {/* Message bubble skeleton */}
             <div className={`p-3 rounded-lg ${
-              index % 2 === 0 ? 'bg-neutral-3' : 'bg-org-primary'
+              index % 2 === 0 ? 'bg-hairline' : 'bg-org-primary'
             }`}>
               {/* Message lines */}
               <div className="space-y-2">
                 <div className={`h-3 rounded ${
-                  index % 2 === 0 ? 'bg-neutral-4' : 'bg-white/30'
+                  index % 2 === 0 ? 'bg-hairline' : 'bg-white/30'
                 } ${index % 3 === 0 ? 'w-full' : 'w-3/4'}`}></div>
                 <div className={`h-3 rounded ${
-                  index % 2 === 0 ? 'bg-neutral-4' : 'bg-white/30'
+                  index % 2 === 0 ? 'bg-hairline' : 'bg-white/30'
                 } ${index % 2 === 0 ? 'w-1/2' : 'w-2/3'}`}></div>
                 {index % 4 === 0 && (
                   <div className={`h-3 rounded ${
-                    index % 2 === 0 ? 'bg-neutral-4' : 'bg-white/30'
+                    index % 2 === 0 ? 'bg-hairline' : 'bg-white/30'
                   } w-1/3`}></div>
                 )}
               </div>
@@ -58,7 +58,7 @@ export const ChatMessagesSkeleton: React.FC = () => {
             <div className={`text-xs mt-1 ${
               index % 2 === 0 ? 'text-left' : 'text-right'
             }`}>
-              <div className="h-3 bg-neutral-4 rounded w-12 inline-block"></div>
+              <div className="h-3 bg-hairline rounded w-12 inline-block"></div>
             </div>
           </div>
         </div>

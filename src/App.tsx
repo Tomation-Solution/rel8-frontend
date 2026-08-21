@@ -4,7 +4,6 @@ import "./App.css";
 import Loader from "./components/Loader";
 import DashboardLayout from "./layouts/DashboardLayout";
 import ApplicantLayout from "./layouts/ApplicantLayout";
-import ActivateAccount from "./pages/ActivateAccount";
 import DuesPage from "./pages/dashboard/dues/DuesPage";
 import ErrorPage from "./pages/ErrorPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -15,13 +14,9 @@ function App() {
   const ServiceRequestDetail = lazy(() => import("./pages/dashboard/service_request/details"));
   const TrackApplicationPage = lazy(() => import("./pages/applicant/TrackApplicationPage"));
   const ApplicationStatusPage = lazy(() => import("./pages/applicant/ApplicationStatusPage"));
-  const VerifyMemberPage = lazy(() => import("./pages/auth/VerifyMemberPage"));
   const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
-  const RegistrationPage = lazy(() => import("./pages/auth/RegistrationPage"));
   const ForgotPasswordPage = lazy(() => import("./pages/auth/forgot-password/ForgotPasswordPage"));
-  const EnterCodePage = lazy(() => import("./pages/auth/forgot-password/EnterCodePage"));
   const SetupNewPasswordPage = lazy(() => import("./pages/auth/forgot-password/SetupNewPasswordPage"));
-  const PayupPage = lazy(() => import("./pages/auth/PayupPage"));
   const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
 
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
@@ -40,9 +35,7 @@ function App() {
   const NewsDetailPage = lazy(() => import("./pages/dashboard/news/NewsDetailPage"));
 
   const EnvironmentPage = lazy(() => import("./pages/dashboard/environment/EnvironmentPage"));
-  const MembersPage = lazy(() => import("./pages/dashboard/members/MembersPage"));
   const MemberProfilePage = lazy(() => import("./pages/dashboard/members/MemberProfilePage"));
-  const MemberTypesPage = lazy(() => import("./pages/dashboard/member-types/MemberTypesPage"));
   const MemberTypeDetailPage = lazy(() => import("./pages/dashboard/member-types/MemberTypeDetailPage"));
   const MeetingPage = lazy(() => import("./pages/dashboard/meetings/MeetingPage"));
   const MeetingDetailsPage = lazy(() => import("./pages/dashboard/meetings/MeetingDetailsPage"));
@@ -51,15 +44,6 @@ function App() {
   const ElectionDetailsPage = lazy(() => import("./pages/dashboard/elections/ElectionDetailsPage"));
   const FundAProjectPage = lazy(() => import("./pages/dashboard/projects/FundAProjectPage"));
   const PaystackCallbackPage = lazy(() => import("./pages/PaystackCallbackPage"));
-  const ServicesPage = lazy(() => import("./pages/dashboard/services/ServicesPage"));
-  const LossOfCertificatePage = lazy(() => import("./pages/dashboard/services/LossOfCertificatePage"));
-  const ReIssuanceFormPage = lazy(() => import("./pages/dashboard/services/ReIssuanceFormPage"));
-  const DeactivationOfMembershipPage = lazy(() => import("./pages/dashboard/services/DeactivationOfMembershipPage"));
-  const ReIssuanceOfCertificatePage = lazy(() => import("./pages/dashboard/services/ReIssuanceOfCertificatePage"));
-  const FactoryLocationUpdatePage = lazy(() => import("./pages/dashboard/services/FactoryLocationUpdatePage"));
-  const ChangeOfNamePage = lazy(() => import("./pages/dashboard/services/ChangeOfNamePage"));
-  const MergerOfCompaniesPage = lazy(() => import("./pages/dashboard/services/MergerOfCompaniesPage"));
-  const ProductManufacturingUpdatePage = lazy(() => import("./pages/dashboard/services/ProductManufacturingUpdatePage"));
   const SupportPage = lazy(() => import("./pages/dashboard/support/SupportPage"));
 
   const EnvironmentDetailPage = lazy(() => import("./pages/dashboard/environment/EnvironmentDetailPage"));
@@ -92,28 +76,10 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/verify-membership",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <VerifyMemberPage />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
       path: "/login",
       element: (
         <Suspense fallback={<Loader />}>
           <LoginPage />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/register",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <RegistrationPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -141,24 +107,6 @@ function App() {
       element: (
         <Suspense fallback={<Loader />}>
           <SetupNewPasswordPage />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/enter-code",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <EnterCodePage />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/pay-dues",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <PayupPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -363,20 +311,9 @@ function App() {
     },
 
     {
-      path: "/registry",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <MembersPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      // The consolidated Environment page (REDESIGN.md M4 / §0c). Excos and Committees had
-      // their own screens here until the backend collapsed all three into `Environment`;
-      // `/members` and `/member-types` still resolve to their old screens until M15.
+      // The consolidated Environment page (REDESIGN.md M4 / §0c). Excos, Committees, the
+      // members list and member types all had their own screens; they are tabs here now.
+      // Only the two detail routes survive, linked from this page.
       path: "/environment",
       element: (
         <Suspense fallback={<Loader />}>
@@ -388,33 +325,11 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/members",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <MembersPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
       path: "/members/:id",
       element: (
         <Suspense fallback={<Loader />}>
           <DashboardLayout>
             <MemberProfilePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/member-types",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <MemberTypesPage />
           </DashboardLayout>
         </Suspense>
       ),
@@ -488,105 +403,6 @@ function App() {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/services",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ServicesPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/loss-of-certificate-page",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <LossOfCertificatePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/reissuance-form",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ReIssuanceFormPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/deactivate-membership",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <DeactivationOfMembershipPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/reissuance-of-certificate",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ReIssuanceOfCertificatePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/factory-location-update",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <FactoryLocationUpdatePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/product-manufacturing-update",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ProductManufacturingUpdatePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/change-of-name",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <ChangeOfNamePage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/merger-of-companies",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <DashboardLayout>
-            <MergerOfCompaniesPage />
-          </DashboardLayout>
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
       path: "/support",
       element: (
         <Suspense fallback={<Loader />}>
@@ -614,15 +430,6 @@ function App() {
       element: (
         <Suspense fallback={<Loader />}>
           <LoginPage />
-        </Suspense>
-      ),
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/mailing",
-      element: (
-        <Suspense fallback={<Loader />}>
-          <ActivateAccount />
         </Suspense>
       ),
       errorElement: <ErrorPage />,

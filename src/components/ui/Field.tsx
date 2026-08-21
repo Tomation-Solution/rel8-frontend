@@ -26,6 +26,8 @@ interface IconInputProps extends InputHTMLAttributes<HTMLInputElement> {
    */
   iconStyle?: "inline" | "attached";
   wrapperClassName?: string;
+  /** Rides inside the field on the right — the password eye toggle, a unit, a clear button. */
+  trailing?: React.ReactNode;
 }
 
 /**
@@ -34,7 +36,7 @@ interface IconInputProps extends InputHTMLAttributes<HTMLInputElement> {
  *
  * Forwards its ref so `react-hook-form`'s `{...register("name")}` spreads straight onto it.
  */
-export const IconInput = forwardRef<HTMLInputElement, IconInputProps>(({ label, error, icon, iconStyle = "inline", className = "", wrapperClassName = "", ...rest }, ref) => {
+export const IconInput = forwardRef<HTMLInputElement, IconInputProps>(({ label, error, icon, iconStyle = "inline", className = "", wrapperClassName = "", trailing, ...rest }, ref) => {
   const input = <input ref={ref} className={`flex-1 min-w-0 bg-transparent outline-none text-sm text-ink placeholder:text-muted px-3 py-3 ${className}`} {...rest} />;
 
   return (
@@ -42,12 +44,16 @@ export const IconInput = forwardRef<HTMLInputElement, IconInputProps>(({ label, 
       {iconStyle === "attached" ? (
         <div className="flex items-stretch gap-0">
           {icon && <div className="w-12 rounded-l-lg bg-org-tint grid place-items-center flex-shrink-0">{createElement(icon, { className: "w-5 h-5 text-org-primary" })}</div>}
-          <div className={`flex-1 min-w-0 flex items-center border border-hairline bg-white focus-within:border-org-primary ${icon ? "rounded-r-lg" : "rounded-lg"}`}>{input}</div>
+          <div className={`flex-1 min-w-0 flex items-center border border-hairline bg-white focus-within:border-org-primary ${icon ? "rounded-r-lg" : "rounded-lg"}`}>
+            {input}
+            {trailing}
+          </div>
         </div>
       ) : (
         <div className="flex items-center rounded-lg border border-hairline bg-white focus-within:border-org-primary">
           {icon && <div className="pl-3 pr-3 py-3 border-r border-hairline flex-shrink-0">{createElement(icon, { className: "w-5 h-5 text-muted" })}</div>}
           {input}
+          {trailing}
         </div>
       )}
     </Field>

@@ -1,31 +1,26 @@
-// import loginPageCoverImage from "../../assets/cover-images/login-background-cover.png";
-import loginPageCoverImage from "../../assets/cover-images/login-back2.jpg";
-import formImage from "../../assets/images/form-image.png";
-import AuthPageLeftContainer from "../../components/auth/AuthPageLeftContainer";
-import AuthPageHeader from "../../components/auth/AuthPageHeader";
-import AuthPageInformation from "../../components/auth/AuthPageInformation";
-import RememberUser from "../../components/auth/RememberUser";
-import TextInputWithImage from "../../components/form/TextInputWithImage";
-import userIconImage from "../../assets/icons/user.png";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import FormError from "../../components/form/FormError";
-import TextInputPassWord from "../../components/form/TextInputPassword";
-import Button from "../../components/button/Button";
 import { useMutation } from "react-query";
-import { useNavigate } from "react-router-dom";
-import Toast from "../../components/toast/Toast";
+import { Link, useNavigate } from "react-router-dom";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+
 import { memberLogin } from "../../api/auth/auth-api";
 import { useAppContext } from "../../context/authContext";
+import AuthSplitLayout from "../../components/auth/AuthSplitLayout";
+import { Button, IconInput } from "../../components/ui";
+import Toast from "../../components/toast/Toast";
 
 export type LoginFormFields = {
   email: string;
   password: string;
 };
 
+/** `login screen members/member's login page.png`. */
 const LoginPage = () => {
   const { notifyUser } = Toast();
   const navigate = useNavigate();
   const { setRel8LoginUserData } = useAppContext();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -37,56 +32,66 @@ const LoginPage = () => {
     onSuccess: data => {
       setRel8LoginUserData({ ...data.member, token: data.token });
       notifyUser("Login Successful", "success");
-      navigate("/");
+      // Honour where they were headed before the session expired, if anywhere.
+      const intended = sessionStorage.getItem("redirectAfterLogin");
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(intended || "/");
     },
     onError: (error: any) => {
-      const data: any = error.response.data;
-      console.log(data);
-      notifyUser(data.message || "An error occured while logging you in", "error");
+      notifyUser(error?.response?.data?.message || "An error occured while logging you in", "error");
     },
   });
 
-  const onSubmit = (data: LoginFormFields) => {
-    mutate({ userType: "member", ...data });
-  };
+  const onSubmit = (data: LoginFormFields) => mutate({ userType: "member", email: data.email, password: data.password });
 
   return (
-    <div className="grid items-center w-full h-screen place text-color">
-      <div className="grid w-full h-full grid-cols-2 ">
-        <AuthPageLeftContainer image={loginPageCoverImage} />
-        <section className="relative grid h-full col-span-2 md:col-span-1 place-items-center">
-          {/* <img
-            src={formImage}
-            className=" absolute top-0 left-0 w-[250px] z-[1] 2xl:w-[450px]"
-            alt=""
-          /> */}
-          <div className="relative auth-form-container ">
-            <AuthPageHeader className="sm:mt-10 md:mt-0" authPageHeader="Login" authPageText="Input details to access alumnus account" />
-            <form className="flex flex-col w-full max-w-md gap-y-4" onSubmit={handleSubmit(onSubmit)}>
-              <div>
-                {errors.email?.type === "required" && <FormError message="Email is required" />}
-                <TextInputWithImage inputType="email" register={register} name="email" placeHolder="Email" image={userIconImage} />
-              </div>
+    <AuthSplitLayout title="Login" subtitle="Input details to access alumnus account">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <IconInput
+          iconStyle="attached"
+          icon={FiMail}
+          type="email"
+          placeholder="Email Address"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register("email", {
+            required: "Email is required",
+            pattern: { value: /\S+@\S+\.\S+/, message: "Enter a valid email address" },
+          })}
+        />
 
-              <div>
-                {errors.password?.type === "required" && <FormError message="Password is required" />}
-                <TextInputPassWord register={register} name="password" placeHolder="Password" image={true} />
-              </div>
+        <IconInput
+          iconStyle="attached"
+          icon={FiLock}
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          {...register("password", { required: "Password is required" })}
+          // The eye toggle rides inside the field, as the mockup draws it.
+          trailing={
+            <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"} className="text-muted hover:text-org-primary px-3">
+              {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+            </button>
+          }
+        />
 
-              <RememberUser showLink={true} />
-              <div className="grid">
-                <Button isLoading={isLoading} text="Login" />
-              </div>
-            </form>
-            {/* <AuthPageInformation
-              authPageInformationText="Don’t have an account?"
-              authPageInformationAction="Register"
-              authPageInformationLink="/register"
-            /> */}
-          </div>
-        </section>
-      </div>
-    </div>
+        <div className="flex items-center justify-between gap-4">
+          <label className="inline-flex items-center gap-2 text-sm text-ink cursor-pointer">
+            <input type="checkbox" className="w-4 h-4 rounded border-hairline accent-[rgb(var(--color-org-primary))]" />
+            Remember me
+          </label>
+
+          <Link to="/forgot-password" className="text-sm text-ink hover:text-org-primary">
+            Forget Password?
+          </Link>
+        </div>
+
+        <Button htmlType="submit" fullWidth size="lg" isLoading={isLoading} className="mt-2">
+          Login
+        </Button>
+      </form>
+    </AuthSplitLayout>
   );
 };
 

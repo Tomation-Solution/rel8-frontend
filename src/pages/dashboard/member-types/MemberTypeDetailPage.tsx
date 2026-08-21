@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
-import BreadCrumb from "../../../components/breadcrumb/BreadCrumb";
+import { BackLink, Button, EmptyState, PageHeader } from "../../../components/ui";
+import { FiUsers } from "react-icons/fi";
 import CircleLoader from "../../../components/loaders/CircleLoader";
 import Toast from "../../../components/toast/Toast";
 import { useAppContext } from "../../../context/authContext";
@@ -34,8 +35,9 @@ const MemberTypeDetailPage = () => {
   if (isError || !data) {
     return (
       <main className="max-w-4xl">
-        <BreadCrumb title="Membership Type" />
-        <p className="text-red-500 py-8 text-center">Failed to load membership type.</p>
+        <BackLink to="/environment" label="Back to environment" />
+        <PageHeader title="Membership Type" />
+        <EmptyState icon={FiUsers} title="Couldn't load this membership type" description="Something went wrong reaching the server. Try again in a moment." />
       </main>
     );
   }
@@ -43,13 +45,9 @@ const MemberTypeDetailPage = () => {
   if (!canView) {
     return (
       <main className="max-w-4xl">
-        <BreadCrumb title={data.memberType?.name ?? "Membership Type"} />
-        <div className="py-16 text-center">
-          <p className="text-gray-500 text-base">You are not a member of this membership type.</p>
-          <button onClick={() => navigate("/member-types")} className="mt-4 text-org-primary text-sm underline">
-            Back to Membership Types
-          </button>
-        </div>
+        <BackLink to="/environment" label="Back to environment" />
+        <PageHeader title={data.memberType?.name ?? "Membership Type"} />
+        <EmptyState icon={FiUsers} title="Not visible to you" description="You are not a member of this membership type." action={<Button onClick={() => navigate("/environment")}>Back to environment</Button>} />
       </main>
     );
   }
@@ -59,12 +57,8 @@ const MemberTypeDetailPage = () => {
 
   return (
     <main>
-      <BreadCrumb title={typeName} />
-
-      {/* Tab bar */}
-      <div className="mt-4 border-b border-gray-200 flex gap-1 overflow-x-auto">
-        <button className="px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 border-org-primary text-org-primary">Members ({members.length})</button>
-      </div>
+      <BackLink to="/environment" label="Back to environment" />
+      <PageHeader title={typeName} subtitle={`${members.length} member${members.length === 1 ? "" : "s"} in this membership type`} />
 
       {/* Members grid */}
       <div className="mt-6">

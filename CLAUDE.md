@@ -6,8 +6,8 @@ Served at `app.rel8.ng` (or whatever `FRONTEND_URL` is on the backend).
 > 🎨 **A full visual redesign is in flight — read [`REDESIGN.md`](./REDESIGN.md) before
 > touching any UI.** It carries the design tokens, the shared primitives in
 > `src/components/ui/`, the module-by-module plan and a "Resume here" section with the
-> current state. Currently: M0–M13 done — everything except Auth (M14) and the dead-code
-> sweep (M15). The applicant portal (M1's deferred shell) is now built too. Nothing committed.
+> current state: **complete — M0 through M15 all done.** The applicant portal and member
+> support tickets are built too. What is left is a live-tenant eyeball, not redesign work.
 > This file still governs stack rules, payment architecture and status vocabulary —
 > none of which the redesign changes.
 
@@ -127,6 +127,23 @@ in old call sites and only ever worked because `name` is undefined. Accessors li
 `memberAmount` when the admin set a member discount, else `amount`. `paymentConfig.methods`
 empty ⇒ free. A registration can now be `pending_payment` — a place held while checkout is
 in flight, which does **not** count toward capacity.
+
+## Support tickets
+
+Members raise and track tickets at Support → My Tickets (`api/tickets/tickets-api.ts`).
+`ticket.routes.js` is `requireOrgAdminOrMember`, so the portal client deliberately exposes
+only read + create — status changes and deletion are the admin's, and `getMyTickets` scopes
+the list server-side. The Admin/Technical Support contact forms create tickets through the
+same resource.
+
+## There is no registration
+
+A member is created by an admin, or by an admin approving a membership application. They are
+emailed a link, set a password, and log in. **There is no self-registration**, and the
+screens that implemented one (`RegistrationPage`, `VerifyMemberPage`) posted to Django-era
+routes this backend never mounted. They were deleted in M14 — do not rebuild them.
+
+The one self-service path in is the public **application** form; see below.
 
 ## Membership applications — the applicant portal
 

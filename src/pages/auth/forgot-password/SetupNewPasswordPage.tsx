@@ -1,14 +1,12 @@
-import bluePurpleGradientCoverBackground from "../../../assets/images/bluePurpleGradientCoverBackgrond.png";
-import AuthPageLeftContainer from "../../../components/auth/AuthPageLeftContainer";
-import AuthPageHeader from "../../../components/auth/AuthPageHeader";
-import RememberUser from "../../../components/auth/RememberUser";
-import FormError from "../../../components/form/FormError";
-import TextInputPassWord from "../../../components/form/TextInputPassword";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import Button from "../../../components/button/Button";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "react-query";
-import { resetPassword, setPassword } from "../../../api/auth/auth-api";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+
+import { setPassword } from "../../../api/auth/auth-api";
+import AuthSplitLayout from "../../../components/auth/AuthSplitLayout";
+import { Button, IconInput } from "../../../components/ui";
 import Toast from "../../../components/toast/Toast";
 
 export type SetupNewPasswordInput = {
@@ -16,94 +14,89 @@ export type SetupNewPasswordInput = {
   password2: string;
 };
 
+/** No mockup — same split layout as login, which does have one. */
 const SetupNewPasswordPage = () => {
+  const [params] = useSearchParams();
+  const token = params.get("token");
+  const navigate = useNavigate();
+  const { notifyUser } = Toast();
+  const [show, setShow] = useState(false);
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SetupNewPasswordInput>();
 
-    const [params] = useSearchParams();
-
-  const token = params.get('token');
-
-  const navigate = useNavigate();
-  const { notifyUser } = Toast();
-
   const { mutate, isLoading } = useMutation(setPassword, {
-    onSuccess: (data) => {
-      // setRel8LoginUserData(data)
-      notifyUser("Reset Successful","success");
-      console.log(data)
-      navigate('/login')
-     
+    onSuccess: () => {
+      notifyUser("Password set. You can log in now.", "success");
+      navigate("/login");
     },
-    onError: (error:any) => {
-      const data:any = error.response.data
-      console.log(data)
-      notifyUser(data.errors?.[0]?.msg || "An error occured","error");
+    onError: (error: any) => {
+      notifyUser(error?.response?.data?.errors?.[0]?.msg || error?.response?.data?.message || "An error occured", "error");
     },
-    
   });
 
-  const onSubmit: SubmitHandler<SetupNewPasswordInput> = (data) => {
+  const onSubmit: SubmitHandler<SetupNewPasswordInput> = data => {
+    mutate({ password: data.password1, token: token || "" });
+  };
 
-    if(data.password1 !== data.password2){
-      notifyUser("Passwords do not match","error");
-      return;
-    }
+  const eye = (
+    <button type="button" onClick={() => setShow(v => !v)} aria-label={show ? "Hide password" : "Show password"} className="text-muted hover:text-org-primary px-3">
+      {show ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+    </button>
+  );
 
-    mutate({ password: data.password1, token: token || '' })
+  // A link with no token cannot work — say so rather than letting them fill in a form that
+  // will fail on submit.
+  if (!token) {
+    return (
+      <AuthSplitLayout title="This link isn't valid" subtitle="It may have expired, or been opened without the full address.">
+        <Button fullWidth size="lg" onClick={() => navigate("/forgot-password")}>
+          Request a new link
+        </Button>
+      </AuthSplitLayout>
+    );
   }
-    
 
   return (
-    <div className="grid items-center w-full h-screen place text-color">
-      <div className="grid w-full h-full grid-cols-2 ">
-        <AuthPageLeftContainer image={bluePurpleGradientCoverBackground} />
-        <section className="relative grid h-full col-span-2 md:col-span-1 place-items-center">
-          <div className="relative auth-form-container ">
-            <AuthPageHeader
-              authPageHeader="Setup new password"
-              authPageText="Input new password to recover account"
-            />
-            <form
-              className="flex flex-col w-full max-w-md gap-y-4"
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div>
-                {errors.password1?.type === "required" && (
-                  <FormError message="Password 1 is required" />
-                )}
-                <TextInputPassWord
-                  register={register}
-                  name="password1"
-                  placeHolder="Password"
-                  image={true}
-                />
-              </div>
-              <div>
-                {errors.password2?.type === "required" && (
-                  <FormError message="Password 2 is required" />
-                )}
-                <TextInputPassWord
-                  register={register}
-                  name="password2"
-                  placeHolder="Confirm Password"
-                  image={true}
-                />
-              </div>
+    <AuthSplitLayout title="Setup new password" subtitle="Input new password to recover account">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <IconInput
+          iconStyle="attached"
+          icon={FiLock}
+          type={show ? "text" : "password"}
+          placeholder="Password"
+          autoComplete="new-password"
+          trailing={eye}
+          error={errors.password1?.message}
+          {...register("password1", {
+            required: "Password is required",
+            // Matches the server's rule, so a mismatch is caught here rather than as a 400.
+            minLength: { value: 8, message: "Use at least 8 characters" },
+          })}
+        />
 
-              <RememberUser />
+        <IconInput
+          iconStyle="attached"
+          icon={FiLock}
+          type={show ? "text" : "password"}
+          placeholder="Confirm Password"
+          autoComplete="new-password"
+          error={errors.password2?.message}
+          {...register("password2", {
+            required: "Confirm your password",
+            validate: value => value === watch("password1") || "Passwords do not match",
+          })}
+        />
 
-              <div className="grid">
-                <Button isLoading={isLoading} text="Submit" />
-              </div>
-            </form>
-          </div>
-        </section>
-      </div>
-    </div>
+        <Button htmlType="submit" fullWidth size="lg" isLoading={isLoading} className="mt-2">
+          Submit
+        </Button>
+      </form>
+    </AuthSplitLayout>
   );
 };
 

@@ -15,6 +15,39 @@ export const DEFAULT_SECONDARY = '#B44FD0';
  */
 export const DEFAULT_TINT = '#F8E6FB';
 
+/**
+ * Colours from the pre-redesign palette that are still sitting in tenant records.
+ *
+ * `Organization.colorTheme.primary` now defaults to #7F02A2, but organizations created
+ * before that keep whatever was persisted — and what was persisted is this palette, which
+ * was never anybody's brand. It was the app's own old default. The result is that
+ * `setOrganizationTheme` faithfully applies a blue that nobody chose, overriding the CSS
+ * `:root` purple, and every `text-org-primary` in the app comes out blue.
+ *
+ * A finite blocklist is the right shape here precisely because this is a finite, historical
+ * set — not a guess about which colours are "too blue". A tenant that genuinely picks one
+ * of these can still have it; they just have to pick it again, post-redesign.
+ */
+const LEGACY_PALETTE = new Set(
+  [
+    '#015595', // primary.blue
+    '#0c3958', // activeLink
+    '#003964', // primary.dark1
+    '#002541', // primary.dark2
+    '#006abb', // primary.light1
+    '#0084e8', // primary.light2
+    '#01aaff', // secondary.blue
+    '#67ccff', // secondary.blue-variant
+    '#1a56db', // membership card fallback
+    '#0e3d91', // membership card fallback (secondary)
+    '#1e3a5f', // receipt accent
+    '#72a1ed', // loader secondary
+  ].map(c => c.toLowerCase()),
+);
+
+/** True when a stored "brand" colour is really a leftover default rather than a choice. */
+export const isLegacyBrandColour = (hex?: string | null): boolean => !!hex && LEGACY_PALETTE.has(String(hex).trim().toLowerCase());
+
 export const hexToRgb = (hex: string): string => {
   const [r, g, b] = parseHex(hex);
   return `${r} ${g} ${b}`;
@@ -37,8 +70,17 @@ export const tintColor = (hex: string, lightness: number): string => {
   return `${r} ${g} ${b}`;
 };
 
-export const setOrganizationTheme = (primaryColor: string, secondaryColor: string) => {
+export const setOrganizationTheme = (primaryColorInput: string, secondaryColorInput: string) => {
   const root = document.documentElement;
+
+  // Ignore leftovers from the old palette — see LEGACY_PALETTE. Without this, an org record
+  // written before the redesign repaints the whole app in a blue nobody picked.
+  const primaryColor = isLegacyBrandColour(primaryColorInput) ? DEFAULT_PRIMARY : primaryColorInput || DEFAULT_PRIMARY;
+  const secondaryColor = isLegacyBrandColour(secondaryColorInput) ? DEFAULT_SECONDARY : secondaryColorInput || DEFAULT_SECONDARY;
+
+  if (import.meta.env.DEV && (isLegacyBrandColour(primaryColorInput) || isLegacyBrandColour(secondaryColorInput))) {
+    console.warn(`[theme] Ignored a pre-redesign brand colour on this organization (${primaryColorInput} / ${secondaryColorInput}) and used the Rel8 defaults. Update colorTheme on the organization record to set a real brand.`);
+  }
 
   root.style.setProperty('--color-org-primary', hexToRgb(primaryColor));
   root.style.setProperty('--color-org-primary-hover', darkenColor(primaryColor, 8));

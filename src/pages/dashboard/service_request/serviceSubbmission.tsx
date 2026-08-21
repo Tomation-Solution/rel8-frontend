@@ -11,8 +11,7 @@ import PaymentMethodChoice from "../../../components/payments/PaymentMethodChoic
 import { defaultMethod } from "../../../components/payments/defaultMethod";
 import BankTransferPanel from "../../../components/payments/BankTransferPanel";
 import CircleLoader from "../../../components/loaders/CircleLoader";
-import InputWithLabel from "../../../components/form/InputWithLabel";
-import { BackLink, Button, Card, PageHeader } from "../../../components/ui";
+import { BackLink, Button, Card, IconInput, PageHeader } from "../../../components/ui";
 
 const schema = yup.object({
   street: yup.string().required("Street address is required"),
@@ -201,18 +200,18 @@ const ServiceSubmission = () => {
               <h3 className="text-lg font-semibold text-ink mb-4">Delivery Address</h3>
 
               <div className="space-y-4">
-                <InputWithLabel label="Street Address" register={register("street")} />
+                <IconInput label="Street Address" {...register("street")} />
                 {errors.street && <p className="text-status-danger text-xs">{errors.street.message}</p>}
 
-                <InputWithLabel label="City" register={register("city")} />
+                <IconInput label="City" {...register("city")} />
                 {errors.city && <p className="text-status-danger text-xs">{errors.city.message}</p>}
 
-                <InputWithLabel label="State (Optional)" register={register("state")} />
+                <IconInput label="State (Optional)" {...register("state")} />
 
-                <InputWithLabel label="Country" register={register("country")} />
+                <IconInput label="Country" {...register("country")} />
                 {errors.country && <p className="text-status-danger text-xs">{errors.country.message}</p>}
 
-                <InputWithLabel label="Postal Code (Optional)" register={register("postalCode")} />
+                <IconInput label="Postal Code (Optional)" {...register("postalCode")} />
               </div>
 
               <div className="mt-6 flex gap-4">

@@ -64,8 +64,7 @@ const NavItem = ({ item, isMobileSidebarOpen, setIsMobileSidebarOpen, onLogout, 
         {dot && <span className="w-2 h-2 rounded-full bg-org-primary flex-shrink-0" aria-label="unread" />}
       </span>
       <span className="flex items-center gap-1 flex-shrink-0">
-        {typeof badge === "number" && badge > 0 && <span className={`text-xs rounded-full px-2 py-0.5 ${isActive ? "bg-org-primary text-white" : "bg-neutral-2 text-white"}`}>{badge}</span>}
-        {(item.activeLinkIcon || item.notActiveLinkIcon) && <img className="w-fit h-6 object-fit" src={isActive ? item.activeLinkIcon : item.notActiveLinkIcon} alt="" />}
+        {typeof badge === "number" && badge > 0 && <span className={`text-xs rounded-full px-2 py-0.5 ${isActive ? "bg-org-primary text-white" : "bg-past text-white"}`}>{badge}</span>}
         {item.subMenu && <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />}
       </span>
     </div>

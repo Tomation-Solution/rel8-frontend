@@ -11,7 +11,6 @@ import { useForm } from "react-hook-form";
 import { Button, Card, EmptyState, MediaCardGrid, PageHeader, StatusPill } from "../../../components/ui";
 import MediaCard from "../../../components/ui/MediaCard";
 import { FiHeart } from "react-icons/fi";
-import FormError from "../../../components/form/FormError";
 
 interface ContributionFormData {
   contributionType: "cash" | "in_kind";
@@ -278,7 +277,7 @@ const FundAProjectPage = () => {
                   <>
                     <div>
                       <label className="block text-sm font-medium text-ink mb-2">Contribution Amount</label>
-                      <input type="number" step="0.01" min="0" {...register("amount", { required: true })} className="form-control w-full p-2 border border-hairline rounded" placeholder="Enter amount" />
+                      <input type="number" step="0.01" min="0" {...register("amount", { required: true })} className="w-full px-3 py-2.5 rounded-lg border border-hairline text-ink placeholder:text-muted outline-none focus:border-org-primary" placeholder="Enter amount" />
                       {errors.amount && <p className="text-status-danger text-xs mt-1">Amount is required</p>}
                     </div>
 
@@ -321,13 +320,13 @@ const FundAProjectPage = () => {
                 {contributionType === "in_kind" && !transferCheckout && (
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Describe Your In-Kind Contribution</label>
-                    {errors.inKindDescription?.type === "required" && <FormError message="Description is required" />}
+                    {errors.inKindDescription?.type === "required" && <p className="text-xs text-status-danger">Description is required</p>}
                     <textarea
                       {...register("inKindDescription", {
                         required: contributionType === "in_kind",
                       })}
                       rows={5}
-                      className="form-control w-full p-2 border border-hairline rounded"
+                      className="w-full px-3 py-2.5 rounded-lg border border-hairline text-ink placeholder:text-muted outline-none focus:border-org-primary"
                       placeholder="Describe what you're contributing (e.g., services, materials, time, etc.)"
                     />
                   </div>

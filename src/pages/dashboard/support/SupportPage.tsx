@@ -6,6 +6,7 @@ import { fetchAllFAQ, FAQItem } from "../../../api/faq/api-faq";
 import { useAdminSupport, useTechnicalSupport } from "../../../hooks/contactUsHook";
 import { Accordion, AccordionItem, ContactForm, ContactFormValues, EmptyState, PageHeader, SubNav, TabItem } from "../../../components/ui";
 import CircleLoader from "../../../components/loaders/CircleLoader";
+import MyTicketsTab from "./MyTicketsTab";
 import Toast from "../../../components/toast/Toast";
 import { useAppContext } from "../../../context/authContext";
 
@@ -17,12 +18,15 @@ import { useAppContext } from "../../../context/authContext";
  * form twice, differing only in which mutation they called; both now render the shared
  * `ContactForm`.
  */
-type Section = "faq" | "admin" | "technical";
+type Section = "faq" | "admin" | "technical" | "tickets";
 
 const SECTIONS: TabItem[] = [
   { key: "faq", label: "FAQs" },
   { key: "admin", label: "Admin Support" },
   { key: "technical", label: "Technical Support" },
+  // Not in the mockup: the two forms above have always created tickets, and until now
+  // there was no way to see what became of one.
+  { key: "tickets", label: "My Tickets" },
 ];
 
 const SupportPage = () => {
@@ -46,7 +50,7 @@ const SupportPage = () => {
     const mutation = kind === "admin" ? adminSupport : technicalSupport;
     mutation.mutate(values, {
       onSuccess: (result: any) => {
-        notifyUser(result?.message || "Thanks — we've received your message.", "success");
+        notifyUser(result?.ticketId ? `Thanks — that's ticket ${result.ticketId}. Track it under My Tickets.` : result?.message || "Thanks — we've received your message.", "success");
       },
       onError: (error: any) => {
         notifyUser(error?.response?.data?.message || "Could not send your message. Please try again.", "error");
@@ -81,6 +85,13 @@ const SupportPage = () => {
           <>
             <PageHeader title="Admin Support" subtitle="Message your association's administrators." />
             <ContactForm title="Contact your association" description="Questions about membership, dues, events or anything the association handles." submitLabel="Send to admin" isLoading={adminSupport.isLoading} onSubmit={submit("admin")} defaults={defaults} />
+          </>
+        )}
+
+        {section === "tickets" && (
+          <>
+            <PageHeader title="My Tickets" subtitle="Follow anything you've raised with your association." />
+            <MyTicketsTab />
           </>
         )}
 

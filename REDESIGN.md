@@ -12,7 +12,7 @@ we drop it rather than inventing an endpoint.
 
 ## 0. Resume here
 
-**State as of 2026-08-21 — M0 through M13 done. `npx tsc --noEmit` and `npm run build` are
+**State as of 2026-08-21 — the redesign is complete. M0–M15 all done. `npx tsc --noEmit` and `npm run build` are
 clean; `npm run dev` boots and serves.** Nothing has been eyeballed against a live tenant —
 that needs a logged-in member, so someone with credentials should sanity-check the new
 screens. M1's applicant shell is deferred, not built.
@@ -21,11 +21,16 @@ Nothing is committed.
 
 ### Next three things, in order
 
-1. **M14 (Auth)** — the login / register / verify / forgot-password screens. **No mockups
-   exist for any of them**, so it is extrapolated from the established language.
-2. **M15 (dead-code sweep)** — the last module, and by now the list is long.
-3. Then: get someone with a member login to eyeball the whole thing against a live tenant.
-   (§0d is done — fixed in the backend repo, uncommitted there.)
+**Every module is done.** What remains is not redesign work:
+
+1. **Eyeball it against a live tenant** with a member login. Nothing here has been clicked
+   through in a browser against real data — that is the one gap the build and the test
+   harnesses cannot close.
+2. `PaystackCallbackPage` was deliberately left alone — it is a redirect target, not a
+   designed screen.
+3. Lint sits at **5 warnings** against `main`'s 12, all pre-existing
+   `react-hooks/exhaustive-deps` in files the redesign did not touch. Worth clearing if you
+   want the `--max-warnings 0` gate to actually pass.
 
 Before starting any of them, read **§0b**. Checking the backend mount list first is what
 turned up §0c, and in M5 it turned up the opposite mistake — a feature we had written off
@@ -296,6 +301,29 @@ a green brand must come out green. Any literal `#7F02A2` in a component is a bug
 Files: `src/index.css` (`:root` block), `tailwind.config.js` (`colors`),
 `src/utils/themeUtils.ts` (`resetToDefaultTheme`).
 
+### Why the app kept coming out blue (fixed 2026-08-21)
+
+`--color-org-primary` is set at **runtime**, so the `:root` purple is only the value before
+the tenant loads. Three things were overwriting it, and each had to go:
+
+1. **Stored tenant colours from the old palette.** `Organization.colorTheme.primary`
+   defaults to `#7F02A2` now, but organizations created earlier kept what was persisted —
+   the app's own pre-redesign blue, which was never anyone's brand.
+   `themeUtils.LEGACY_PALETTE` lists those historical hexes and `setOrganizationTheme`
+   ignores them in favour of the default, warning in dev so it is diagnosable rather than
+   mysterious. A tenant who genuinely wants one of those blues can set it again.
+2. **`localStorage.orgTheme`.** `ThemeProvider` mirrored the theme there and re-applied it
+   on mount. It bought nothing — `TenantProvider` re-fetches the org every load — while
+   letting one tenant's colour survive into another's session, and a pre-redesign colour
+   survive the redesign. **The cache is gone**, and the provider removes the old key so it
+   does not linger in anyone's browser.
+3. **Hardcoded fallbacks** in the loaders (`#015595`), the membership card (`#1a56db`) and
+   the PDF receipt (`#1e3a5f`). All now read the brand.
+
+Diagnosing this from the CSS alone is impossible — the variable looks right in `:root` and
+wrong in the inspector. If it happens again, check what `setOrganizationTheme` was called
+with, not the stylesheet.
+
 ---
 
 ## 2. Shared primitives
@@ -378,7 +406,9 @@ The frame every screen sits in. Highest-leverage module.
   time-of-day aware) + role pill + rail + red Logout. Badges come from the **existing**
   `"events"` / `"notifications"` query keys so react-query serves them from cache instead of
   refetching. **Dropped the dynamic group submenu** — see the resume notes
-- [x] `src/components/navigation/Navbar.tsx` — rewritten: disabled `Ctrl + K` search,
+- [x] `src/components/navigation/Navbar.tsx` — **right-aligned** (2026-08-21): a single
+  `flex-1` spacer leads, so search, date, notifications and the org block sit together
+  against the right edge. Rewritten: disabled `Ctrl + K` search,
   `formatTopbarDate()` chip, Notifications pill with an unread dot, org name/role + logo.
   **Removed the Environments checkbox dropdown** — see the open decision
 - [x] `src/layouts/DashboardLayout.tsx` — rewritten. The navbar sits in the flow now, so the
@@ -744,42 +774,80 @@ there as BE-38) was repaired in `rel8-backend-nordjs-2025`, so environment chat 
 history across a reload and the conversation list shows real counts. No portal change was
 needed.
 
-### [ ] M14 · Auth screens — **no mockups supplied**
-`Relate/` contains no login, register, verify, forgot-password or activate screen.
-Extrapolated from the established language (purple CTA, hairline cards, icon inputs) —
-revisit if mockups turn up.
-- `src/pages/auth/LoginPage.tsx`, `RegistrationPage.tsx`, `VerifyMemberPage.tsx`,
-  `AuthenticationPage.tsx`, `PayupPage.tsx`
-- `src/pages/auth/forgot-password/*`
-- `src/pages/ActivateAccount.tsx`, `PaystackCallbackPage.tsx`, `ErrorPage.tsx`,
-  `NotFoundPage.tsx`
-- `src/components/auth/*`
+### [x] M14 · Auth screens — **done 2026-08-21**
 
-### [ ] M15 · Dead-code sweep — **deliberately last**
-After every screen is on the primitives, delete what nothing imports.
+A mockup exists for one of them: `Downloads/login screen members/member's login page.png`.
+Split screen — illustration left behind a hairline divider, form right. The rest are built
+on that language.
 
-**The Group -> Environment casualties (§0c) — dead endpoints, not just unused files:**
-`src/api/committee/committee.ts`, `src/api/groups/groups-api.ts`, `fetchAllExcos` +
-`fetchExcoById` in `src/api/members/api-members.ts`, `pages/dashboard/members/ExcosPage.tsx`,
-`ExcoDetailPage.tsx`, `pages/dashboard/committees/*`, `pages/dashboard/groups/GroupDetailPage.tsx`,
-and the `/committees`, `/committees/:id`, `/groups/:id` routes in `App.tsx`.
-Keep `GroupChatTab` / `GroupConversationPanel` — M13 repoints them.
+- [x] `components/auth/AuthSplitLayout.tsx` — the shared shell
+- [x] `components/ui/Field.tsx` — `IconInput` gained a `trailing` slot for the password eye
+- [x] `LoginPage` — the mockup exactly. Also honours `redirectAfterLogin`, which `baseApi`
+  has been writing on every 401 and nothing ever read
+- [x] `ForgotPasswordPage` — with a real "check your inbox" state
+- [x] `SetupNewPasswordPage` — enforces the server's 8-character minimum client-side, and
+  refuses a link with no token instead of failing on submit
+- [x] `AuthenticationPage` (magic link) — a failure used to bounce silently to `/login`,
+  which reads as "the link did nothing". It now names the likeliest cause (links last an
+  hour) so the member asks for another instead of re-clicking a dead one
+- [x] `ErrorPage`, `NotFoundPage` — rebuilt on `EmptyState`; the error page shows the
+  underlying message in dev only
 
-**Now also unreferenced after M8–M11:** `components/Table/Table.jsx` and
-`components/Table/DataTable.tsx` (both replaced by `ui/Table`), `components/cards/NewsCard.tsx`,
-`PublicationCard.tsx`, `PublicationComment.tsx`, `components/button/Button.tsx` and
-`components/form/*` wherever the migrated screens dropped them. Confirm with a build.
+**Four screens deleted, because the flows behind them do not exist.** Confirmed with the
+user: *there is no registration.* A member is created by an admin (or by an approved
+application), is emailed a link, sets a password and logs in.
 
-Known candidates already: `src/components/cards/HomePageNewsCard.tsx`,
-`src/components/navigation/QuickNav.tsx`, `src/components/homepage/HomePageNotification.tsx`,
-`src/components/SeeAll.tsx`, `src/components/PageHeading.tsx`,
-`src/components/breadcrumb/BreadCrumb.tsx`, `src/components/form/*` (superseded),
-`src/pages/dashboard/services/*` (nine static service form pages the mockups replace with
-the generic Service Request flow), `src/components/PaymentSuccess/ThankYou.tsx`.
+| deleted | why |
+|---|---|
+| `RegistrationPage` | posted to `/auth/ManageMemberValidation/create_member/` — Django-era, unmounted |
+| `VerifyMemberPage` | posted to `/auth/ManageMemberValidation/` — same. Its only exit was `/register` |
+| `ActivateAccount` | called `/tenant/:t/mailing/activate/...` — unmounted. Its `/mailing` route went too |
+| `PayupPage` | read `dues?.data?.data.filter(...)` where the endpoint returns a bare array — it would **throw on render**. Unreachable anyway (nothing links `/pay-dues`), and the dues blocker already covers the job |
 
-> ⚠️ **`src/components/TenantProvider.tsx` is load-bearing** — `main.tsx` imports it as
-> `TenantGate` *with an explicit extension*, so a naive grep says it is unused. Confirm
-> deletions with `npm run build`, never with grep. (Same warning as `CLAUDE.md` MP-7.)
+`components/pay-up/PayUpForASingleDue` went with `PayupPage`, its only consumer.
+
+### [x] M15 · Dead-code sweep — **done 2026-08-21**
+
+Driven by a script that walks `src/` and reports files nothing imports, re-run after each
+deletion so that removing one thing exposes the next. It finishes at **zero unreferenced
+modules**. Every deletion was confirmed with a build, never a grep — see the
+`TenantProvider` warning below, which is exactly why.
+
+**Screens whose flow does not exist** (nine static service pages the generic Service
+Request flow replaced — none of them made a single API call — plus `/registry`, a second
+route onto the members list):
+`pages/dashboard/services/*` and their nine routes.
+
+**Screens superseded by the Environment page** (M4): `members/MembersPage`,
+`member-types/MemberTypesPage`, and the `/members` and `/member-types` list routes. The two
+*detail* routes survive — the Environment page links to them.
+
+**Components nothing imported any more:** `api/support/api-support.ts`, the four
+`components/auth/*` pieces the M14 split layout replaced, `avatar/Avatar`,
+`button/CardButton`, `button/DownloadFileButton`, `cards/ExcosMemberCard`, the four
+`components/form/*` inputs, `components/breadcrumb/`, `components/button/`, and
+`components/progress-bar/ProgressBar` (a duplicate of the `ui` one, and neither had a
+caller).
+
+**The legacy CSS helpers are gone.** `.btn*`, `.form-control`, `.form-group`,
+`.auth-form-container` and `.registration-table` were kept alive on purpose so unmigrated
+screens did not break mid-flight. Nothing uses them now.
+
+**The pre-redesign Tailwind palette is gone** — `primary.*`, `secondary.*`, `neutral.*`,
+`activeLink`, `textColor` and the flat `success`/`warning`/`error` scales. Leaving it in
+invited exactly the bug it caused; see §1's note on why the app kept coming out blue.
+
+**Two silent bugs fell out of the sweep**, both the kind that only surface when you go
+looking:
+
+- `ChatSkeletons` painted its bars `bg-neutral-4`, **a class that was never defined** — so
+  the loading skeleton rendered invisible.
+- `NavItem` rendered an `<img>` from `item.activeLinkIcon` / `notActiveLinkIcon`, fields no
+  rail entry has set since M1 moved to `react-icons`. Dead branch, dead type fields.
+
+> ⚠️ Still true, and the reason this module insists on builds over greps:
+> **`components/TenantProvider.tsx` is load-bearing.** `main.tsx` imports it as `TenantGate`
+> *with an explicit extension*, so a naive search says it is unused. It survived.
 
 ---
 
@@ -877,6 +945,39 @@ npm run dev        # :4000
 ---
 
 ## 7. Session log
+
+### 2026-08-21 (final) — member tickets, then M15
+
+**Tickets in the portal.** The Support page's Admin and Technical forms have always created
+tickets (`POST /api/tickets`); there was simply no way to see what became of one. Added a
+"My Tickets" section to the Support SubNav — list, filter, detail, and a full raise-a-ticket
+form with attachments — mirroring the admin's screen minus the things a member must not do:
+no status change, no delete. `getMyTickets` scopes the list server-side, so that is enforced
+rather than merely hidden. The two contact forms now name the ticket ID in their success
+message, so the member knows there is something to follow.
+
+The category list is deliberately shorter than the admin's: theirs carries HR, Payroll,
+Attendance, Leave and Performance, which belong to a different product and would only
+confuse someone raising a ticket about their dues.
+
+**M15.** Driven by a script that reports files nothing imports, re-run after every deletion
+so removing one thing exposes the next; it finishes at zero. Gone: nine static service
+pages that made no API calls, the screens the Environment page superseded, thirteen
+orphaned components, the legacy CSS helpers, and the entire pre-redesign Tailwind palette.
+
+Two silent bugs fell out of it. `ChatSkeletons` painted its bars `bg-neutral-4` — **a class
+that was never defined** — so the loading skeleton rendered invisible. And `NavItem` still
+had a dead `<img>` branch reading rail-icon fields nothing has set since M1 moved to
+`react-icons`.
+
+`TenantProvider` survived, as the standing warning says it must: `main.tsx` imports it as
+`TenantGate` with an explicit extension, so a grep says it is unused and a build says
+otherwise. Every deletion in this module was confirmed with a build.
+
+**The redesign is complete.** `npx tsc --noEmit` clean · `npm run build` clean ·
+`npm run dev` serves 200 · `npm run lint` **5** warnings against `main`'s 12.
+
+---
 
 ### 2026-08-21 (latest) — M12, and M13 as a removal
 
