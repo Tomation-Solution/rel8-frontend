@@ -28,4 +28,4 @@ jobs:
           git status
           yarn
           yarn build
-          sudo systemctl restart rel8-frontend
+          pm2 restart rel8-frontend
