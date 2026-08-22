@@ -292,7 +292,12 @@ columns carry `min-w-0`. Three things are worth knowing when adding screens:
   label/value pairs. Mark the heading cell with `primary: true` (defaults to the first
   column), drop filler columns with `hideOnMobile`, and give an action column
   `mobileFullWidth: true` so its buttons get the whole card width. `keepTableOnMobile` opts
-  out, for a genuinely comparative grid.
+  out, for a genuinely comparative grid. The admin's `DataTable` now follows the same
+  contract, so the two stay recognisable to each other.
+- **Watch the flex axis when a row stacks.** `SearchFilterBar` is `flex-col sm:flex-row`,
+  and a bare `flex-1` on a child means `flex-basis: 0%` on the **height** while it is a
+  column — which beat `h-12` and collapsed the search pill to the height of its own text.
+  Use `sm:flex-1`, not `flex-1`, on anything with a fixed height inside a bar that stacks.
 - **Fields are forced to 16px on coarse pointers** (bottom of `index.css`). Safari zooms the
   viewport on any focused field under 16px and never zooms back out — that single rule is
   most of what "the app isn't responsive on my phone" meant.
