@@ -247,9 +247,86 @@ for that position — sync the UI rather than surfacing a bare error.
 
 ---
 
+## Sessions — read before touching auth
+
+The session lives under one localStorage key, `rel8User` (`{...member, token}`), and **one
+module decides what it means: `src/utils/session.ts`**. Nothing else should parse that key
+by hand — the two axios instances, the sidebar, the chat panels and `extra_functions` each
+used to keep their own copy of that parse, with different ideas about what a missing or
+malformed value meant.
+
+```
+src/utils/session.ts             read/write/clear, JWT expiry, the intended-path handoff
+src/context/authContext.tsx      the React-visible session: user, isAuthenticated, logout
+src/components/auth/guards.tsx   <RequireAuth> and <GuestOnly>
+```
+
+Rules:
+
+- **`isAuthenticated`, never `!!user`.** `user` is also truthy mid-logout and falsy while a
+  profile refetch is in flight.
+- **Read storage in the initial state, never in an effect.** This was the session-persistence
+  bug: `AppProvider` filled `user` from a `useEffect`, and effects run child-first, so
+  `DashboardLayout`'s "no user → /login" check ran a full tick before the provider had
+  looked at localStorage. Every hard refresh of a dashboard page bounced a logged-in member
+  to the login screen.
+- **`DashboardLayout` is `<RequireAuth>` wrapping `DashboardShell`.** The split matters: the
+  shell's org-settings query has no `enabled` guard, and letting it fire while signed out
+  produced a guaranteed 401 on the way to the login screen.
+- `/login` and `/forgot-password` are wrapped in `<GuestOnly>`. `/setup-new-password` and
+  `/authentication` are **not** — they carry a one-time token from an email and must work in
+  any session state.
+- **Log out through `logout()` from the context**, which clears storage *and*
+  `queryClient.clear()`. `/logout` is a real page (`pages/auth/LogoutPage`); it used to
+  render `LoginPage` and clear nothing.
+- A 401 on either axios instance clears the session, remembers the path in `sessionStorage`
+  and `window.location.replace("/login")`. The redirect had been commented out, which is why
+  an expired session showed a dashboard where every panel silently failed.
+
+## Mobile
+
+The redesign is responsive by construction — grids carry `sm:`/`lg:` steps and content
+columns carry `min-w-0`. Three things are worth knowing when adding screens:
+
+- **`<Table>` is not a table on a phone.** Below `md` each row renders as a stacked card of
+  label/value pairs. Mark the heading cell with `primary: true` (defaults to the first
+  column), drop filler columns with `hideOnMobile`, and give an action column
+  `mobileFullWidth: true` so its buttons get the whole card width. `keepTableOnMobile` opts
+  out, for a genuinely comparative grid.
+- **Fields are forced to 16px on coarse pointers** (bottom of `index.css`). Safari zooms the
+  viewport on any focused field under 16px and never zooms back out — that single rule is
+  most of what "the app isn't responsive on my phone" meant.
+- **Two-pane screens show one pane at a time.** `EnvironmentChatTab` is the pattern: the room
+  list and the conversation are separate screens below `md`, with a back arrow in the
+  conversation header (`onBack` on `EnvironmentPanel` / `PrivatePanel`).
+
 ## TODOs
 
 Legend: `[ ]` open · `[x]` done. IDs shared with the sibling repos (`MP-*` = portal only).
+
+- [x] **MP-8 · Session persistence was broken in four places.**
+  A refresh on any dashboard page bounced a logged-in member to `/login`; an authenticated
+  member could still open `/login` and `/forgot-password`; `/logout` rendered the login page
+  without clearing anything; and the 401 redirect in `baseApi.ts` was commented out, so an
+  expired session showed a dashboard where every panel silently failed. Token expiry was
+  never checked at all.
+  **RESOLVED (2026-08-22):** `utils/session.ts`, `components/auth/guards.tsx`, a real
+  `LogoutPage`, `AppProvider` rewritten to hydrate synchronously and expose
+  `isAuthenticated` / `logout`, both axios instances sharing one `attachSession` and one 401
+  path. See "Sessions" above.
+
+- [x] **MP-9 · Mobile refinements.**
+  **RESOLVED (2026-08-22):** `<Table>` renders stacked cards below `md` (it was a 720px
+  grid inside a horizontal scroller, hiding status and actions behind a swipe); 16px fields
+  on touch screens; the chat tab shows one pane at a time instead of a 240px room rail
+  beside a 135px conversation; the sidebar drawer locks body scroll, closes on Escape and on
+  navigation, and clears the iOS home indicator; the membership card scales to fit instead
+  of forcing a 340px card through a ~295px column; tab strips bleed to the screen edge with
+  the scrollbar hidden; filter selects go full width when the search bar stacks.
+
+- [ ] **MP-10 · There is no application-fee payment UI on the public website.**
+  An applicant cannot pay a fee themselves — only events have a public payment path. Carried
+  over from the admin repo's `FE-17`.
 
 - [x] **X-1 / X-7 (portal side) · Migrate onto the unified payment layer.**
   **RESOLVED (2026-08-18):** `paystack-api.ts` rewritten; new

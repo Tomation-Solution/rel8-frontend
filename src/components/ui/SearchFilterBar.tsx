@@ -9,12 +9,20 @@ interface SearchInputProps {
   className?: string;
 }
 
-/** The wide centred pill. Note the mockups centre the icon+placeholder, not left-align it. */
+/**
+ * The wide centred pill. Note the mockups centre the icon+placeholder, not left-align it.
+ *
+ * `sm:flex-1`, not a bare `flex-1`: `SearchFilterBar` stacks into a **column** below `sm`,
+ * and in a column container `flex-1` is `flex-basis: 0%` on the *height*, which beat the
+ * `h-12` and collapsed the pill to the height of its own text. That is why the search bar
+ * looked squashed on a phone and full-size on a desktop. Flexing only applies once the bar
+ * is actually a row.
+ */
 export const SearchInput = ({ value, onChange, placeholder = "Search", className = "" }: SearchInputProps) => (
-  <label className={`flex-1 min-w-0 flex items-center gap-2 h-12 px-4 rounded-full border border-org-tint-strong bg-white focus-within:border-org-primary ${className}`}>
+  <label className={`w-full sm:flex-1 min-w-0 flex items-center gap-2 h-12 flex-shrink-0 px-4 rounded-full border border-org-tint-strong bg-white focus-within:border-org-primary ${className}`}>
     <span className="flex-1 flex items-center justify-center gap-2 min-w-0">
       <HiMiniMagnifyingGlass className="w-5 h-5 text-org-primary/60 flex-shrink-0" />
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full bg-transparent outline-none text-sm text-ink placeholder:text-muted" />
+      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full h-full bg-transparent outline-none text-sm text-ink placeholder:text-muted" />
     </span>
   </label>
 );
