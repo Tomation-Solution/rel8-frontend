@@ -1,8 +1,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import Sidebar from "../components/navigation/Sidebar";
 import Navbar from "../components/navigation/Navbar";
-import { useNavigate, useLocation } from "react-router-dom";
-import Toast from "../components/toast/Toast";
+import { useLocation } from "react-router-dom";
 import { useAppContext } from "../context/authContext";
 import OutstandingDuesModal from "../components/modals/OutstandingDuesModal";
 import { useQuery } from "react-query";
@@ -10,6 +9,7 @@ import { fetchUserDues } from "../api/account/account-api";
 import { fetchOrganizationSettings } from "../api/organization/organization-api";
 import { TableDataType } from "../types/myTypes";
 import { isOutstanding } from "../api/paystack-api";
+import { RequireAuth } from "../components/auth/guards";
 
 interface DashboardLayoutInterfaceProps {
   children: ReactNode;
@@ -24,11 +24,14 @@ const currencySymbols: Record<string, string> = {
   AUD: "A$",
 };
 
-const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
+/**
+ * The signed-in shell. Split from the exported component below so that *no* dashboard
+ * hook — the org settings query in particular, which has no `enabled` guard — can fire
+ * while the member is signed out and trip the 401 redirect on its way to the login screen.
+ */
+const DashboardShell = ({ children }: DashboardLayoutInterfaceProps) => {
   const { user, organization } = useAppContext();
-  const navigate = useNavigate();
   const location = useLocation();
-  const { notifyUser } = Toast();
 
   const canShowBlocker = !!organization?.settings?.show_dues_blocker;
 
@@ -56,13 +59,6 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
       ?.reduce((total: number, dues: TableDataType) => {
         return total + parseFloat(dues.amount || "0");
       }, 0) || 0;
-
-  useEffect(() => {
-    if (!user) {
-      notifyUser("You must be logged in to view this page", "error");
-      navigate("/login");
-    }
-  }, [user, navigate, notifyUser]);
 
   useEffect(() => {
     if (user && userDues && canShowBlocker && totalOutstandingAmount > 0 && !isAccountPage) {
@@ -101,5 +97,11 @@ const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => {
     </div>
   );
 };
+
+const DashboardLayout = ({ children }: DashboardLayoutInterfaceProps) => (
+  <RequireAuth>
+    <DashboardShell>{children}</DashboardShell>
+  </RequireAuth>
+);
 
 export default DashboardLayout;

@@ -33,8 +33,10 @@ interface FilterSelectProps {
 
 /** The rounded outline dropdown sitting to the right of the search pill. */
 export const FilterSelect = ({ value, onChange, options, className = "" }: FilterSelectProps) => (
-  <div className={`relative flex-shrink-0 ${className}`}>
-    <select value={value} onChange={e => onChange(e.target.value)} className="appearance-none h-12 pl-5 pr-11 rounded-full border border-org-primary bg-white text-sm font-medium text-org-primary outline-none cursor-pointer">
+  <div className={`relative flex-shrink-0 w-full sm:w-auto ${className}`}>
+    {/* Full width on a phone, where the bar stacks — an intrinsically-sized select sitting
+        left of a full-width search pill reads as a layout mistake. */}
+    <select value={value} onChange={e => onChange(e.target.value)} className="appearance-none w-full sm:w-auto h-12 pl-5 pr-11 rounded-full border border-org-primary bg-white text-sm font-medium text-org-primary outline-none cursor-pointer">
       {options.map(option => (
         <option key={option.value} value={option.value}>
           {option.label}

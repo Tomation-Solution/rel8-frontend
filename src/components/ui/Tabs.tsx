@@ -15,9 +15,13 @@ interface TabsProps {
 /**
  * Underlined tab strip — active tab gets a tinted panel and a brand-coloured underline that
  * meets the hairline running the full width. Chat, Environment, Elections, Account.
+ *
+ * On a phone the strip scrolls sideways, bleeding to both screen edges so the cut-off tab
+ * at the right reads as "there is more" rather than as a clipped layout. The scrollbar is
+ * hidden: a grey track sitting under a tab row looks like a broken border.
  */
 export const Tabs = ({ tabs, active, onChange, className = "" }: TabsProps) => (
-  <div className={`flex items-end border-b border-hairline mb-6 overflow-x-auto ${className}`}>
+  <div className={`flex items-end border-b border-hairline mb-6 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 ${className}`}>
     {tabs.map(tab => {
       const isActive = tab.key === active;
       return (
@@ -48,7 +52,7 @@ interface SubNavProps {
  */
 export const SubNav = ({ items, active, onChange, className = "" }: SubNavProps) => (
   <nav className={`w-full lg:w-56 flex-shrink-0 lg:border-r border-hairline lg:pr-4 lg:min-h-[70vh] ${className}`}>
-    <ul className="flex lg:flex-col gap-1 overflow-x-auto">
+    <ul className="flex lg:flex-col gap-1 overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
       {items.map(item => {
         const isActive = item.key === active;
         return (

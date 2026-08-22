@@ -8,6 +8,7 @@ import { useAppContext } from "../../../context/authContext";
 import { EnvironmentPanel, PrivatePanel } from "./EnvironmentConversationPanel";
 import { ENDPOINT_URL } from "../../../utils/constants";
 import profileImage from "../../../assets/images/dummy.jpg";
+import { getSessionToken } from "../../../utils/session";
 
 type SelectedRoom = { kind: "environment" } | { kind: "private"; member: EnvironmentMember };
 
@@ -20,6 +21,9 @@ interface Props {
 
 const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }: Props) => {
   const [selected, setSelected] = useState<SelectedRoom>({ kind: "environment" });
+
+  /* Which of the two panes a phone is looking at. Ignored from `md` up, where both show. */
+  const [mobileShowConversation, setMobileShowConversation] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const loggedInUser = getUserOrNull();
   const { user } = useAppContext();
@@ -38,7 +42,7 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
   useEffect(() => {
     const token: string | undefined = (() => {
       try {
-        return JSON.parse(localStorage.getItem("rel8User") ?? "")?.token;
+        return getSessionToken();
       } catch {
         return undefined;
       }
@@ -62,7 +66,7 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
 
     const token: string | undefined = (() => {
       try {
-        return JSON.parse(localStorage.getItem("rel8User") ?? "")?.token;
+        return getSessionToken();
       } catch {
         return undefined;
       }
@@ -97,6 +101,7 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
   //    the panel fetches fresh messages on mount) ───────────────────
   const handleSelect = (room: SelectedRoom) => {
     setSelected(room);
+    setMobileShowConversation(true);
     if (room.kind === "environment") {
       setUnreadCounts(prev => ({ ...prev, environment: 0 }));
       queryClient.invalidateQueries(["environmentChatHistory", environmentId]);
@@ -119,13 +124,26 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
     if (target) {
       appliedInitialRef.current = true;
       setSelected({ kind: "private", member: target });
+      // "Chat Up" is an explicit request for that conversation — open it, not the list.
+      setMobileShowConversation(true);
     }
   }, [initialMemberId, members]);
 
+  /*
+   * Phones show one pane at a time.
+   *
+   * The room list is a fixed 240px rail, which left about 135px of a 375px screen for the
+   * conversation — messages wrapped to two or three words a line and the composer had no
+   * room for its send button. Below `md` the list and the conversation are now separate
+   * screens, with a back arrow in the conversation header; from `md` up both panes show
+   * side by side exactly as before.
+   */
+  const closeConversation = () => setMobileShowConversation(false);
+
   return (
-    <div className="flex border rounded-lg overflow-hidden bg-white" style={{ height: "calc(100vh - 280px)", minHeight: 480 }}>
+    <div className="flex border rounded-lg overflow-hidden bg-white h-[calc(100dvh-220px)] min-h-[480px] md:h-[calc(100vh-280px)]">
       {/* ── Left: Room list ─────────────────────────────────────────── */}
-      <div className="w-60 flex-shrink-0 border-r flex flex-col">
+      <div className={`w-full md:w-60 flex-shrink-0 border-r flex-col ${mobileShowConversation ? "hidden md:flex" : "flex"}`}>
         <div className="px-3 py-2.5 border-b bg-gray-50">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Rooms</p>
         </div>
@@ -172,7 +190,13 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
       </div>
 
       {/* ── Right: Conversation panel ────────────────────────────────── */}
-      <div className="flex-1 min-w-0">{selected.kind === "environment" ? <EnvironmentPanel environmentId={environmentId} environmentName={environmentName} /> : <PrivatePanel member={selected.member} />}</div>
+      <div className={`flex-1 min-w-0 ${mobileShowConversation ? "flex flex-col" : "hidden md:flex md:flex-col"}`}>
+        {selected.kind === "environment" ? (
+          <EnvironmentPanel environmentId={environmentId} environmentName={environmentName} onBack={closeConversation} />
+        ) : (
+          <PrivatePanel member={selected.member} onBack={closeConversation} />
+        )}
+      </div>
     </div>
   );
 };

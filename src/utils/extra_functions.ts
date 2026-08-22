@@ -4,53 +4,16 @@
  * an admin (or by an approved application), emailed a link, set a password and log in.
  */
 import React from "react";
-import jwt_decode from "jwt-decode";
 import { useLocation } from "react-router-dom";
 import { MemberType } from "../api/members/api-members";
+import { readStoredSession } from "./session";
 
-export const getRel8LoginUserToken = () => {
-  try {
-    const data = localStorage.getItem("rel8User");
-    if (data) {
-      const token = JSON.parse(data)?.token;
-      return token;
-    }
-  } catch (err: any) {
-    return null;
-  }
-};
-
-export const getRel8LoginUserData = () => {
-  try {
-    const data = localStorage.getItem("rel8User");
-    if (data) {
-      const logged_in_user = jwt_decode(JSON.parse(data)?.access);
-      return logged_in_user;
-    }
-  } catch (err: any) {
-    return null;
-  }
-};
-export const setRel8LoginUserData = (data: { item: string; value: any }) => {
-  try {
-    localStorage.setItem("rel8User", JSON.stringify(data));
-    return getRel8LoginUserData();
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const getRel8LoginUserMemberId = () => {
-  try {
-    const data = localStorage.getItem("rel8User");
-    if (data) {
-      const memberId = JSON.parse(data)?.member_id;
-      return memberId;
-    }
-  } catch (err: any) {
-    return null;
-  }
-};
+/*
+ * `getRel8LoginUserToken`, `getRel8LoginUserData`, `setRel8LoginUserData` and
+ * `getRel8LoginUserMemberId` lived here and had no callers left. Two of them could not
+ * have worked: they read `access` and `member_id`, fields of the old Django session shape
+ * that this backend has never returned. Session reads now go through `utils/session`.
+ */
 
 export const getSubdomain = () => {
   const hostname = window.location.hostname;
@@ -97,14 +60,8 @@ export type UserType = {
 };
 
 type getUserOrNullResponse = null | UserType;
-export const getUserOrNull = (): getUserOrNullResponse => {
-  try {
-    const user: any = localStorage.getItem("rel8User");
-    return JSON.parse(user);
-  } catch (err: any) {
-    return null;
-  }
-};
+/** Thin alias over the session store, kept for the chat tab that identifies "me". */
+export const getUserOrNull = (): getUserOrNullResponse => readStoredSession() as getUserOrNullResponse;
 
 // export const toCurrency = (amount: number | string) => {
 //   return '₦'+ numbro(amount).format('₦0,0');

@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
 import { sideBarData } from "../../data/sideBarData";
 import NavItem from "./NavItem";
@@ -22,7 +22,43 @@ const roleLabel = (user: any): string => {
 
 const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const location = useLocation();
+  const { user, logout } = useAppContext();
+
+  /*
+   * Freeze the page behind the drawer. Without this the body kept scrolling under the
+   * overlay on iOS, so a member who swiped while the menu was open came back to a menu
+   * floating over a completely different part of the page.
+   */
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return;
+
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isMobileSidebarOpen]);
+
+  /** Escape closes it, like every other dismissable layer. */
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMobileSidebarOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMobileSidebarOpen, setIsMobileSidebarOpen]);
+
+  /* Safety net: `NavItem` closes the drawer itself, but anything else that navigates —
+     a card link inside the menu, a redirect — would otherwise leave it hanging open over
+     the new page. */
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   // Same query keys the Events page and Navbar use, so react-query serves these from cache
   // rather than firing a second request just to draw a badge.
@@ -38,8 +74,10 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
   );
 
   const handleLogout = () => {
-    localStorage.removeItem("rel8User");
-    navigate("/login");
+    // Was a bare `localStorage.removeItem` — which left the context still holding the
+    // member and react-query still holding their dues, events and notifications.
+    logout();
+    navigate("/login", { replace: true });
   };
 
   const firstName = String(user?.name ?? "").split(" ")[0];
@@ -78,15 +116,18 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
       {/* Mobile drawer */}
       <div
         onClick={() => setIsMobileSidebarOpen(false)}
+        aria-hidden={!isMobileSidebarOpen}
         className={`lg:hidden fixed inset-0 top-[70px] bg-black/50 z-40 transition-opacity duration-200 ${isMobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       >
         <nav
-          className={`fixed left-0 bottom-0 top-[70px] w-[82%] max-w-[300px] bg-app overflow-y-auto transform transition-transform duration-200 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          className={`fixed left-0 bottom-0 top-[70px] w-[82%] max-w-[300px] bg-app overflow-y-auto overscroll-contain transform transition-transform duration-200 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
           onClick={e => e.stopPropagation()}
           aria-label="Mobile navigation"
         >
           {header}
-          <div className="pb-8">{items}</div>
+          {/* pb-safe clears the iOS home indicator, which otherwise sat on top of the last
+              nav row (Logout). */}
+          <div className="pb-safe">{items}</div>
         </nav>
       </div>
     </>

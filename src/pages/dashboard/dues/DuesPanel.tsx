@@ -153,6 +153,8 @@ const DuesPanel = ({ showStat = true }: DuesPanelProps) => {
     },
     {
       key: "actions",
+      // Buttons get the full card width on a phone rather than a squeezed right column.
+      mobileFullWidth: true,
       label: "Actions",
       align: "right",
       render: due => {

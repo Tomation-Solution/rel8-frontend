@@ -487,7 +487,7 @@ const ElectionDetailsPage = () => {
                 </div>
 
                 {/* Position Stats */}
-                <div className="grid grid-cols-2 gap-4 p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
                   <StatCard
                     title="Total Votes Cast"
                     value={positionTotalVotes}

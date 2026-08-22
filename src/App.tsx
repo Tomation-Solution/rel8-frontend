@@ -7,6 +7,7 @@ import ApplicantLayout from "./layouts/ApplicantLayout";
 import DuesPage from "./pages/dashboard/dues/DuesPage";
 import ErrorPage from "./pages/ErrorPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import { GuestOnly } from "./components/auth/guards";
 
 function App() {
   const ServiceRequestSubmission = lazy(() => import("./pages/dashboard/service_request/serviceSubbmission"));
@@ -18,6 +19,7 @@ function App() {
   const ForgotPasswordPage = lazy(() => import("./pages/auth/forgot-password/ForgotPasswordPage"));
   const SetupNewPasswordPage = lazy(() => import("./pages/auth/forgot-password/SetupNewPasswordPage"));
   const AuthenticationPage = lazy(() => import("./pages/auth/AuthenticationPage"));
+  const LogoutPage = lazy(() => import("./pages/auth/LogoutPage"));
 
   const HomePage = lazy(() => import("./pages/dashboard/home/HomePage"));
   // const ProfilePage = lazy(() => import("./pages/dashboard/profile/ProfilePage"));
@@ -79,7 +81,9 @@ function App() {
       path: "/login",
       element: (
         <Suspense fallback={<Loader />}>
-          <LoginPage />
+          <GuestOnly>
+            <LoginPage />
+          </GuestOnly>
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -88,7 +92,9 @@ function App() {
       path: "/forgot-password",
       element: (
         <Suspense fallback={<Loader />}>
-          <ForgotPasswordPage />
+          <GuestOnly>
+            <ForgotPasswordPage />
+          </GuestOnly>
         </Suspense>
       ),
       errorElement: <ErrorPage />,
@@ -429,7 +435,7 @@ function App() {
       path: "/logout",
       element: (
         <Suspense fallback={<Loader />}>
-          <LoginPage />
+          <LogoutPage />
         </Suspense>
       ),
       errorElement: <ErrorPage />,

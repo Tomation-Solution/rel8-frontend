@@ -81,6 +81,8 @@ const ElectionsPage = () => {
     { key: "turnout", label: "Turnout", align: "center", render: item => `${item.stats?.turnout ?? 0}%` },
     {
       key: "actions",
+      // Buttons get the full card width on a phone rather than a squeezed right column.
+      mobileFullWidth: true,
       label: "Actions",
       align: "right",
       render: item => {

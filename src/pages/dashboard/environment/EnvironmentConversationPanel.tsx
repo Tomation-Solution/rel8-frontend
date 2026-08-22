@@ -9,6 +9,8 @@ import { ENDPOINT_URL } from "../../../utils/constants";
 import MessageBubble from "./MessageBubble";
 import { ChatMessagesSkeleton } from "../../../components/loaders/ChatSkeletons";
 import { EnvironmentMember } from "../../../api/environments/environments-api";
+import { getSessionToken } from "../../../utils/session";
+import { FiChevronLeft } from "react-icons/fi";
 
 interface Message {
   user__id: string | null;
@@ -30,6 +32,13 @@ const HISTORY_QUERY_OPTS = { staleTime: Infinity, refetchOnWindowFocus: false } 
 
 // ── Shared input bar ─────────────────────────────────────────────────────────
 
+/** Phones show one pane at a time, so the conversation needs a way back to the room list. */
+const BackToRooms = ({ onBack }: { onBack: () => void }) => (
+  <button type="button" onClick={onBack} aria-label="Back to rooms" className="md:hidden -ml-1 p-1 rounded-full hover:bg-white/20 flex-shrink-0">
+    <FiChevronLeft className="w-5 h-5" />
+  </button>
+);
+
 interface InputBarProps {
   text: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -39,12 +48,12 @@ interface InputBarProps {
 }
 
 const InputBar = ({ text, onChange, onKeyUp, onSend, onBlur }: InputBarProps) => (
-  <div className="border-t border-gray-200 bg-white px-4 py-3 flex-shrink-0">
+  <div className="border-t border-gray-200 bg-white px-4 py-3 flex-shrink-0 [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))]">
     <div className="flex items-center gap-2">
       <div className="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-2">
         <input type="text" className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-gray-400" placeholder="Type a message…" value={text} onChange={onChange} onKeyUp={onKeyUp} onBlur={onBlur} />
       </div>
-      <button onClick={onSend} disabled={!text.trim()} className="p-3 rounded-full bg-org-primary text-white hover:bg-org-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md">
+      <button onClick={onSend} disabled={!text.trim()} className="p-3 min-w-[44px] min-h-[44px] grid place-items-center rounded-full bg-org-primary text-white hover:bg-org-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex-shrink-0">
         <AiOutlineSend className="w-4 h-4" />
       </button>
     </div>
@@ -100,12 +109,17 @@ const MessagesArea = ({ isLoading, messages, userId, emptyIcon, emptyText, messa
  * which is what the error strip below renders.
  */
 
-interface EnvironmentPanelProps {
+/** Shown only on phones, where the room list and the conversation share one screen. */
+interface BackProps {
+  onBack?: () => void;
+}
+
+interface EnvironmentPanelProps extends BackProps {
   environmentId: string;
   environmentName: string;
 }
 
-export const EnvironmentPanel = ({ environmentId, environmentName }: EnvironmentPanelProps) => {
+export const EnvironmentPanel = ({ environmentId, environmentName, onBack }: EnvironmentPanelProps) => {
   const { user } = useAppContext();
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -126,7 +140,7 @@ export const EnvironmentPanel = ({ environmentId, environmentName }: Environment
   useEffect(() => {
     const token: string | undefined = (() => {
       try {
-        return JSON.parse(localStorage.getItem("rel8User") ?? "")?.token;
+        return getSessionToken();
       } catch {
         return undefined;
       }
@@ -223,6 +237,7 @@ export const EnvironmentPanel = ({ environmentId, environmentName }: Environment
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-org-primary to-org-primary/90 text-white flex-shrink-0">
+        {onBack && <BackToRooms onBack={onBack} />}
         <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
           <BsPeople className="w-4 h-4" />
         </div>
@@ -252,11 +267,11 @@ export const EnvironmentPanel = ({ environmentId, environmentName }: Environment
 
 // ── Private (1-on-1) panel (Socket.IO /private namespace) ───────────────────
 
-interface PrivatePanelProps {
+interface PrivatePanelProps extends BackProps {
   member: EnvironmentMember;
 }
 
-export const PrivatePanel = ({ member }: PrivatePanelProps) => {
+export const PrivatePanel = ({ member, onBack }: PrivatePanelProps) => {
   const { user } = useAppContext();
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -277,7 +292,7 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
 
     const token: string | undefined = (() => {
       try {
-        return JSON.parse(localStorage.getItem("rel8User") ?? "")?.token;
+        return getSessionToken();
       } catch {
         return undefined;
       }
@@ -347,6 +362,7 @@ export const PrivatePanel = ({ member }: PrivatePanelProps) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-org-primary to-org-primary/90 text-white flex-shrink-0">
+        {onBack && <BackToRooms onBack={onBack} />}
         <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">{member.name.charAt(0).toUpperCase()}</div>
         <p className="font-semibold text-sm">{member.name}</p>
       </div>

@@ -1,4 +1,4 @@
-import {} from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 import { fetchUserDues } from "../../../api/account/account-api";
 import { useAppContext } from "../../../context/authContext";
@@ -30,6 +30,36 @@ const getCardColors = (organization: any): { primary: string; secondary: string 
 // ── card dimensions (px) ───────────────────────────────────────────────────
 const CARD_W = 340;
 const CARD_H = 214;
+
+/**
+ * Scales a fixed-size card down to whatever width it is given, never up.
+ *
+ * The cards are drawn at a fixed 340×214 because that geometry is what the PDF export
+ * reproduces — but 340px plus the section's own padding is wider than a 360px phone, so
+ * the whole Account page scrolled sideways. Scaling keeps the artwork pixel-exact on a
+ * desktop and simply shrinks it on a phone.
+ */
+const FitCard = ({ children }: { children: ReactNode }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const measure = () => {
+      const available = wrapperRef.current?.clientWidth ?? CARD_W;
+      setScale(Math.min(1, available / CARD_W));
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="w-full max-w-[340px]" style={{ height: CARD_H * scale }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: CARD_W, height: CARD_H }}>{children}</div>
+    </div>
+  );
+};
 
 // ── PDF download ─────────────────────────────────────────────────────────────
 //
@@ -616,7 +646,7 @@ const MembershipCardTab = () => {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">Membership Card</h2>
         <p className="text-sm text-gray-500 mb-6">Your digital membership card for {currentYear}. Download as a PDF to print both sides at any computer centre.</p>
 
@@ -635,9 +665,9 @@ const MembershipCardTab = () => {
         ) : (
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col sm:flex-row gap-8 items-start justify-center">
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Front</span>
-                <div>
+                <FitCard>
                   <CardFront
                     name={user?.name ?? ""}
                     memberId={memberId}
@@ -649,12 +679,12 @@ const MembershipCardTab = () => {
                     groups={userGroups}
                     colors={colors}
                   />
-                </div>
+                </FitCard>
               </div>
 
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-2 min-w-0 w-full sm:w-auto">
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Back</span>
-                <div>
+                <FitCard>
                   <CardBack
                     orgName={organization?.name ?? "Organisation"}
                     orgLogo={logo ?? undefined}
@@ -664,7 +694,7 @@ const MembershipCardTab = () => {
                     yearEstablished={organization?.yearEstablished}
                     colors={colors}
                   />
-                </div>
+                </FitCard>
               </div>
             </div>
 

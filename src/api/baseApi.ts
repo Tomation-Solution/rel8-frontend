@@ -1,5 +1,6 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 import { ENDPOINT_URL } from "../utils/constants";
+import { clearStoredSession, readStoredSession, rememberIntendedPath } from "../utils/session";
 
 // Public auth routes that don't require authentication
 const PUBLIC_AUTH_ROUTES = [
@@ -9,6 +10,11 @@ const PUBLIC_AUTH_ROUTES = [
   "/setup-new-password",
   "/enter-code",
   "/authentication",
+  "/logout",
+  // The applicant portal: no account exists yet, so a 401 there must never bounce someone
+  // to a login they cannot complete.
+  "/track",
+  "/application",
 ];
 
 // Helper function to check if current route is public
@@ -32,71 +38,58 @@ const apiTenant = axios.create({
   },
 });
 
-// Response interceptor - handles 401 errors
+/**
+ * Attach the session to an outgoing request.
+ *
+ * Both instances used to inline their own copy of this, each parsing `rel8User` by hand.
+ * The `isPublicRoute` skip is kept — an auth screen must be able to call the login and
+ * password-reset routes without a stale bearer token attached — but the storage read now
+ * goes through `utils/session`, which is the one place that knows the shape.
+ */
+const attachSession = (config: InternalAxiosRequestConfig) => {
+  if (isPublicRoute(window.location.pathname)) return config;
+
+  const session = readStoredSession();
+  if (!session) return config;
+
+  config.headers['Authorization'] = `Bearer ${session.token}`;
+
+  if (session.orgId) {
+    // Merge, never replace: callers pass their own params (filters, pagination) and this
+    // must not discard them.
+    config.params = { ...(config.params ?? {}), orgId: session.orgId };
+  }
+
+  return config;
+};
+
+/**
+ * A 401 means the session is gone — the token expired, was revoked, or belongs to a member
+ * the org removed. The redirect here was commented out, so the app stayed on a dashboard
+ * where every panel silently failed to load and nothing said why. It now clears the dead
+ * session and sends the member to login, remembering where they were so they land back
+ * there afterwards.
+ */
 apiTenant.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Only redirect to login if:
-    // 1. Response is 401 (Unauthorized)
-    // 2. Not already on a public auth route
-    // 3. Not already on login page
-    if (
-      error.response && 
-      error.response.status === 401 && 
-      !isPublicRoute(window.location.pathname)
-    ) {
-      localStorage.removeItem('rel8User');
-      
-      // Preserve the intended destination for redirect after login
-      const intendedPath = window.location.pathname + window.location.search;
-      if (intendedPath !== '/login') {
-        sessionStorage.setItem('redirectAfterLogin', intendedPath);
-      }
-      
-      // window.location.href = '/login';
+    const isUnauthorized = error.response?.status === 401;
+
+    if (isUnauthorized && !isPublicRoute(window.location.pathname)) {
+      clearStoredSession();
+      rememberIntendedPath(window.location.pathname + window.location.search);
+
+      // A hard navigation rather than a router push: the interceptor lives outside the
+      // router, and the reload drops every cached query belonging to the dead session.
+      // `replace` so the back button does not return to a page that cannot load.
+      window.location.replace('/login');
     }
 
     return Promise.reject(error);
   }
 );
 
-// Request interceptor - adds auth token for protected routes
-apiTenant.interceptors.request.use(
-  (config) => {
-    const currentPath = window.location.pathname;
-    
-    // Only add auth headers if NOT on a public route
-    if (!isPublicRoute(currentPath)) {
-      try {
-        const user = JSON.parse(localStorage.getItem('rel8User') || "null");
-        
-        // If a token is available, set the 'Authorization' header
-        if (user && user.token) {
-          config.headers['Authorization'] = `Bearer ${user.token}`;
-          
-          const orgId = user.orgId;
-          if (orgId) {
-            if (!config.params) {
-              config.params = { orgId };
-            } else {
-              config.params.orgId = orgId;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
-        localStorage.removeItem('rel8User');
-      }
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+apiTenant.interceptors.request.use(attachSession, (error) => Promise.reject(error));
 
 // Form data API instance — used by the `declare*` payment calls, which upload a proof file.
 //
@@ -115,36 +108,18 @@ export const apiTenantAxiosForm = axios.create({
   baseURL: `${ENDPOINT_URL}/`,
 });
 
-apiTenantAxiosForm.interceptors.request.use(
-  (config) => {
-    const currentPath = window.location.pathname;
-    
-    // Only add auth headers if NOT on a public route
-    if (!isPublicRoute(currentPath)) {
-      try {
-        const user = JSON.parse(localStorage.getItem('rel8User') || "null");
-        
-        if (user && user.token) {
-          config.headers['Authorization'] = `Bearer ${user.token}`;
-          
-          const orgId = user.orgId;
-          if (orgId) {
-            if (!config.params) {
-              config.params = { orgId };
-            } else {
-              config.params.orgId = orgId;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
-        localStorage.removeItem('rel8User');
-      }
-    }
-    
-    return config;
-  },
+apiTenantAxiosForm.interceptors.request.use(attachSession, (error) => Promise.reject(error));
+
+// Same 401 treatment as the JSON instance — a proof upload whose session has expired must
+// end up at the login screen, not fail silently behind a spinner.
+apiTenantAxiosForm.interceptors.response.use(
+  (response) => response,
   (error) => {
+    if (error.response?.status === 401 && !isPublicRoute(window.location.pathname)) {
+      clearStoredSession();
+      rememberIntendedPath(window.location.pathname + window.location.search);
+      window.location.replace('/login');
+    }
     return Promise.reject(error);
   }
 );

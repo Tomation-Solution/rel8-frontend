@@ -63,6 +63,32 @@
     .animate-slide-up {
         animation: slideUp 0.3s ease-out;
     }
+
+    /* A horizontally scrolling strip (tab bars, chip rows) with no visible scrollbar. The
+       overflow is still there and still swipeable — only the bar is hidden, because a
+       persistent grey track under a tab row reads as a broken border on mobile. */
+    .scrollbar-none {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* For anything user-supplied that has no spaces to break on — an email address, a long
+       reference, a pasted URL. Without it these force the whole card wider than the
+       viewport and the page scrolls sideways. */
+    .break-anywhere {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Bottom padding that clears the iOS home indicator on a fixed element. Written as a
+       single declaration rather than `pb-8 pb-safe`, so there is no ordering race between
+       two utilities setting the same property. */
+    .pb-safe {
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+    }
 }
 
 @keyframes fadeIn {
@@ -73,4 +99,25 @@
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+
+/*
+ * Mobile input sizing.
+ *
+ * Safari on iOS zooms the viewport whenever a focused field's text is under 16px, and the
+ * design uses 14-15px fields throughout — so tapping any input on an iPhone zoomed the
+ * page in and left it there, which is the single most common "the app is not responsive"
+ * complaint. Bumping to 16px on touch screens removes the trigger. `!important` because
+ * this has to beat the `text-sm` utility on the element itself.
+ *
+ * Deliberately outside `@layer` so it is the last word, and scoped to coarse pointers so
+ * the desktop design is untouched.
+ */
+@media (pointer: coarse) and (max-width: 1023px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
 }

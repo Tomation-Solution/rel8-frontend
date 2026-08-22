@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 
 import { memberLogin } from "../../api/auth/auth-api";
@@ -9,6 +9,8 @@ import { useAppContext } from "../../context/authContext";
 import AuthSplitLayout from "../../components/auth/AuthSplitLayout";
 import { Button, IconInput } from "../../components/ui";
 import Toast from "../../components/toast/Toast";
+import { takeIntendedPath } from "../../utils/session";
+import { HOME_ROUTE } from "../../components/auth/guards";
 
 export type LoginFormFields = {
   email: string;
@@ -19,6 +21,7 @@ export type LoginFormFields = {
 const LoginPage = () => {
   const { notifyUser } = Toast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { setRel8LoginUserData } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -32,10 +35,13 @@ const LoginPage = () => {
     onSuccess: data => {
       setRel8LoginUserData({ ...data.member, token: data.token });
       notifyUser("Login Successful", "success");
-      // Honour where they were headed before the session expired, if anywhere.
-      const intended = sessionStorage.getItem("redirectAfterLogin");
-      sessionStorage.removeItem("redirectAfterLogin");
-      navigate(intended || "/");
+      // Honour where they were headed before the session expired, if anywhere. Router
+      // state covers an in-app bounce, sessionStorage the full page load the 401
+      // interceptor performs. `replace` keeps the login screen out of the back stack —
+      // otherwise "back" from the dashboard landed on a login form for a live session.
+      const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
+      const intended = takeIntendedPath() ?? (from ? from.pathname + (from.search ?? "") : null);
+      navigate(intended ?? HOME_ROUTE, { replace: true });
     },
     onError: (error: any) => {
       notifyUser(error?.response?.data?.message || "An error occured while logging you in", "error");
