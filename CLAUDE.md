@@ -247,6 +247,31 @@ for that position — sync the UI rather than surfacing a bare error.
 
 ---
 
+## Global search
+
+The topbar field is live (2026-08-24). It used to be `<input disabled>` with a comment
+saying the backend had no search endpoint; `GET /api/search` now exists.
+
+```
+src/api/search/search-api.ts          the call + the response types
+src/utils/searchDestinations.ts       type -> route in THIS client
+src/components/navigation/GlobalSearch.tsx
+```
+
+One endpoint serves all three clients (admin dashboard, this portal, the mobile app), so it
+returns `type` + `id` and **no URL** — the same record opens somewhere different in each.
+`searchDestinations.ts` is this client's half of that; the admin's is `src/types/search.ts`
+and the app's is `src/constants/search.ts`. Keep the three in step when a route moves.
+
+Two things the backend already handles, so do not re-implement them here:
+
+- **Audience scoping.** A member's results are filtered by the same `getAudienceFilter` the
+  list endpoints use, so search never surfaces an environment's content to someone outside
+  it. Tickets come back scoped to the member's own.
+- **Which types exist.** `SEARCHABLE_TYPES` is sent as `?types=`, and it is derived from the
+  destination map — a type this portal cannot open is never requested. Minutes are the only
+  one currently excluded (no screen for them).
+
 ## Sessions — read before touching auth
 
 The session lives under one localStorage key, `rel8User` (`{...member, token}`), and **one

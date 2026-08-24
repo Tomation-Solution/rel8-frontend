@@ -408,7 +408,8 @@ The frame every screen sits in. Highest-leverage module.
   refetching. **Dropped the dynamic group submenu** — see the resume notes
 - [x] `src/components/navigation/Navbar.tsx` — **right-aligned** (2026-08-21): a single
   `flex-1` spacer leads, so search, date, notifications and the org block sit together
-  against the right edge. Rewritten: disabled `Ctrl + K` search,
+  against the right edge. Rewritten: `Ctrl + K` search (live since 2026-08-24 — see
+  `GlobalSearch.tsx`; it was a disabled input until `GET /api/search` existed),
   `formatTopbarDate()` chip, Notifications pill with an unread dot, org name/role + logo.
   **Removed the Environments checkbox dropdown** — see the open decision
 - [x] `src/layouts/DashboardLayout.tsx` — rewritten. The navbar sits in the flow now, so the
@@ -890,7 +891,7 @@ Recorded so they don't get re-litigated. Each is a UI affordance with no backend
 | in the mockups | why not |
 |---|---|
 | Standalone Chat page (`Chat.png`, `Chat-1.png`) | chat is a property of an Environment (`hasChat`, `EnvironmentMessage`, a socket keyed on `environmentId`). It lives in the Environment detail page instead of as a parallel second home for the same conversations. Decided with the user, M13 |
-| Global `Ctrl + K` "Search Anything" | no search endpoint; rendered as a decorative, disabled input for now |
+| ~~Global `Ctrl + K` "Search Anything"~~ | **Built (2026-08-24).** `GET /api/search` now exists — one query across everything a member may see, audience-filtered server-side. `components/navigation/GlobalSearch.tsx` replaced the disabled input; Ctrl + K focuses it, arrow keys move, Enter opens. Destinations live in `utils/searchDestinations.ts` |
 | Bulk row checkboxes (dues, services, gallery, elections) | no bulk-action endpoints; column omitted |
 | ~~"Remind Me To Join" on meetings~~ | **This entry was wrong — the feature is built (M5).** `POST /api/meetings/:id/remind` is mounted and `requireOrgAdminOrMember`. It was listed here because nobody checked `src/app.js`, which is exactly the mistake §0b exists to prevent |
 | ~~Election "Average Turn-out"~~ | **Half wrong — built in M8.** Not on `fetchElectionResults`, but `GET /api/elections/member-stats` returns `averageTurnout`. The stat card is real |

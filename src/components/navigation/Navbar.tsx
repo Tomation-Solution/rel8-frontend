@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import { FiBell } from "react-icons/fi";
-import { HiMiniMagnifyingGlass, HiOutlineCalendarDays } from "react-icons/hi2";
+import { HiOutlineCalendarDays } from "react-icons/hi2";
 import { useAppContext } from "../../context/authContext";
 import { fetchAllNotifications } from "../../api/notifications/notifications-api";
 import { formatTopbarDate } from "../../utils/dates";
+import GlobalSearch from "./GlobalSearch";
 
 interface Props {
   isMobileSidebarOpen: boolean;
@@ -29,19 +30,12 @@ const Navbar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: Props) => {
           {isMobileSidebarOpen ? <AiOutlineClose className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
         </button>
 
-        {/*
-          Decorative for now — there is no search endpoint on this backend, so wiring the
-          field would only produce a box that never returns anything. See REDESIGN.md §5.
-        */}
         {/* Everything in the topbar is right-aligned: this spacer takes the slack so the
             search, date, notifications and org block sit together against the right edge. */}
         <div className="flex-1" />
 
-        <div className="hidden md:flex w-full max-w-md items-center gap-2 h-11 px-4 rounded-lg border border-org-tint-strong bg-white cursor-not-allowed">
-          <HiMiniMagnifyingGlass className="w-5 h-5 text-org-primary/50 flex-shrink-0" />
-          <input type="text" disabled placeholder="Search Anything" className="flex-1 min-w-0 bg-transparent outline-none text-sm placeholder:text-muted cursor-not-allowed" aria-label="Search (coming soon)" />
-          <kbd className="hidden lg:inline text-[11px] text-muted bg-hairline/70 rounded px-2 py-1 flex-shrink-0">Ctrl + K</kbd>
-        </div>
+        {/* Live since `GET /api/search` landed — it used to be a disabled box. */}
+        <GlobalSearch />
 
         <Divider />
 
