@@ -18,7 +18,7 @@ jobs:
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.STAGING_HOST }}
+        host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_PRI_KEY }}
         port: 22
@@ -26,6 +26,6 @@ jobs:
           cd /var/www/rel8-frontend/
           git pull origin main
           git status
-          npm i
-          npm run build
-          sudo systemctl restart bukaa.bukaa.service
+          yarn
+          yarn build
+          pm2 restart rel8-frontend
