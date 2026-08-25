@@ -25,3 +25,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Lockfile: regenerated on the deploy server by `yarn`, which left the
+# working tree dirty and made the next `git pull` fail.
+yarn.lock
