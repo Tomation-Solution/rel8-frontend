@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "react-query";
 import { MemberInfoType, Organization } from "../types/myTypes";
 import { fetchUserProfile } from "../api/profile/profile-api";
 import { clearStoredSession, hasValidSession, readStoredSession, takeIntendedPath, writeStoredSession } from "../utils/session";
+import { disconnectSupportSocket } from "../utils/supportSocket";
 
 interface AppContextType {
   user: any | null;
@@ -96,6 +97,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     clearStoredSession();
     takeIntendedPath();
+    disconnectSupportSocket();
     setUser(null);
     setUserFullName("");
     setUserProfileData([]);

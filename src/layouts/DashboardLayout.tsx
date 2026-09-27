@@ -10,6 +10,7 @@ import { fetchOrganizationSettings } from "../api/organization/organization-api"
 import { TableDataType } from "../types/myTypes";
 import { isOutstanding } from "../api/paystack-api";
 import { RequireAuth } from "../components/auth/guards";
+import ChatLauncher from "../components/live-chat/ChatLauncher";
 
 interface DashboardLayoutInterfaceProps {
   children: ReactNode;
@@ -94,6 +95,8 @@ const DashboardShell = ({ children }: DashboardLayoutInterfaceProps) => {
 
       {/* Outstanding Dues Modal */}
       <OutstandingDuesModal isOpen={showDuesModal} onClose={() => setShowDuesModal(false)} totalAmount={totalOutstandingAmount} currencySymbol={currencySymbol} />
+
+      <ChatLauncher />
     </div>
   );
 };
