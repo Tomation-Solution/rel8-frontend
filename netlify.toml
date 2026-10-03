@@ -1,0 +1,4 @@
+# Static deploy: build once, serve dist/ — never run `vite preview` in production.
+[build]
+  command = "yarn build"
+  publish = "dist"
