@@ -47,7 +47,7 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
         return undefined;
       }
     })();
-    const socket = io(ENDPOINT_URL, { auth: { token }, transports: ["websocket", "polling"] });
+    const socket = io(ENDPOINT_URL, { auth: { token }, transports: ["polling", "websocket"] });
     socket.on("connect", () => socket.emit("joinEnvironment", environmentId));
     socket.on("environmentMessage", () => {
       if (selectedRef.current.kind !== "environment") {
@@ -74,7 +74,7 @@ const EnvironmentChatTab = ({ environmentId, environmentName, initialMemberId }:
 
     const socket = io(`${ENDPOINT_URL}/private`, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
     });
 
     socket.on("privateMessage", (msg: any) => {

@@ -148,7 +148,7 @@ export const EnvironmentPanel = ({ environmentId, environmentName, onBack }: Env
 
     const socket = io(ENDPOINT_URL, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
     });
     socketRef.current = socket;
 
@@ -301,7 +301,7 @@ export const PrivatePanel = ({ member, onBack }: PrivatePanelProps) => {
     // Connect to the /private namespace
     const socket = io(`${ENDPOINT_URL}/private`, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
     });
 
     socketRef.current = socket;
