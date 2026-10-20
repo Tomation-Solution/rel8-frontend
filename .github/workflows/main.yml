@@ -28,9 +28,8 @@ jobs:
           ls -larth
           git status
           yarn install --frozen-lockfile
-          yarn global add serve 
+          npm install -g serve 
           yarn build
+          pm2 del rel8-frontend
           pm2 start serve --name "rel8-frontend" -- -s dist -l 4176
-          cd /var/www/rel8-frontend
-          ls -la serve
           which serve
