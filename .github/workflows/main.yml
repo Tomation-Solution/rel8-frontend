@@ -25,6 +25,8 @@ jobs:
         script: |
           cd /var/www/rel8-frontend/
           git pull origin main
+          ls -larth
           git status
           yarn install --frozen-lockfile
           yarn build
+          pm2 restart 14
