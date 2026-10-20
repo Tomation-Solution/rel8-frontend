@@ -2,9 +2,9 @@ name: Deploy
 
 # Controls when the action will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Deploys on push to main only (the script below always pulls main)
   push:
-    branches: 
+    branches: [main]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -26,6 +26,5 @@ jobs:
           cd /var/www/rel8-frontend/
           git pull origin main
           git status
-          yarn
+          yarn install --frozen-lockfile
           yarn build
-          pm2 restart rel8-frontend
