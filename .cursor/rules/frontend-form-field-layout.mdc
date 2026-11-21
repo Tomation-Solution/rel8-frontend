@@ -1,0 +1,18 @@
+---
+description: Required fields first; advanced/optional fields in a collapsible Advanced section
+alwaysApply: true
+---
+
+# Form field layout
+
+## Do
+
+- Put **required** fields first
+- Put optional or rarely changed fields behind an **Advanced options** disclosure
+- Add concise help text so users understand each control
+- Prefer shared `Field` / `src/components/ui` primitives over one-off layout patterns
+
+## Don't
+
+- Interleave optional/advanced controls above required fields
+- Dump every setting in one flat list without grouping

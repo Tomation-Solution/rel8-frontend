@@ -1,0 +1,31 @@
+---
+description: Form fields use RHF+yup+api; button-only uses useMutation
+alwaysApply: true
+---
+
+# Forms vs button actions
+
+## Form fields present
+
+Use **react-hook-form** + **yup** (this app’s resolver stack) + shared `Field` / form UI + `src/api/` in `onSubmit`.
+
+- Never plain `useState` for new form field state
+- Do **not** wrap submit in react-query `useMutation`
+- Do not introduce zod here unless migrating the whole form stack with explicit approval
+
+## Button click only (no form fields)
+
+Use react-query v3 **`useMutation`** + API module.
+
+- Do **not** introduce react-hook-form
+
+## Do not mix
+
+Never combine `useMutation` and react-hook-form in the same interaction. Choose based on whether inputs exist.
+
+## Related
+
+- Mutating button actions still need a confirmation dialog/modal first
+- Prefer backend `message` for toasts — see `clear-error-messages.mdc`
+- Use shared `Button` `isLoading` — no hand-rolled spinner/label swaps
+- Immediate feedback, long-task progress, success confirm — see `frontend-perceived-performance.mdc`

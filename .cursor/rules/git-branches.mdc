@@ -1,0 +1,10 @@
+---
+description: Feature/fix/bug branch workflow and post-merge cleanup
+alwaysApply: true
+---
+
+# Git branches
+
+- Implementation work uses a dedicated branch: `feat/`, `fix/`, or `bug/` (never commit feature work straight to `main` or `staging`)
+- After a PR merges successfully, delete the local and remote branch **only after explicit user approval**
+- Do not force-push or auto-delete branches without that approval

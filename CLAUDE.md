@@ -1,5 +1,9 @@
 # Rel8 Members Portal — CLAUDE.md
 
+Coding conventions for agents live in **`AGENTS.md`** and `.cursor/rules/` (mirrored from
+the E-MetricSuite standard practices, adapted to this app’s react-query v3 + yup stack).
+This file is product/architecture context, payments, and TODOs.
+
 The member-facing app: dues, events, elections, projects, services, chat, profile.
 Served at `app.rel8.ng` (or whatever `FRONTEND_URL` is on the backend).
 

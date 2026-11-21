@@ -1,0 +1,23 @@
+---
+description: Immediate feedback, progress, success confirm, no blank screens
+alwaysApply: true
+---
+
+# Perceived performance
+
+Make the UI feel fast. Feedback must start on press; long work must show progress; important success must not be silent.
+
+## Do
+
+- Wire shared `Button` `isLoading` from mutation/pending state (see `frontend-button-loading.mdc`)
+- For long work (upload, payment redirect, multi-step): show progress or clear status text
+- Confirm important success (payments, registrations, votes) via toast and/or an explicit success state
+- On failure, explain how to fix it — see `clear-error-messages.mdc`
+- While data loads, use existing loaders / empty states — never a blank screen
+
+## Don't
+
+- Await the network before showing button loading / disabled state
+- Leave long tasks with only a frozen screen and no progress
+- Succeed silently on important mutations
+- Invent a second toast when the API `message` is already shown

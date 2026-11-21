@@ -1,0 +1,22 @@
+---
+description: Every UI change must be mobile-responsive
+alwaysApply: true
+---
+
+# Mobile responsiveness
+
+Every new or revamped screen must work on phone and tablet — not desktop-only with later polish.
+
+## Do
+
+- Mobile-first Tailwind (base = phone, then `sm` / `md` / `lg`)
+- Keep content in-flow: flex/grid children need `min-w-0` so they cannot force page-wide horizontal scroll
+- Wide tables/lists: horizontal scroll or a mobile card layout under `md`
+- Touch targets ≥ 44px for icon-only controls
+- Before marking work done, verify at ~375px and ~768px
+
+## Don't
+
+- Ship a change that only looks correct at desktop widths
+- Rely on `hidden` for primary actions without a mobile equivalent
+- Use fixed pixel widths for drawers/dialogs without responsive overrides

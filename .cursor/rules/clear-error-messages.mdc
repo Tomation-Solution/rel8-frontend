@@ -1,0 +1,28 @@
+---
+description: User-facing UI errors must be specific and actionable
+alwaysApply: true
+---
+
+# Clear error messages
+
+Never show vague copy like `Something went wrong`, `An error occurred`, `Request failed`, or `Error`.
+
+## Do
+
+- Prefer the backend `message` from axios / react-query errors (do not replace it with a generic toast)
+- For client-side validation / preflight failures, name the field and the fix
+- Empty/error states: say what failed to load and offer retry when possible
+
+## Don't
+
+```tsx
+// ❌ BAD
+Toast("Something went wrong", "error");
+setError("An error occurred");
+
+// ✅ GOOD
+Toast("Select a payment method before continuing.", "error");
+setError("Could not load your dues. Check your connection and retry.");
+```
+
+When the API already returned a clear `message`, do not toast a second generic line on top of it.

@@ -1,0 +1,30 @@
+---
+description: Separation of concerns — api stays in src/api, pages compose UI
+alwaysApply: true
+---
+
+# Separation of concerns (frontend)
+
+Every page/component file has **one job: compose UI and wire props**. Do not mix raw API calls into large page files for new work.
+
+## Layout
+
+| Concern | Location | Contains |
+|---------|----------|----------|
+| UI | `src/pages/`, `src/components/` | JSX, local UI state, layout |
+| API | `src/api/` | Axios calls — **no React** |
+| Hooks | `src/hooks/` / feature hooks | react-query orchestration |
+| Utils | `src/utils/` | Pure helpers |
+| UI kit | `src/components/ui/` | Redesign primitives |
+
+## Do
+
+- Pages import hooks + presentational components; hooks/pages call `src/api/`
+- Define every backend path in `src/api/` — never hardcode URLs in components
+- Keep files ≤ 350 lines; split by concern when growing
+
+## Don't
+
+- Call `axios` / hardcode routes inside a page for new work
+- Colocate API helpers at the bottom of a page “for convenience”
+- Bypass `paystack-api.ts` for payment starts/declares

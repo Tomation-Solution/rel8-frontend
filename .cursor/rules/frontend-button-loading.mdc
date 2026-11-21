@@ -1,0 +1,28 @@
+---
+description: Use shared Button isLoading for async actions
+alwaysApply: true
+---
+
+# Button loading
+
+Shared `Button` (`src/components/ui/Button.tsx`) already supports:
+
+- `isLoading` — shows a spinner, disables the control, and shows a loading label
+
+## Do
+
+```tsx
+<Button isLoading={mutation.isLoading} onClick={onPay}>
+  Pay now
+</Button>
+```
+
+- Bind `isLoading` to pending state so feedback starts on press (see `frontend-perceived-performance.mdc`)
+- If a custom loading label is required, extend `Button` with `loadingText` rather than ternary children
+
+## Don't
+
+- Manual ternary children: `{loading ? "Saving..." : "Save"}`
+- Separate `disabled={loading}` when `isLoading` already disables
+- Custom spinners next to the button when the component handles it
+- Waiting for the network before showing loading feedback

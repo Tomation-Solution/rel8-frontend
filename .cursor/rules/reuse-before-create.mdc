@@ -1,0 +1,18 @@
+---
+description: Before creating a new component or utility, search for and reuse an existing similar one
+alwaysApply: true
+---
+
+# Reuse before create
+
+Before adding a **new** component, utility, helper, hook, or service:
+
+1. **Search first** — look in the same feature area, sibling Rel8 apps (`Rel8-Backend-Nordjs-2025`, `Rel8-Admin-Version-2`, `rel8-website-2025`, `Rel8-membership-mobile`), and shared folders (`src/components/ui/`, `src/components/`, `src/api/`, `src/utils/`, `src/hooks/`)
+2. **Reuse or extend** — prefer importing, wrapping, or lightly extending the existing piece (especially redesign primitives in `src/components/ui/`)
+3. **Only create when nothing fits** — keep new files focused and in the correct folder
+
+## Don't
+
+- Copy-paste a near-duplicate under a new name
+- Add a second Button, Field, StatusPill, Table, or payment panel when one already exists
+- Promote to a shared folder until a second feature actually needs it
